@@ -1,0 +1,39 @@
+# iOS
+Salom-Ai-iOS/Pods/
+Salom-Ai-iOS/*.xcworkspace/xcuserdata/
+Salom-Ai-iOS/*.xcodeproj/xcuserdata/
+Salom-Ai-iOS/*.xcodeproj/project.xcworkspace/xcuserdata/
+Salom-Ai-iOS/DerivedData/
+Salom-Ai-iOS/build/
+*.ipa
+*.dSYM.zip
+*.dSYM
+
+# Android
+android/.gradle/
+android/.idea/
+android/build/
+android/local.properties
+android/*/build/
+android/*/.gradle/
+*.apk
+*.aab
+
+# macOS
+.DS_Store
+.AppleDouble
+.LSOverride
+
+# IDE
+.vscode/
+.idea/
+
+# Environment
+.env
+.env.local
+
+# Logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*

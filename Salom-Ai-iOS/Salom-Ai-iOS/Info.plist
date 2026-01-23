@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>API_BASE_URL</key>
+	<string>https://api.salom-ai.uz</string>
+	<key>CFBundleURLTypes</key>
+	<array>
+		<dict>
+			<key>CFBundleTypeRole</key>
+			<string>Editor</string>
+			<key>CFBundleURLSchemes</key>
+			<array>
+				<string>com.googleusercontent.apps.347718573096-ki8ir8dmk06osats71t7qp3q2fcks8qm</string>
+			</array>
+		</dict>
+	</array>
+	<key>GOOGLE_CLIENT_ID</key>
+	<string>347718573096-ki8ir8dmk06osats71t7qp3q2fcks8qm.apps.googleusercontent.com</string>
+	<key>NSAppTransportSecurity</key>
+	<dict>
+		<key>NSExceptionDomains</key>
+		<dict>
+			<key>api.salom-ai.uz</key>
+			<dict>
+				<key>NSIncludesSubdomains</key>
+				<true/>
+			</dict>
+			<key>localhost</key>
+			<dict>
+				<key>NSExceptionAllowsInsecureHTTPLoads</key>
+				<true/>
+				<key>NSIncludesSubdomains</key>
+				<true/>
+			</dict>
+		</dict>
+	</dict>
+	<key>SUPABASE_ANON_KEY</key>
+	<string>eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJa9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImNmdmxmY2d2Z2diZ2NqYnVuc2prIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjM2NTc2MzMsImV4cCI6MjA3OTIzMzYzM30.1j-9j6vhZJWc_QdUsMufatthhx-uy0TWE9EhZxAVLvI</string>
+	<key>SUPABASE_URL</key>
+	<string>https://cfvlfcgvggbgcjbunsjk.supabase.co</string>
+	<key>UIBackgroundModes</key>
+	<array>
+		<string>remote-notification</string>
+	</array>
+</dict>
+</plist>
