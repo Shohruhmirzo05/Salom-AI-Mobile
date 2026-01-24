@@ -221,14 +221,13 @@ extension APIClient {
         case perplexityChat(conversationId: Int?, text: String, model: String?, searchMode: String?)
         case perplexityResearch(query: String, reasoningEffort: String)
         case perplexityUsage
-        case perplexityModels
         case getModels
         
         // Voice
-        case stt(audio: Data, filename: String)
-        case tts(text: String)
-        case chatVoice(audio: Data, filename: String, conversationId: Int?)
-        case ttsStream(text: String)
+//        case stt(audio: Data, filename: String)
+//        case tts(text: String)
+//        case chatVoice(audio: Data, filename: String, conversationId: Int?)
+//        case ttsStream(text: String)
         
         // Conversations
         case listConversations(limit: Int, offset: Int)
@@ -253,7 +252,7 @@ extension APIClient {
         
         fileprivate var method: HTTPMethod {
             switch self {
-            case .listConversations, .getConversation, .getConversationMessages, .perplexityUsage, .perplexityModels, .currentSubscription, .getSettings, .getModels, .getUsageStats, .listPlans, .oauthUser:
+            case .listConversations, .getConversation, .getConversationMessages, .perplexityUsage, .currentSubscription, .getSettings, .getModels, .getUsageStats, .listPlans, .oauthUser:
                 return .get
             case .deleteConversation, .deleteAccount:
                 return .delete
@@ -268,7 +267,7 @@ extension APIClient {
         
         fileprivate var requiresAuth: Bool {
             switch self {
-            case .requestOTP, .verifyOTP, .refresh, .perplexityModels, .oauthVerify:
+            case .requestOTP, .verifyOTP, .refresh, .oauthVerify:
                 return false
             default:
                 return true
@@ -277,7 +276,7 @@ extension APIClient {
         
         fileprivate var isMultipart: Bool {
             switch self {
-            case .stt, .chatVoice, .uploadFile:
+            case .uploadFile:
                 return true
             default:
                 return false
@@ -327,18 +326,8 @@ extension APIClient {
                 return "/perplexity/research"
             case .perplexityUsage:
                 return "/perplexity/usage"
-            case .perplexityModels:
-                return "/perplexity/models"
             case .getModels:
                 return "/chat/models"
-            case .stt:
-                return "/stt"
-            case .tts:
-                return "/tts"
-            case .chatVoice:
-                return "/chat-voice"
-            case .ttsStream:
-                return "/tts"
             case .listConversations:
                 return "/conversations"
             case .getConversation(let id):
@@ -427,8 +416,6 @@ extension APIClient {
                 var body: [String: Any] = ["query": query]
                 if let conversationId { body["conversation_id"] = conversationId }
                 return body
-            case .tts(let text):
-                return ["text": text]
             case .subscribe(let plan, let provider):
                 return ["plan": plan, "provider": provider]
             case .updateSettings(let payload):
@@ -443,8 +430,6 @@ extension APIClient {
                 return body
             case .updatePlatform(let platform):
                 return ["platform": platform]
-            case .ttsStream(let text):
-                return ["text": text]
             case .sendFeedback(let content):
                 return ["content": content, "platform": "ios"]
             default:
@@ -463,23 +448,6 @@ extension APIClient {
             }
             
             switch self {
-            case .stt(let audio, let filename):
-                append("--\(boundary)\r\n")
-                append("Content-Disposition: form-data; name=\"file\"; filename=\"\(filename)\"\r\n")
-                append("Content-Type: audio/m4a\r\n\r\n")
-                body.append(audio)
-                append("\r\n")
-            case .chatVoice(let audio, let filename, let conversationId):
-                if let conversationId {
-                    append("--\(boundary)\r\n")
-                    append("Content-Disposition: form-data; name=\"conversation_id\"\r\n\r\n")
-                    append("\(conversationId)\r\n")
-                }
-                append("--\(boundary)\r\n")
-                append("Content-Disposition: form-data; name=\"file\"; filename=\"\(filename)\"\r\n")
-                append("Content-Type: audio/m4a\r\n\r\n")
-                body.append(audio)
-                append("\r\n")
             case .uploadFile(let data, let filename):
                 append("--\(boundary)\r\n")
                 append("Content-Disposition: form-data; name=\"file\"; filename=\"\(filename)\"\r\n")
