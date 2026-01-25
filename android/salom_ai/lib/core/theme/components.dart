@@ -32,14 +32,14 @@ class PremiumGlassButton extends StatelessWidget {
       child: GlassContainer(
         borderRadius: BorderRadius.circular(16),
         blur: 10,
-        border: 2,
+        border: Border.all(color: Colors.white.withOpacity(0.2), width: 2),
         color: AppTheme.primary.withOpacity(0.8),
         gradient: LinearGradient(
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
           colors: [
             AppTheme.primary.withOpacity(0.9),
-            AppTheme.primaryVariant.withOpacity(0.8),
+            AppTheme.accentSecondary.withOpacity(0.8),
           ],
         ),
         child: Material(
@@ -99,9 +99,8 @@ class PremiumTextField extends StatelessWidget {
     return GlassContainer(
       borderRadius: BorderRadius.circular(12),
       blur: 10,
-      border: 1,
+      border: Border.all(color: Colors.white.withOpacity(0.1), width: 1),
       color: Colors.white.withOpacity(0.05),
-      borderColor: Colors.white.withOpacity(0.1),
       child: TextField(
         controller: controller,
         obscureText: obscureText,

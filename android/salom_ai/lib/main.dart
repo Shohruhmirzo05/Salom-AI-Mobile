@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:salom_ai/core/constants/config.dart';
 import 'package:salom_ai/core/theme/app_theme.dart';
@@ -14,7 +15,16 @@ void main() async {
     anonKey: Config.supabaseAnonKey,
   );
 
-  runApp(const ProviderScope(child: SalomAIApp()));
+  final sharedPreferences = await SharedPreferences.getInstance();
+
+  runApp(
+    ProviderScope(
+      overrides: [
+        sharedPreferencesProvider.overrideWithValue(sharedPreferences),
+      ],
+      child: const SalomAIApp(),
+    ),
+  );
 }
 
 class SalomAIApp extends ConsumerWidget {
