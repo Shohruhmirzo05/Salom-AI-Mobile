@@ -22,6 +22,24 @@ class ChatOut {
   }
 }
 
+class ChatStreamEvent {
+  final String type;
+  final String? content;
+  final int? conversationId;
+  final String? message;
+
+  ChatStreamEvent({required this.type, this.content, this.conversationId, this.message});
+
+  factory ChatStreamEvent.fromJson(Map<String, dynamic> json) {
+    return ChatStreamEvent(
+      type: json['type'] as String,
+      content: json['content'] as String?,
+      conversationId: json['conversation_id'] as int?,
+      message: json['message'] as String?,
+    );
+  }
+}
+
 class TokenPair {
   final String accessToken;
   final String refreshToken;

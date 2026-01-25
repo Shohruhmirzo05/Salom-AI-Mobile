@@ -44,6 +44,12 @@ struct ChatReplyResponse: Codable {
     let conversationId: Int
     // Note: No custom CodingKeys needed - decoder uses .convertFromSnakeCase
 }
+struct ChatStreamEvent: Codable {
+    let type: String
+    let content: String?
+    let conversationId: Int?
+    let message: String?
+}
 
 struct ChatSavePayload: Codable {
     let conversationId: Int

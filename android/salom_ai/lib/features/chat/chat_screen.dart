@@ -70,10 +70,19 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
   Widget build(BuildContext context) {
      final state = ref.watch(chatViewModelProvider);
      
-     // Auto scroll on new messages
+     // Auto scroll on new messages or streaming content
      ref.listen(chatViewModelProvider, (prev, next) {
-        if (next.messages.length > (prev?.messages.length ?? 0)) {
-           Future.delayed(const Duration(milliseconds: 100), _scrollToBottom);
+        final messagesChanged = next.messages.length != (prev?.messages.length ?? 0);
+        final lastMessageContentChanged = (next.messages.isNotEmpty && prev?.messages.isNotEmpty == true) && 
+                                          (next.messages.last.text != prev?.messages.last.text);
+        
+        if (messagesChanged || lastMessageContentChanged) {
+           // Use jump for streaming to stay at bottom without bouncy animations
+           if (next.isSending && lastMessageContentChanged) {
+             _jumpToBottom();
+           } else {
+             _scrollToBottom();
+           }
         }
      });
 
@@ -91,15 +100,8 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
             : ListView.builder(
               controller: _scrollController,
               padding: const EdgeInsets.only(bottom: 20, top: 10),
-              itemCount: state.messages.length + (state.isSending ? 1 : 0),
+              itemCount: state.messages.length,
               itemBuilder: (context, index) {
-                if (index >= state.messages.length) {
-                   return const Padding(
-                     padding: EdgeInsets.all(16.0),
-                     child: Center(child: CircularProgressIndicator(color: AppTheme.accentPrimary)),
-                   );
-                }
-                
                 final msg = state.messages[index];
                 return _buildMessage(msg);
               },
@@ -111,6 +113,12 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
         ],
       ),
     );
+  }
+  
+  void _jumpToBottom() {
+    if (_scrollController.hasClients) {
+      _scrollController.jumpTo(_scrollController.position.maxScrollExtent);
+    }
   }
   
   Widget _buildTopBar(ChatState state) {
@@ -168,6 +176,7 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
   Widget _buildMessage(MessageDTO msg) {
     final isUser = msg.role == MessageRole.user;
     return Align(
+      key: Key(msg.id.toString()),
       alignment: isUser ? Alignment.centerRight : Alignment.centerLeft,
       child: Container(
          margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),

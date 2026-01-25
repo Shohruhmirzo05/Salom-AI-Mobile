@@ -11,12 +11,21 @@ import PhotosUI
 import Photos
 
 struct ChatMessage: Identifiable {
-    let id = UUID()
+    let id: UUID
     let remoteId: Int?
     let text: String
     let role: MessageRole
     let createdAt: Date?
     var fileUrls: [String]? = nil
+    
+    init(id: UUID = UUID(), remoteId: Int? = nil, text: String, role: MessageRole, createdAt: Date? = nil, fileUrls: [String]? = nil) {
+        self.id = id
+        self.remoteId = remoteId
+        self.text = text
+        self.role = role
+        self.createdAt = createdAt
+        self.fileUrls = fileUrls
+    }
     
     var isUser: Bool {
         role == .user
@@ -344,46 +353,81 @@ final class ChatViewModel: ObservableObject {
         
         objectWillChange.send()
         messages.append(userMessage)
+        
         isSending = true
         isTyping = true
         
         let currentAttachments = attachments
         attachments = []
         
+        let currentConvId = selectedConversation?.id
+        let selectedModelId = selectedModel?.id
+        
         Task {
             do {
-                let response = try await client.request(
-                    .chat(conversationId: selectedConversation?.id, text: trimmed, projectId: nil, model: selectedModel?.id, attachments: currentAttachments.isEmpty ? nil : currentAttachments),
-                    decodeTo: ChatReplyResponse.self
+                let stream = client.chatStream(
+                    .chatStream(conversationId: currentConvId, text: trimmed, projectId: nil, model: selectedModelId, attachments: currentAttachments.isEmpty ? nil : currentAttachments)
                 )
                 
-                print("✅ Chat response received: conversationId=\(response.conversationId)")
+                var fullText = ""
+                var assistantMessageId: UUID?
+                
+                for try await event in stream {
+                    switch event.type {
+                    case "chunk":
+                        if let content = event.content {
+                            fullText += content
+                            await MainActor.run {
+                                if let existingId = assistantMessageId,
+                                   let index = self.messages.firstIndex(where: { $0.id == existingId }) {
+                                    // Update existing message
+                                    self.messages[index] = ChatMessage(
+                                        id: existingId,
+                                        remoteId: self.messages[index].remoteId,
+                                        text: fullText,
+                                        role: .assistant,
+                                        createdAt: self.messages[index].createdAt
+                                    )
+                                } else {
+                                    // First chunk: Create message and hide typing indicator
+                                    let newMessage = ChatMessage(
+                                        text: fullText,
+                                        role: .assistant,
+                                        createdAt: Date()
+                                    )
+                                    assistantMessageId = newMessage.id
+                                    self.messages.append(newMessage)
+                                    self.isTyping = false
+                                }
+                            }
+                        }
+                    case "done":
+                        if let newId = event.conversationId {
+                            await MainActor.run {
+                                if self.selectedConversation == nil || self.selectedConversation?.id != newId {
+                                    self.selectedConversation = ConversationSummary(
+                                        id: newId,
+                                        title: "Yangi suhbat",
+                                        updatedAt: Date(),
+                                        messageCount: self.messages.count
+                                    )
+                                }
+                            }
+                        }
+                    case "error":
+                        if let errorMsg = event.message {
+                            await MainActor.run {
+                                self.errorMessage = errorMsg
+                            }
+                        }
+                    default:
+                        break
+                    }
+                }
                 
                 await MainActor.run {
-                    self.objectWillChange.send()
                     self.isTyping = false
-                    
-                    let assistantMessage = ChatMessage(
-                        remoteId: nil,
-                        text: response.reply,
-                        role: .assistant,
-                        createdAt: Date()
-                    )
-                    self.messages.append(assistantMessage)
-                    
-                    print("✅ AI response added to messages array: \(self.messages.count) total messages")
-                    
-                    let isNewConversation = self.selectedConversation?.id != response.conversationId
-                    
-                    if isNewConversation {
-                        print("🆕 New conversation created: \(response.conversationId)")
-                        self.selectedConversation = ConversationSummary(
-                            id: response.conversationId,
-                            title: "Yangi suhbat",
-                            updatedAt: Date(),
-                            messageCount: self.messages.count
-                        )
-                    }
+                    self.isSending = false
                 }
                 
                 await loadConversations(selectFirst: false)
@@ -391,14 +435,13 @@ final class ChatViewModel: ObservableObject {
             } catch {
                 await MainActor.run {
                     self.isTyping = false
+                    self.isSending = false
                     self.errorMessage = error.localizedDescription
                     print("❌ Chat error: \(error)")
                 }
             }
             
             await MainActor.run {
-                self.isSending = false
-                // Trigger review request logic
                 ReviewManager.shared.incrementActionCount()
             }
         }
@@ -757,6 +800,9 @@ struct ChatView: View {
                 }
             }
             .onChange(of: viewModel.messages.count) { _, _ in
+                scrollToBottom(proxy: proxy)
+            }
+            .onChange(of: viewModel.messages.last?.text) { _, _ in
                 scrollToBottom(proxy: proxy)
             }
             .onChange(of: viewModel.isTyping) { _, isTyping in

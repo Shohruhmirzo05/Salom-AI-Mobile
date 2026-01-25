@@ -81,56 +81,80 @@ class ChatViewModel extends StateNotifier<ChatState> {
     }
   }
   
-  Future<void> sendMessage(String text, {int? conversationId, String? model}) async {
+  Future<void> sendMessage(String text, {int? conversationId, String? model, List<String>? attachments}) async {
     if (text.trim().isEmpty) return;
     
-    final tempMsg = MessageDTO(
-      id: 0,
+    final userMsg = MessageDTO(
+      id: DateTime.now().millisecondsSinceEpoch,
       role: MessageRole.user,
       text: text,
+      createdAt: DateTime.now(),
+      imageUrls: attachments,
+    );
+    
+    // Placeholder for assistant response
+    final assistantMsgId = DateTime.now().millisecondsSinceEpoch + 1;
+    final assistantMsg = MessageDTO(
+      id: assistantMsgId,
+      role: MessageRole.assistant,
+      text: "",
       createdAt: DateTime.now(),
     );
     
     state = state.copyWith(
-      messages: [...state.messages, tempMsg],
+      messages: [...state.messages, userMsg, assistantMsg],
       isSending: true,
       errorMessage: null,
     );
     
     try {
-      final response = await _client.sendChatMessage(
+      final stream = _client.streamChatMessage(
         text,
         conversationId: conversationId == 0 ? null : conversationId,
-        model: model
+        model: model,
+        attachments: attachments,
       );
+
+      var fullText = "";
+      int? finalConversationId;
+
+      await for (final event in stream) {
+        if (event.type == 'chunk' && event.content != null) {
+          fullText += event.content!;
+          // Update assistant message text in state
+          final updatedMessages = state.messages.map((m) {
+            if (m.id == assistantMsgId) {
+              return MessageDTO(
+                id: m.id,
+                role: m.role,
+                text: fullText,
+                createdAt: m.createdAt,
+              );
+            }
+            return m;
+          }).toList();
+          state = state.copyWith(messages: updatedMessages);
+        } else if (event.type == 'done') {
+          finalConversationId = event.conversationId;
+        } else if (event.type == 'error') {
+          state = state.copyWith(errorMessage: event.message);
+        }
+      }
+
+      state = state.copyWith(isSending: false);
       
-      final replyMsg = MessageDTO(
-        id: 1, 
-        role: MessageRole.assistant,
-        text: response.reply,
-        createdAt: DateTime.now(),
-      );
-      
-      // If new conversation started
-      if (conversationId == null || conversationId == 0) {
-         // Optionally reload conversation to get full state including real IDs
-         // But for now just append
-         // Ideally we should switch context to the new ID
+      if (finalConversationId != null && (conversationId == null || conversationId == 0)) {
+         // Optionally update the current conversation context
+         // But usually the screen will handle navigation or state update
       }
       
-      state = state.copyWith(
-        messages: [...state.messages, replyMsg],
-        isSending: false
-      );
-      
-      // Refresh conversations in background
+      // Refresh conversations list
       loadConversations();
       
     } catch (e) {
       state = state.copyWith(
         isSending: false,
         errorMessage: "Failed to send: $e",
-        // remove temp message? Or show error state on it.
       );
     }
   }

@@ -129,6 +129,65 @@ final class APIClient {
             throw error
         }
     }
+
+    func chatStream(_ endpoint: Endpoint, allowRetry: Bool = true) -> AsyncThrowingStream<ChatStreamEvent, Error> {
+        AsyncThrowingStream { continuation in
+            Task {
+                do {
+                    let request = try self.buildRequest(for: endpoint)
+                    let (bytes, response) = try await self.session.bytes(for: request)
+                    
+                    guard let httpResponse = response as? HTTPURLResponse else {
+                        continuation.finish(throwing: APIError.invalidResponse)
+                        return
+                    }
+                    
+                    if httpResponse.statusCode == 401 {
+                        if allowRetry, TokenStore.shared.refreshToken != nil {
+                            try await self.refreshAccessToken()
+                            let retryStream = self.chatStream(endpoint, allowRetry: false)
+                            for try await event in retryStream {
+                                continuation.yield(event)
+                            }
+                            continuation.finish()
+                            return
+                        } else {
+                            await MainActor.run { SessionManager.shared.logout() }
+                            continuation.finish(throwing: APIError.unauthorized)
+                            return
+                        }
+                    }
+                    
+                    guard (200...299).contains(httpResponse.statusCode) else {
+                        var message = "Stream failed"
+                        // Try to read error body if possible, but bytes already consumed? 
+                        // For now keep it simple.
+                        continuation.finish(throwing: APIError.server(status: httpResponse.statusCode, message: message))
+                        return
+                    }
+                    
+                    for try await line in bytes.lines {
+                        if line.hasPrefix("data: ") {
+                            let jsonString = String(line.dropFirst(6))
+                            let trimmed = jsonString.trimmingCharacters(in: .whitespaces)
+                            if trimmed == "[DONE]" { continue }
+                            if let data = jsonString.data(using: .utf8) {
+                                do {
+                                    let event = try self.decoder.decode(ChatStreamEvent.self, from: data)
+                                    continuation.yield(event)
+                                } catch {
+                                    print("❌ Failed to decode stream event: \(error)")
+                                }
+                            }
+                        }
+                    }
+                    continuation.finish()
+                } catch {
+                    continuation.finish(throwing: error)
+                }
+            }
+        }
+    }
     
     // MARK: - Request Builder
     
@@ -213,6 +272,7 @@ extension APIClient {
         
         // Chat
         case chat(conversationId: Int?, text: String, projectId: Int?, model: String?, attachments: [String]?)
+        case chatStream(conversationId: Int?, text: String, projectId: Int?, model: String?, attachments: [String]?)
         case generateImage(conversationId: Int?, prompt: String, projectId: Int?)
         case saveChat(conversationId: Int, userText: String, assistantText: String)
         case uploadFile(data: Data, filename: String)
@@ -224,10 +284,10 @@ extension APIClient {
         case getModels
         
         // Voice
-//        case stt(audio: Data, filename: String)
-//        case tts(text: String)
-//        case chatVoice(audio: Data, filename: String, conversationId: Int?)
-//        case ttsStream(text: String)
+        case stt(audio: Data, filename: String)
+        case tts(text: String)
+        case chatVoice(audio: Data, filename: String, conversationId: Int?)
+        case ttsStream(text: String)
         
         // Conversations
         case listConversations(limit: Int, offset: Int)
@@ -276,7 +336,7 @@ extension APIClient {
         
         fileprivate var isMultipart: Bool {
             switch self {
-            case .uploadFile:
+            case .uploadFile, .stt, .chatVoice:
                 return true
             default:
                 return false
@@ -308,10 +368,20 @@ extension APIClient {
                 return "/auth/logout"
             case .chat:
                 return "/chat"
+            case .chatStream:
+                return "/chat/stream"
             case .generateImage:
                 return "/chat/generate-image"
             case .uploadFile:
                 return "/files/upload"
+            case .stt:
+                return "/voice/stt"
+            case .tts:
+                return "/voice/tts"
+            case .chatVoice:
+                return "/voice/chat"
+            case .ttsStream:
+                return "/voice/tts-stream"
             case .saveChat:
                 return "/chat/save"
             case .oauthVerify:
@@ -383,7 +453,8 @@ extension APIClient {
                 return ["refresh_token": refreshToken]
             case .oauthVerify(let accessToken):
                 return ["access_token": accessToken]
-            case .chat(let conversationId, let text, let projectId, let model, let attachments):
+            case .chat(let conversationId, let text, let projectId, let model, let attachments),
+                 .chatStream(let conversationId, let text, let projectId, let model, let attachments):
                 var body: [String: Any] = ["text": text]
                 if let conversationId { body["conversation_id"] = conversationId }
                 if let projectId { body["project_id"] = projectId }
@@ -432,6 +503,8 @@ extension APIClient {
                 return ["platform": platform]
             case .sendFeedback(let content):
                 return ["content": content, "platform": "ios"]
+            case .tts(let text), .ttsStream(let text):
+                return ["text": text]
             default:
                 return nil
             }
@@ -448,12 +521,25 @@ extension APIClient {
             }
             
             switch self {
-            case .uploadFile(let data, let filename):
+            case .uploadFile(let data, let filename),
+                 .stt(let data, let filename):
                 append("--\(boundary)\r\n")
                 append("Content-Disposition: form-data; name=\"file\"; filename=\"\(filename)\"\r\n")
                 append("Content-Type: application/octet-stream\r\n\r\n")
                 body.append(data)
                 append("\r\n")
+            case .chatVoice(let data, let filename, let conversationId):
+                append("--\(boundary)\r\n")
+                append("Content-Disposition: form-data; name=\"file\"; filename=\"\(filename)\"\r\n")
+                append("Content-Type: application/octet-stream\r\n\r\n")
+                body.append(data)
+                append("\r\n")
+                
+                if let conversationId {
+                    append("--\(boundary)\r\n")
+                    append("Content-Disposition: form-data; name=\"conversation_id\"\r\n\r\n")
+                    append("\(conversationId)\r\n")
+                }
             default:
                 break
             }

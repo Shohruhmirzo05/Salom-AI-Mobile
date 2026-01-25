@@ -1,5 +1,8 @@
 import 'dart:io';
+import 'dart:convert';
+import 'dart:async';
 import 'package:dio/dio.dart';
+import 'package:http/http.dart' as http;
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:salom_ai/core/constants/config.dart';
 import 'package:salom_ai/core/api/token_store.dart';
@@ -10,6 +13,7 @@ final apiClientProvider = Provider((ref) => ApiClient(ref));
 class ApiClient {
   final Ref _ref;
   late final Dio _dio;
+  final _httpClient = http.Client();
   
   ApiClient(this._ref) {
     _dio = Dio(BaseOptions(
@@ -26,16 +30,12 @@ class ApiClient {
   }
 
   void _setupInterceptors() {
-    // Use QueuedInterceptorsWrapper for automatic request locking
     _dio.interceptors.add(QueuedInterceptorsWrapper(
       onRequest: (options, handler) async {
-        // Attach Access Token if available
         final token = await TokenStore.shared.getAccessToken();
         if (token != null) {
           options.headers['Authorization'] = 'Bearer $token';
         }
-        
-        // Debug Log
         print('➡️ [API] ${options.method} ${options.path}');
         return handler.next(options);
       },
@@ -45,33 +45,26 @@ class ApiClient {
       },
       onError: (DioException e, handler) async {
         print('❌ [API Error] ${e.message}');
-        
-        // Handle 401 Unauthorized (Refresh Token Logic)
         if (e.response?.statusCode == 401) {
           final refreshToken = await TokenStore.shared.getRefreshToken();
           if (refreshToken != null) {
             try {
-              // Call refresh endpoint
               final newTokens = await _refreshAccessToken(refreshToken);
               await TokenStore.shared.saveTokens(newTokens.accessToken, newTokens.refreshToken);
-              
-              // Retry original request
               e.requestOptions.headers['Authorization'] = 'Bearer ${newTokens.accessToken}';
               final response = await _dio.request(
                 e.requestOptions.path,
                 options: Options(
                   method: e.requestOptions.method,
                   headers: e.requestOptions.headers,
+                  responseType: e.requestOptions.responseType,
                 ),
                 data: e.requestOptions.data,
                 queryParameters: e.requestOptions.queryParameters,
               );
               return handler.resolve(response);
-              
             } catch (authError) {
-              // Logout if refresh fails
               await TokenStore.shared.clear();
-              // Ideally trigger a global logout event here
               return handler.next(e);
             }
           }
@@ -80,18 +73,13 @@ class ApiClient {
       },
     ));
   }
-  
-  // -- Auth --
-  
+
   Future<TokenPair> _refreshAccessToken(String refreshToken) async {
-    // Navigate around the interceptor to avoid loops (create a clean dio instance or specific ignore)
-    // Simple way: Access the base dio without interceptors for this one, or just use a flag.
-    // Here we make a raw request.
     final dioRefresh = Dio(BaseOptions(baseUrl: Config.apiBaseUrl));
     final response = await dioRefresh.post('/auth/refresh', data: {'refresh_token': refreshToken});
     return TokenPair.fromJson(response.data);
   }
-  
+
   Future<void> verifyOtp(String phone, String code) async {
     final response = await _dio.post('/auth/verify-otp', data: {'phone': phone, 'code': code});
     final tokens = TokenPair.fromJson(response.data);
@@ -99,7 +87,6 @@ class ApiClient {
   }
 
   Future<TokenPair> oauthVerify(String token) async {
-    // Sending ID token as 'access_token' per backend requirement
     final response = await _dio.post('/auth/oauth/verify', data: {'access_token': token});
     return TokenPair.fromJson(response.data);
   }
@@ -108,9 +95,65 @@ class ApiClient {
     final response = await _dio.get('/auth/me');
     return OAuthUser.fromJson(response.data);
   }
-  
-  // -- Chat --
-  
+
+  Stream<ChatStreamEvent> streamChatMessage(String text, {int? conversationId, String? model, List<String>? attachments}) async* {
+    final url = Uri.parse('${Config.apiBaseUrl}/chat/stream');
+    final accessToken = await TokenStore.shared.getAccessToken();
+    
+    final request = http.Request('POST', url);
+    request.headers.addAll({
+      'Authorization': 'Bearer $accessToken',
+      'Content-Type': 'application/json',
+      'Accept': 'text/event-stream',
+    });
+    
+    request.body = jsonEncode({
+      'text': text,
+      if (conversationId != null && conversationId != 0) 'conversation_id': conversationId,
+      if (model != null) 'model': model,
+      if (attachments != null) 'attachments': attachments,
+    });
+
+    try {
+      print('➡️ [API-HTTP-Stream] POST ${url.path}');
+      final response = await _httpClient.send(request);
+      
+      if (response.statusCode == 401) {
+        final refreshToken = await TokenStore.shared.getRefreshToken();
+        if (refreshToken != null) {
+          final newTokens = await _refreshAccessToken(refreshToken);
+          await TokenStore.shared.saveTokens(newTokens.accessToken, newTokens.refreshToken);
+          yield* streamChatMessage(text, conversationId: conversationId, model: model, attachments: attachments);
+          return;
+        }
+      }
+
+      final stream = response.stream
+        .transform(utf8.decoder)
+        .transform(const LineSplitter());
+
+      await for (final line in stream) {
+        final trimmedLine = line.trim();
+        if (trimmedLine.isEmpty) continue;
+        print('📡 SSE Line: $trimmedLine');
+
+        if (trimmedLine.startsWith('data:')) {
+          final jsonStr = trimmedLine.substring(5).trim();
+          if (jsonStr == "[DONE]") continue;
+          try {
+            final Map<String, dynamic> json = jsonDecode(jsonStr);
+            yield ChatStreamEvent.fromJson(json);
+          } catch (e) {
+            print("❌ Failed to parse SSE JSON: $jsonStr Error: $e");
+          }
+        }
+      }
+    } catch (e) {
+      print('❌ [API-HTTP-Stream Error] $e');
+      rethrow;
+    }
+  }
+
   Future<ChatOut> sendChatMessage(String text, {int? conversationId, String? model, int? projectId, List<String>? attachments}) async {
     final data = {
       'text': text,
@@ -119,30 +162,19 @@ class ApiClient {
       if (projectId != null) 'project_id': projectId,
       if (attachments != null) 'attachments': attachments,
     };
-    
     final response = await _dio.post('/chat', data: data);
     return ChatOut.fromJson(response.data);
   }
-  
+
   Future<List<ConversationSummary>> listConversations({int limit = 20, int offset = 0}) async {
-    final response = await _dio.get('/conversations', queryParameters: {
-      'limit': limit,
-      'offset': offset,
-    });
-    // Assuming backend returns a list or a wrapped object. Based on iOS it was ConversationListResponse?
-    // Let's assume list for now or check models.
-    // Checking APIClient.swift: returns ConversationListResponse
+    final response = await _dio.get('/conversations', queryParameters: {'limit': limit, 'offset': offset});
     return ConversationListResponse.fromJson(response.data).conversations;
   }
-  
+
   Future<List<MessageDTO>> getConversationMessages(int id) async {
     final response = await _dio.get('/conversations/$id/messages');
-    // Swift: /conversations/{id}/messages with limit/offset.
-    // Swift returns: ConversationMessagesResponse
     return ConversationMessagesResponse.fromJson(response.data).messages;
   }
-  
-  // -- Subscription --
 
   Future<List<SubscriptionPlan>> listPlans() async {
     final response = await _dio.get('/subscriptions/plans');
@@ -155,20 +187,12 @@ class ApiClient {
   }
 
   Future<SubscribeResponse> subscribe(String plan, String provider) async {
-    final response = await _dio.post('/subscriptions/subscribe', data: {
-      'plan': plan,
-      'provider': provider,
-    });
+    final response = await _dio.post('/subscriptions/subscribe', data: {'plan': plan, 'provider': provider});
     return SubscribeResponse.fromJson(response.data);
   }
 
-  // -- Profile & Settings --
-
   Future<OAuthUser> updateProfile({String? language, String? displayName}) async {
-    final data = {
-      if (language != null) 'language': language,
-      if (displayName != null) 'display_name': displayName,
-    };
+    final data = {if (language != null) 'language': language, if (displayName != null) 'display_name': displayName};
     final response = await _dio.put('/auth/me', data: data);
     return OAuthUser.fromJson(response.data);
   }
@@ -179,10 +203,7 @@ class ApiClient {
   }
 
   Future<FeedbackResponse> sendFeedback(String content) async {
-    final response = await _dio.post('/feedback', data: {
-      'content': content,
-      'platform': 'android',
-    });
+    final response = await _dio.post('/feedback', data: {'content': content, 'platform': 'android'});
     return FeedbackResponse.fromJson(response.data);
   }
 }
