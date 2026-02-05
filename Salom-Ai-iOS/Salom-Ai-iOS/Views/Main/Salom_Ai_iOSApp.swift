@@ -13,11 +13,23 @@ struct Salom_Ai_iOSApp: App {
     @UIApplicationDelegateAdaptor(AppDelegate.self) var appDelegate
     
     @AppStorage(AppStorageKeys.preferredLanguageCode) var languageCode: String = "uz"
-
+    @Environment(\.scenePhase) var scenePhase
+    @StateObject private var session = SessionManager.shared
+    
     var body: some Scene {
         WindowGroup {
             ContentView()
+                .environmentObject(session)
                 .environment(\.locale, Locale(identifier: languageCode))
+                .onChange(of: scenePhase) { newPhase in
+                    if newPhase == .active {
+                        Task {
+                            // Check subscription whenever app comes to foreground
+                            // This handles the case where user paid in Safari/Click app and returned
+                            await SubscriptionManager.shared.checkSubscriptionStatus()
+                        }
+                    }
+                }
         }
     }
 }

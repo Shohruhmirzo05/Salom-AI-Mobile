@@ -40,11 +40,48 @@ struct ContentView: View {
         .animation(.easeInOut(duration: 0.35), value: showSplash)
         .animation(.easeInOut(duration: 0.35), value: hasCompletedOnboarding)
         .animation(.easeInOut(duration: 0.35), value: session.contentType)
-        .onChange(of: languageCode) { _ in
+        .onChange(of: languageCode) { _, _ in
             refreshID = UUID()
         }
         .onAppear {
             session.bootstrap(hasCompletedOnboarding: hasCompletedOnboarding)
+        }
+        .fullScreenCover(isPresented: $showPaywall) {
+            PaywallSheet()
+        }
+        .onChange(of: showSplash) { _, isSplashActive in
+            if !isSplashActive {
+                print("DEBUG: Splash finished. Checking paywall.")
+                checkAndShowPaywall()
+            }
+        }
+        .onChange(of: session.contentType) { _, newValue in
+            if newValue == .main && !showSplash {
+                 checkAndShowPaywall()
+            }
+        }
+    }
+    
+    @State private var showPaywall = false
+    @State private var hasShownPaywall = false
+    
+    private func checkAndShowPaywall() {
+        guard !hasShownPaywall else { return }
+        guard !showSplash else {
+            return
+        }
+        
+        Task {
+            // Data is preloaded in SplashView, so standard check is fast.
+            let isPro = SubscriptionManager.shared.isPro
+            
+            if !isPro {
+                try? await Task.sleep(nanoseconds: 500_000_000) // 0.5s delay for smooth transition after splash
+                await MainActor.run {
+                    showPaywall = true
+                    hasShownPaywall = true
+                }
+            }
         }
     }
 }

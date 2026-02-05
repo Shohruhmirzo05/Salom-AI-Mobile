@@ -40,6 +40,7 @@ final class SessionManager: ObservableObject {
             contentType = .main
             Task {
                 try? await APIClient.shared.requestData(.updatePlatform(platform: "ios"))
+                await SubscriptionManager.shared.checkSubscriptionStatus()
             }
         }
     }
@@ -50,6 +51,7 @@ final class SessionManager: ObservableObject {
         
         Task {
             try? await APIClient.shared.requestData(.updatePlatform(platform: "ios"))
+            await SubscriptionManager.shared.checkSubscriptionStatus()
         }
     }
     

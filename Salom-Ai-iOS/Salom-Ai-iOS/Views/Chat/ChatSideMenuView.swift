@@ -141,8 +141,60 @@ struct ChatSideMenuView: View {
         }
     }
     
+    @StateObject private var subscriptionManager = SubscriptionManager.shared
+    @State private var showPaywall = false
+    
     @ViewBuilder func PrimaryItemsSection() -> some View {
         VStack(alignment: .leading, spacing: 12) {
+            
+            
+            // Pro Upgrade Banner
+            if !subscriptionManager.isPro {
+                Button {
+                    showPaywall = true
+                } label: {
+                    HStack(spacing: 12) {
+                        ZStack {
+                            Circle()
+                                .fill(LinearGradient(colors: [.purple, .blue], startPoint: .topLeading, endPoint: .bottomTrailing))
+                                .frame(width: 32, height: 32)
+                            
+                            Image(systemName: "crown.fill")
+                                .font(.system(size: 14, weight: .bold))
+                                .foregroundColor(.white)
+                        }
+                        
+                        VStack(alignment: .leading, spacing: 2) {
+                            Text("Premium ga o'tish")
+                                .font(.system(size: 15, weight: .bold))
+                                .foregroundColor(.white)
+                            Text("Cheklovsiz imkoniyatlar")
+                                .font(.caption2)
+                                .foregroundColor(.white.opacity(0.8))
+                        }
+                        
+                        Spacer()
+                        
+                        Image(systemName: "chevron.right")
+                            .font(.system(size: 12, weight: .semibold))
+                            .foregroundColor(.white.opacity(0.5))
+                    }
+                    .padding(.horizontal, 12)
+                    .padding(.vertical, 10)
+                    .background(
+                        RoundedRectangle(cornerRadius: 16, style: .continuous)
+                            .fill(Color.white.opacity(0.08))
+                            .overlay(
+                                RoundedRectangle(cornerRadius: 16)
+                                    .stroke(LinearGradient(colors: [.purple.opacity(0.5), .blue.opacity(0.5)], startPoint: .topLeading, endPoint: .bottomTrailing), lineWidth: 1)
+                            )
+                    )
+                }
+                .fullScreenCover(isPresented: $showPaywall) {
+                    PaywallSheet()
+                }
+            }
+            
             MenuItemRow(
                 systemName: MainSection.chat.icon,
                 title: MainSection.chat.title,

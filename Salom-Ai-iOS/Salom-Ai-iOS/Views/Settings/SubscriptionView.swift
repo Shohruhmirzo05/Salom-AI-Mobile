@@ -3,7 +3,7 @@ import SafariServices
 import Combine
 
 struct SubscriptionView: View {
-    @StateObject private var viewModel = SubscriptionViewModel()
+    @StateObject private var subscriptionManager = SubscriptionManager.shared
     @Environment(\.dismiss) var dismiss
     @State private var showSafari = false
     @State private var paymentUrl: URL?
@@ -20,7 +20,7 @@ struct SubscriptionView: View {
                 VStack(spacing: 24) {
                     HeaderSection()
                     
-                    if viewModel.isLoading {
+                    if subscriptionManager.isLoading && subscriptionManager.plans.isEmpty {
                         ProgressView()
                             .tint(.white)
                             .padding(.top, 40)
@@ -42,8 +42,8 @@ struct SubscriptionView: View {
             }
         }
         .task {
-            await viewModel.fetchPlans()
-            await viewModel.fetchCurrentSubscription()
+            await subscriptionManager.fetchPlans()
+            await subscriptionManager.checkSubscriptionStatus()
         }
         .sheet(isPresented: $showSafari) {
             if let url = paymentUrl {
@@ -54,7 +54,7 @@ struct SubscriptionView: View {
             if !isPresented {
                 // Refresh subscription when returning from Safari
                 Task {
-                    await viewModel.fetchCurrentSubscription()
+                    await subscriptionManager.checkSubscriptionStatus()
                 }
             }
         }
@@ -76,7 +76,7 @@ struct SubscriptionView: View {
     
     @ViewBuilder
     private func CurrentPlanSection() -> some View {
-        if let current = viewModel.currentSubscription, current.active {
+        if let current = subscriptionManager.currentPlan, current.active {
             VStack(alignment: .leading, spacing: 12) {
                 Text("Joriy reja")
                     .font(.footnote.weight(.semibold))
@@ -117,7 +117,7 @@ struct SubscriptionView: View {
     @ViewBuilder
     private func PlansGrid() -> some View {
         VStack(spacing: 16) {
-            ForEach(viewModel.plans) { plan in
+            ForEach(subscriptionManager.plans) { plan in
                 PlanCard(plan: plan)
             }
         }
@@ -125,7 +125,7 @@ struct SubscriptionView: View {
     
     @ViewBuilder
     private func PlanCard(plan: SubscriptionPlan) -> some View {
-        let isCurrent = viewModel.currentSubscription?.plan == plan.code && viewModel.currentSubscription?.active == true
+        let isCurrent = subscriptionManager.currentPlan?.plan == plan.code && subscriptionManager.currentPlan?.active == true
         
         VStack(alignment: .leading, spacing: 16) {
             HStack {
@@ -177,9 +177,10 @@ struct SubscriptionView: View {
             .padding(.vertical, 8)
             
             Button {
+                HapticManager.shared.fire(.mediumImpact)
                 if plan.priceUzs > 0 {
                     Task {
-                        if let url = await viewModel.subscribe(planCode: plan.code) {
+                        if let url = await subscriptionManager.subscribe(planCode: plan.code) {
                             paymentUrl = url
                             showSafari = true
                         }
@@ -187,9 +188,14 @@ struct SubscriptionView: View {
                 }
             } label: {
                 HStack {
-                    if viewModel.isProcessing == plan.code {
-                        ProgressView()
-                            .tint(.black)
+                    if subscriptionManager.isLoading {
+                        // Ideal world: per-button loading state. 
+                        // For now we check globally or simply don't block.
+                        // Manager clears loading fast for fetch, but subscribe?
+                        // Manager doesn't track specific subscribe loading yet in shared state except locally in view usually.
+                        // We'll trust the flow or add local loading.
+                         Text(plan.priceUzs > 0 ? "Tanlash (Click)" : "Bepul")
+                            .fontWeight(.semibold)
                     } else {
                         if isCurrent {
                             Text("Faol")
@@ -214,7 +220,7 @@ struct SubscriptionView: View {
                 )
                 .foregroundColor((isCurrent || plan.priceUzs == 0) ? .white : .black)
             }
-            .disabled(isCurrent || plan.priceUzs == 0 || viewModel.isProcessing != nil)
+            .disabled(isCurrent || plan.priceUzs == 0)
         }
         .padding(20)
         .background(
@@ -224,54 +230,8 @@ struct SubscriptionView: View {
     }
 }
 
-class SubscriptionViewModel: ObservableObject {
-    @Published var plans: [SubscriptionPlan] = []
-    @Published var currentSubscription: CurrentSubscriptionResponse?
-    @Published var isLoading = false
-    @Published var isProcessing: String? // plan code being processed
-    
-    func fetchPlans() async {
-        await MainActor.run { isLoading = true }
-        do {
-            let plans = try await APIClient.shared.request(.listPlans, decodeTo: [SubscriptionPlan].self)
-            await MainActor.run {
-                self.plans = plans
-                self.isLoading = false
-            }
-        } catch {
-            print("Failed to fetch plans: \(error)")
-            await MainActor.run { isLoading = false }
-        }
-    }
-    
-    func fetchCurrentSubscription() async {
-        do {
-            let sub = try await APIClient.shared.request(.currentSubscription, decodeTo: CurrentSubscriptionResponse.self)
-            await MainActor.run {
-                self.currentSubscription = sub
-            }
-        } catch {
-            print("Failed to fetch subscription: \(error)")
-        }
-    }
-    
-    func subscribe(planCode: String) async -> URL? {
-        await MainActor.run { isProcessing = planCode }
-        defer { Task { await MainActor.run { isProcessing = nil } } }
-        
-        do {
-            let response = try await APIClient.shared.request(.subscribe(plan: planCode, provider: "click"), decodeTo: SubscribeResponse.self)
-            
-            if let urlString = response.checkoutUrl, let url = URL(string: urlString) {
-                return url
-            }
-        } catch {
-            print("Subscribe failed: \(error)")
-        }
-        return nil
-    }
-}
-
+// Keep SafariView as it's used here and in PaywallSheet (if we don't move it)
+// Ideally move to Utils but keeping here for compilation safety based on previous file context.
 struct SafariView: UIViewControllerRepresentable {
     let url: URL
     

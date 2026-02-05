@@ -58,8 +58,6 @@ struct NotificationHistoryView: View {
                 .listStyle(PlainListStyle())
             }
         }
-        .navigationTitle("Notifications")
-        .navigationBarTitleDisplayMode(.inline)
         .onAppear {
             fetchNotifications()
         }

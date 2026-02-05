@@ -51,10 +51,21 @@ struct SplashView: View {
         }
         .onAppear {
             animateIn()
-            DispatchQueue.main.asyncAfter(deadline: .now() + 1.8) {
-                withAnimation {
-                    isActive = false
-                }
+        }
+        .task {
+            // Preload data while splash is showing
+            // We want to ensure minimum splash time of 1.8s for branding,
+            // but also wait for critical data if it takes longer.
+            
+            async let minSplashTime: () = try! await Task.sleep(nanoseconds: 1_800_000_000)
+            async let subCheck: () = await SubscriptionManager.shared.checkSubscriptionStatus()
+            async let plansFetch: () = await SubscriptionManager.shared.fetchPlans(force: true)
+            
+            // Wait for all to finish
+            _ = await (minSplashTime, subCheck, plansFetch)
+            
+            withAnimation {
+                isActive = false
             }
         }
     }
