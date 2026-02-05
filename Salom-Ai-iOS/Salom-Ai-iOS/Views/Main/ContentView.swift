@@ -16,7 +16,6 @@ struct ContentView: View {
     
     @StateObject private var session = SessionManager.shared
     @State private var showSplash: Bool = true
-    @State private var refreshID = UUID()
 
     var body: some View {
         ZStack {
@@ -36,13 +35,9 @@ struct ContentView: View {
                     .transition(.opacity)
             }
         }
-        .id(refreshID)
         .animation(.easeInOut(duration: 0.35), value: showSplash)
         .animation(.easeInOut(duration: 0.35), value: hasCompletedOnboarding)
         .animation(.easeInOut(duration: 0.35), value: session.contentType)
-        .onChange(of: languageCode) { _, _ in
-            refreshID = UUID()
-        }
         .onAppear {
             session.bootstrap(hasCompletedOnboarding: hasCompletedOnboarding)
         }

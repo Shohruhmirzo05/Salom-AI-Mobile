@@ -216,6 +216,7 @@ struct SettingsScreen: View {
 
             Picker("Til", selection: $languageCode) {
                 Text("Oʻzbekcha").tag("uz")
+                Text("Oʻzbekcha (Kirill)").tag("uz-Cyrl")
                 Text("Ruscha").tag("ru")
                 Text("Inglizcha").tag("en")
             }

@@ -194,6 +194,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
           SegmentedButton<String>(
             segments: [
               ButtonSegment(value: 'uz', label: Text(ref.tr('uzbek'))),
+              ButtonSegment(value: 'uz-Cyrl', label: Text(ref.tr('uzbek_cyrl'))),
               ButtonSegment(value: 'ru', label: Text(ref.tr('russian'))),
               ButtonSegment(value: 'en', label: Text(ref.tr('english'))),
             ],
