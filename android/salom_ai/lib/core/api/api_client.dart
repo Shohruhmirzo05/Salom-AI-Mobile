@@ -14,7 +14,7 @@ class ApiClient {
   final Ref _ref;
   late final Dio _dio;
   final _httpClient = http.Client();
-  
+
   ApiClient(this._ref) {
     _dio = Dio(BaseOptions(
       baseUrl: Config.apiBaseUrl,
@@ -36,15 +36,15 @@ class ApiClient {
         if (token != null) {
           options.headers['Authorization'] = 'Bearer $token';
         }
-        print('➡️ [API] ${options.method} ${options.path}');
+        print('\u27a1\ufe0f [API] ${options.method} ${options.path}');
         return handler.next(options);
       },
       onResponse: (response, handler) {
-        print('⬅️ [API] ${response.statusCode} ${response.requestOptions.path}');
+        print('\u2b05\ufe0f [API] ${response.statusCode} ${response.requestOptions.path}');
         return handler.next(response);
       },
       onError: (DioException e, handler) async {
-        print('❌ [API Error] ${e.message}');
+        print('\u274c [API Error] ${e.message}');
         if (e.response?.statusCode == 401) {
           final refreshToken = await TokenStore.shared.getRefreshToken();
           if (refreshToken != null) {
@@ -80,6 +80,8 @@ class ApiClient {
     return TokenPair.fromJson(response.data);
   }
 
+  // -- Auth --
+
   Future<void> verifyOtp(String phone, String code) async {
     final response = await _dio.post('/auth/verify-otp', data: {'phone': phone, 'code': code});
     final tokens = TokenPair.fromJson(response.data);
@@ -96,17 +98,25 @@ class ApiClient {
     return OAuthUser.fromJson(response.data);
   }
 
+  Future<void> sendPlatform() async {
+    try {
+      await _dio.post('/auth/platform', data: {'platform': 'android'});
+    } catch (_) {}
+  }
+
+  // -- Chat --
+
   Stream<ChatStreamEvent> streamChatMessage(String text, {int? conversationId, String? model, List<String>? attachments}) async* {
     final url = Uri.parse('${Config.apiBaseUrl}/chat/stream');
     final accessToken = await TokenStore.shared.getAccessToken();
-    
+
     final request = http.Request('POST', url);
     request.headers.addAll({
       'Authorization': 'Bearer $accessToken',
       'Content-Type': 'application/json',
       'Accept': 'text/event-stream',
     });
-    
+
     request.body = jsonEncode({
       'text': text,
       if (conversationId != null && conversationId != 0) 'conversation_id': conversationId,
@@ -115,9 +125,9 @@ class ApiClient {
     });
 
     try {
-      print('➡️ [API-HTTP-Stream] POST ${url.path}');
+      print('\u27a1\ufe0f [API-HTTP-Stream] POST ${url.path}');
       final response = await _httpClient.send(request);
-      
+
       if (response.statusCode == 401) {
         final refreshToken = await TokenStore.shared.getRefreshToken();
         if (refreshToken != null) {
@@ -129,13 +139,12 @@ class ApiClient {
       }
 
       final stream = response.stream
-        .transform(utf8.decoder)
-        .transform(const LineSplitter());
+          .transform(utf8.decoder)
+          .transform(const LineSplitter());
 
       await for (final line in stream) {
         final trimmedLine = line.trim();
         if (trimmedLine.isEmpty) continue;
-        print('📡 SSE Line: $trimmedLine');
 
         if (trimmedLine.startsWith('data:')) {
           final jsonStr = trimmedLine.substring(5).trim();
@@ -144,12 +153,12 @@ class ApiClient {
             final Map<String, dynamic> json = jsonDecode(jsonStr);
             yield ChatStreamEvent.fromJson(json);
           } catch (e) {
-            print("❌ Failed to parse SSE JSON: $jsonStr Error: $e");
+            print("\u274c Failed to parse SSE JSON: $jsonStr Error: $e");
           }
         }
       }
     } catch (e) {
-      print('❌ [API-HTTP-Stream Error] $e');
+      print('\u274c [API-HTTP-Stream Error] $e');
       rethrow;
     }
   }
@@ -166,6 +175,22 @@ class ApiClient {
     return ChatOut.fromJson(response.data);
   }
 
+  // -- Models --
+
+  Future<List<AIModel>> listModels() async {
+    final response = await _dio.get('/chat/models');
+    final data = response.data;
+    if (data is List) {
+      return data.map((e) => AIModel.fromJson(e)).toList();
+    }
+    if (data is Map && data['models'] is List) {
+      return (data['models'] as List).map((e) => AIModel.fromJson(e)).toList();
+    }
+    return [];
+  }
+
+  // -- Conversations --
+
   Future<List<ConversationSummary>> listConversations({int limit = 20, int offset = 0}) async {
     final response = await _dio.get('/conversations', queryParameters: {'limit': limit, 'offset': offset});
     return ConversationListResponse.fromJson(response.data).conversations;
@@ -175,6 +200,19 @@ class ApiClient {
     final response = await _dio.get('/conversations/$id/messages');
     return ConversationMessagesResponse.fromJson(response.data).messages;
   }
+
+  Future<void> deleteConversation(int id) async {
+    await _dio.delete('/conversations/$id');
+  }
+
+  // -- Search --
+
+  Future<SearchResponse> searchMessages(String query) async {
+    final response = await _dio.get('/conversations/search', queryParameters: {'q': query});
+    return SearchResponse.fromJson(response.data);
+  }
+
+  // -- Subscriptions --
 
   Future<List<SubscriptionPlan>> listPlans() async {
     final response = await _dio.get('/subscriptions/plans');
@@ -190,6 +228,52 @@ class ApiClient {
     final response = await _dio.post('/subscriptions/subscribe', data: {'plan': plan, 'provider': provider});
     return SubscribeResponse.fromJson(response.data);
   }
+
+  // -- File Upload --
+
+  Future<FileUploadResponse> uploadFile(File file) async {
+    final formData = FormData.fromMap({
+      'file': await MultipartFile.fromFile(file.path, filename: file.path.split('/').last),
+    });
+    final response = await _dio.post('/files/upload',
+      data: formData,
+      options: Options(contentType: 'multipart/form-data'),
+    );
+    return FileUploadResponse.fromJson(response.data);
+  }
+
+  // -- Image Generation --
+
+  Future<ImageGenerationResponse> generateImage(String prompt, {String? model}) async {
+    final response = await _dio.post('/chat/generate-image', data: {
+      'prompt': prompt,
+      if (model != null) 'model': model,
+    });
+    return ImageGenerationResponse.fromJson(response.data);
+  }
+
+  // -- Usage Stats --
+
+  Future<UsageStatsResponse> getUsageStats() async {
+    final response = await _dio.get('/subscriptions/usage');
+    return UsageStatsResponse.fromJson(response.data);
+  }
+
+  // -- Voice STT --
+
+  Future<STTResponse> speechToText(File audioFile, {String? language}) async {
+    final formData = FormData.fromMap({
+      'file': await MultipartFile.fromFile(audioFile.path, filename: 'audio.wav'),
+      if (language != null) 'language': language,
+    });
+    final response = await _dio.post('/voice/stt',
+      data: formData,
+      options: Options(contentType: 'multipart/form-data'),
+    );
+    return STTResponse.fromJson(response.data);
+  }
+
+  // -- Profile --
 
   Future<OAuthUser> updateProfile({String? language, String? displayName}) async {
     final data = {if (language != null) 'language': language, if (displayName != null) 'display_name': displayName};
