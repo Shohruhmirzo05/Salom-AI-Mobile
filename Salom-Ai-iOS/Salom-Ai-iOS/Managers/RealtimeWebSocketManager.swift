@@ -42,7 +42,10 @@ class RealtimeWebSocketManager: NSObject, ObservableObject {
     private var urlSession: URLSession?
     private let baseURL = "wss://api.salom-ai.uz/ws/voice/yandex/realtime"
     private var reconnectAttempts = 0
-    private let maxReconnectAttempts = 3
+    private let maxReconnectAttempts = 5
+    private var reconnectTask: Task<Void, Never>?
+    private var pingTask: Task<Void, Never>?
+    private var lastPingTime: Date?
     
     var onAudioReceived: ((Data) -> Void)?
     
@@ -55,6 +58,10 @@ class RealtimeWebSocketManager: NSObject, ObservableObject {
     }
     
     func connect(token: String) async {
+        // Cancel any pending reconnect
+        reconnectTask?.cancel()
+        reconnectTask = nil
+        
         guard connectionState != .connected && connectionState != .connecting else {
             print("🔌 [RealtimeWS] Already connected or connecting")
             return
@@ -77,9 +84,8 @@ class RealtimeWebSocketManager: NSObject, ObservableObject {
             print("❌ [RealtimeWS] No access token available")
             await MainActor.run {
                 connectionState = .error("No access token")
-                // Trigger retry if appropriate
-                self.handleError(NSError(domain: "RealtimeWS", code: 401, userInfo: [NSLocalizedDescriptionKey: "No access token"]))
             }
+            scheduleReconnect()
             return
         }
         
@@ -110,10 +116,58 @@ class RealtimeWebSocketManager: NSObject, ObservableObject {
         webSocket?.resume()
         
         receiveMessage()
+        startPingTask()
+    }
+    
+    private func startPingTask() {
+        pingTask?.cancel()
+        pingTask = Task {
+            while !Task.isCancelled {
+                try? await Task.sleep(nanoseconds: 30_000_000_000) // 30 seconds
+                guard !Task.isCancelled, connectionState == .connected else { break }
+                
+                let pingMessage: [String: Any] = ["type": "ping", "timestamp": Date().timeIntervalSince1970]
+                if let jsonData = try? JSONSerialization.data(withJSONObject: pingMessage),
+                   let jsonString = String(data: jsonData, encoding: .utf8) {
+                    webSocket?.send(.string(jsonString)) { error in
+                        if let error = error {
+                            print("⚠️ [RealtimeWS] Ping failed: \(error.localizedDescription)")
+                        } else {
+                            self.lastPingTime = Date()
+                            print("🏓 [RealtimeWS] Ping sent")
+                        }
+                    }
+                }
+            }
+        }
+    }
+    
+    private func scheduleReconnect() {
+        guard reconnectAttempts < maxReconnectAttempts else {
+            print("❌ [RealtimeWS] Max reconnect attempts reached")
+            return
+        }
+        
+        reconnectAttempts += 1
+        let delay = min(pow(2.0, Double(reconnectAttempts)), 30.0) // Exponential backoff, max 30s
+        
+        print("🔄 [RealtimeWS] Scheduling reconnect in \(delay)s (attempt \(reconnectAttempts)/\(maxReconnectAttempts))")
+        
+        reconnectTask = Task {
+            try? await Task.sleep(nanoseconds: UInt64(delay * 1_000_000_000))
+            guard !Task.isCancelled else { return }
+            
+            guard let token = TokenStore.shared.accessToken else { return }
+            await connect(token: token)
+        }
     }
     
     func disconnect() {
         print("🔌 [RealtimeWS] Disconnecting")
+        pingTask?.cancel()
+        pingTask = nil
+        reconnectTask?.cancel()
+        reconnectTask = nil
         webSocket?.cancel(with: .goingAway, reason: nil)
         webSocket = nil
         connectionState = .disconnected
@@ -237,22 +291,12 @@ class RealtimeWebSocketManager: NSObject, ObservableObject {
     
     func reset() {
         guard connectionState == .connected else { return }
-        
+
+        // Use sendJSON helper which correctly sends as .string (not .data)
+        // Backend expects JSON control messages as text frames, not binary
         let resetMessage = ["type": "reset"]
-        guard let jsonData = try? JSONSerialization.data(withJSONObject: resetMessage) else {
-            print("❌ [RealtimeWS] Failed to serialize reset message")
-            return
-        }
-        
-        let message = URLSessionWebSocketTask.Message.data(jsonData)
-        webSocket?.send(message) { error in
-            if let error = error {
-                print("❌ [RealtimeWS] Failed to send reset: \(error.localizedDescription)")
-            } else {
-                print("🔄 [RealtimeWS] Reset sent")
-            }
-        }
-        
+        sendJSON(resetMessage, debugMessage: "reset")
+
         DispatchQueue.main.async {
             self.messages.removeAll()
             self.currentTranscription = ""
@@ -357,22 +401,10 @@ class RealtimeWebSocketManager: NSObject, ObservableObject {
     private func handleError(_ error: Error) {
         DispatchQueue.main.async {
             self.connectionState = .error(error.localizedDescription)
-            
-            // Auto-reconnect
-            if self.reconnectAttempts < self.maxReconnectAttempts {
-                self.reconnectAttempts += 1
-                print("🔄 [RealtimeWS] Reconnecting (attempt \(self.reconnectAttempts)/\(self.maxReconnectAttempts))")
-                
-                DispatchQueue.main.asyncAfter(deadline: .now() + 2.0) {
-                    if let token = TokenStore.shared.accessToken {
-                        Task {
-                            await self.connect(token: token)
-                        }
-                    }
-                }
-            } else {
-                print("❌ [RealtimeWS] Max reconnect attempts reached")
-            }
+            self.pingTask?.cancel()
+            self.pingTask = nil
+            // Use the shared reconnect logic with exponential backoff
+            self.scheduleReconnect()
         }
     }
 }
@@ -380,9 +412,11 @@ class RealtimeWebSocketManager: NSObject, ObservableObject {
 // MARK: - URLSessionWebSocketDelegate
 extension RealtimeWebSocketManager: URLSessionWebSocketDelegate {
     func urlSession(_ session: URLSession, webSocketTask: URLSessionWebSocketTask, didOpenWithProtocol protocol: String?) {
-        print("✅ [RealtimeWS] WebSocket opened")
+        print("✅ [RealtimeWS] WebSocket transport opened")
+        // Don't set .connected here - wait for the "connected" JSON event from server
+        // which confirms authentication and session setup are complete
         DispatchQueue.main.async {
-            self.connectionState = .connected
+            self.connectionState = .connecting
         }
     }
     

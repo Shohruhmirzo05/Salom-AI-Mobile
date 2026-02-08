@@ -174,17 +174,27 @@ class RealtimeAudioManager: NSObject, ObservableObject {
         
         // 4. Initialize & Play
         do {
-            // Check for RIFF header (WAV)
+            // Backend sends MP3 audio from Yandex TTS
+            // AVAudioPlayer can handle MP3 natively - no header manipulation needed
+            // Only add WAV header if data is truly raw PCM (no known audio header)
             var audioData = data
-            let headerPrefix = String(data: data.prefix(4), encoding: .ascii)
-            
-            if headerPrefix != "RIFF" {
-                print("⚠️ [RealtimeAudio] Raw PCM detected, adding WAV header (48kHz)")
-                // Assuming 48kHz based on typical Yandex/Realtime API outputs. 
-                // If it sounds slow/fast, we can adjust this.
+            let headerPrefix = data.prefix(4)
+            let headerStr = String(data: headerPrefix, encoding: .ascii) ?? ""
+
+            // Check for known audio formats: RIFF (WAV), ID3/0xFF (MP3), fLaC, OggS
+            let isMP3 = headerPrefix.count >= 2 && (
+                (headerPrefix[headerPrefix.startIndex] == 0xFF && (headerPrefix[headerPrefix.index(after: headerPrefix.startIndex)] & 0xE0) == 0xE0) ||
+                headerStr.hasPrefix("ID3")
+            )
+            let isKnownFormat = headerStr == "RIFF" || headerStr == "fLaC" || headerStr == "OggS" || isMP3
+
+            if !isKnownFormat && data.count > 44 {
+                print("⚠️ [RealtimeAudio] Unknown format, adding WAV header (48kHz)")
                 audioData = addWavHeader(to: data, sampleRate: 48000)
+            } else {
+                print("✅ [RealtimeAudio] Detected known audio format, playing directly")
             }
-            
+
             audioPlayer = try AVAudioPlayer(data: audioData)
             audioPlayer?.delegate = self
             audioPlayer?.volume = 1.0
@@ -398,28 +408,11 @@ class RealtimeAudioManager: NSObject, ObservableObject {
 extension RealtimeAudioManager: AVAudioPlayerDelegate {
     func audioPlayerDidFinishPlaying(_ player: AVAudioPlayer, successfully flag: Bool) {
         print("✅ [RealtimeAudio] Audio playback finished")
-        DispatchQueue.main.async {
-            self.isPlaying = false
-        }
-        
-        // Resume recording if it was paused for playback
-        if shouldResumeRecording {
-            shouldResumeRecording = false
-            print("▶️ [RealtimeAudio] Resuming recording after playback")
-            startRecording()
-        }
+        finishPlayback()
     }
-    
+
     func audioPlayerDecodeErrorDidOccur(_ player: AVAudioPlayer, error: Error?) {
         print("❌ [RealtimeAudio] Decode error: \(error?.localizedDescription ?? "unknown")")
-        DispatchQueue.main.async {
-            self.isPlaying = false
-        }
-        
-        // Resume recording if it was paused for playback
-        if shouldResumeRecording {
-            shouldResumeRecording = false
-            startRecording()
-        }
+        finishPlayback()
     }
 }

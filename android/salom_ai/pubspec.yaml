@@ -37,6 +37,23 @@ dependencies:
   url_launcher: ^6.2.4
   google_sign_in: ^6.2.1
   http: ^1.6.0
+  
+  # Audio & Voice
+  record: ^5.0.4
+  audioplayers: ^5.2.1
+  web_socket_channel: ^2.4.0
+  
+  # File Handling
+  file_picker: ^6.1.1
+  image_picker: ^1.0.7
+  mime: ^1.0.4
+  
+  # Feedback & Interaction
+  flutter_vibrate: ^1.3.0
+  share_plus: ^7.2.1
+  
+  # Localization
+  easy_localization: ^3.0.5
 
 dev_dependencies:
   flutter_test:
@@ -50,3 +67,4 @@ flutter:
   assets:
     - assets/images/
     - assets/fonts/
+    - assets/translations/
