@@ -1,24 +1,59 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import 'package:go_router/go_router.dart';
 import 'package:salom_ai/core/theme/app_theme.dart';
+import 'package:salom_ai/core/services/subscription_manager.dart';
+import 'package:salom_ai/features/auth/auth_service.dart';
+import 'package:salom_ai/features/settings/paywall_sheet.dart';
 
-class SplashScreen extends StatefulWidget {
+/// Tracks whether the paywall has been shown this session.
+final _paywallShownProvider = StateProvider<bool>((ref) => false);
+
+class SplashScreen extends ConsumerStatefulWidget {
   const SplashScreen({super.key});
 
   @override
-  State<SplashScreen> createState() => _SplashScreenState();
+  ConsumerState<SplashScreen> createState() => _SplashScreenState();
 }
 
-class _SplashScreenState extends State<SplashScreen> {
+class _SplashScreenState extends ConsumerState<SplashScreen> {
   @override
   void initState() {
     super.initState();
-    Future.delayed(const Duration(seconds: 2), () {
-      if (mounted) {
-        context.go('/');
+    _initializeAndNavigate();
+  }
+
+  Future<void> _initializeAndNavigate() async {
+    // Pre-load subscription data while splash is animating
+    final auth = ref.read(authServiceProvider);
+    if (auth.isAuthenticated) {
+      try {
+        await ref.read(subscriptionManagerProvider.notifier).loadAll();
+      } catch (_) {}
+    }
+
+    // Wait for splash animation
+    await Future.delayed(const Duration(seconds: 2));
+
+    if (!mounted) return;
+
+    // Navigate to main content
+    context.go('/');
+
+    // Show paywall if user is authenticated, not pro, and hasn't seen it this session
+    if (auth.isAuthenticated) {
+      final subState = ref.read(subscriptionManagerProvider);
+      final alreadyShown = ref.read(_paywallShownProvider);
+      if (!subState.isPro && !alreadyShown) {
+        ref.read(_paywallShownProvider.notifier).state = true;
+        // Small delay to let the home screen build first
+        await Future.delayed(const Duration(milliseconds: 500));
+        if (mounted) {
+          showPaywallSheet(context);
+        }
       }
-    });
+    }
   }
 
   @override

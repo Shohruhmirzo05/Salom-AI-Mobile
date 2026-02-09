@@ -4,8 +4,11 @@ import 'package:go_router/go_router.dart';
 import 'package:salom_ai/core/api/api_client.dart';
 import 'package:salom_ai/core/api/api_models.dart';
 import 'package:salom_ai/core/theme/app_theme.dart';
+import 'package:salom_ai/core/services/subscription_manager.dart';
 import 'package:salom_ai/features/auth/auth_service.dart';
+import 'package:salom_ai/features/settings/usage_info_view.dart';
 import 'package:salom_ai/core/constants/localization.dart';
+import 'package:google_fonts/google_fonts.dart';
 
 class SettingsScreen extends ConsumerStatefulWidget {
   const SettingsScreen({super.key});
@@ -15,39 +18,7 @@ class SettingsScreen extends ConsumerStatefulWidget {
 }
 
 class _SettingsScreenState extends ConsumerState<SettingsScreen> {
-  String _currentPlanName = "Yuklanmoqda...";
-  bool _isPremium = false;
   bool _isDeleting = false;
-
-  @override
-  void initState() {
-    super.initState();
-    _fetchSubscriptionStatus();
-  }
-
-  Future<void> _fetchSubscriptionStatus() async {
-    try {
-      final sub = await ref.read(apiClientProvider).currentSubscription();
-      if (mounted) {
-        setState(() {
-          if (sub.active && sub.plan != null) {
-            _currentPlanName = sub.plan!.toUpperCase();
-            _isPremium = true;
-          } else {
-            _currentPlanName = ref.tr('free');
-            _isPremium = false;
-          }
-        });
-      }
-    } catch (e) {
-      if (mounted) {
-        setState(() {
-          _currentPlanName = ref.tr('free');
-          _isPremium = false;
-        });
-      }
-    }
-  }
 
   Future<void> _updateLanguage(String code) async {
     try {
@@ -78,6 +49,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
     final auth = ref.watch(authServiceProvider);
     final user = auth.backendUser;
     final locale = ref.watch(localeProvider);
+    final subState = ref.watch(subscriptionManagerProvider);
 
     return Scaffold(
       backgroundColor: AppTheme.bgMain,
@@ -91,7 +63,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
           children: [
             _buildProfileCard(user),
             const SizedBox(height: 20),
-            _buildSubscriptionSection(),
+            _buildSubscriptionSection(subState),
             const SizedBox(height: 20),
             _buildSupportSection(),
             const SizedBox(height: 20),
@@ -106,7 +78,9 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
   }
 
   Widget _buildProfileCard(OAuthUser? user) {
-    final initials = user?.displayName?.substring(0, 1).toUpperCase() ?? "U";
+    final initials = user?.displayName?.isNotEmpty == true
+        ? user!.displayName!.substring(0, 1).toUpperCase()
+        : "U";
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: AppTheme.glassCardDecoration,
@@ -123,7 +97,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(user?.displayName ?? ref.tr('profile_card_default_user'),
-                    style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Colors.white)),
+                    style: GoogleFonts.outfit(fontSize: 18, fontWeight: FontWeight.bold, color: Colors.white)),
                 Text(user?.email ?? ref.tr('phone_not_identified'),
                     style: const TextStyle(fontSize: 14, color: AppTheme.textSecondary)),
               ],
@@ -134,7 +108,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
     );
   }
 
-  Widget _buildSubscriptionSection() {
+  Widget _buildSubscriptionSection(SubscriptionManagerState subState) {
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: AppTheme.glassCardDecoration,
@@ -148,10 +122,24 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
             contentPadding: EdgeInsets.zero,
             onTap: () => context.push('/settings/subscription'),
             leading: Icon(
-              _isPremium ? Icons.workspace_premium : Icons.auto_awesome,
-              color: _isPremium ? Colors.amber : Colors.grey,
+              subState.isPro ? Icons.workspace_premium : Icons.auto_awesome,
+              color: subState.isPro ? Colors.amber : Colors.grey,
             ),
-            title: Text(_currentPlanName, style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
+            title: Text(
+              subState.isPro
+                  ? (subState.currentPlan?.toUpperCase() ?? 'PRO')
+                  : ref.tr('free'),
+              style: GoogleFonts.outfit(color: Colors.white, fontWeight: FontWeight.bold),
+            ),
+            trailing: const Icon(Icons.chevron_right, color: AppTheme.textSecondary, size: 16),
+          ),
+          // Usage stats row
+          ListTile(
+            contentPadding: EdgeInsets.zero,
+            onTap: () => showUsageInfoSheet(context),
+            leading: const Icon(Icons.bar_chart, color: AppTheme.accentSecondary),
+            title: Text(ref.tr('usage_stats'),
+                style: GoogleFonts.outfit(color: Colors.white, fontWeight: FontWeight.bold)),
             trailing: const Icon(Icons.chevron_right, color: AppTheme.textSecondary, size: 16),
           ),
         ],
@@ -173,7 +161,8 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
             contentPadding: EdgeInsets.zero,
             onTap: () => context.push('/settings/feedback'),
             leading: const Icon(Icons.forum, color: Colors.blue),
-            title: Text(ref.tr('send_feedback'), style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
+            title: Text(ref.tr('send_feedback'),
+                style: GoogleFonts.outfit(color: Colors.white, fontWeight: FontWeight.bold)),
             trailing: const Icon(Icons.chevron_right, color: AppTheme.textSecondary, size: 16),
           ),
         ],
@@ -242,9 +231,9 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
           Center(
             child: TextButton(
               onPressed: _isDeleting ? null : _showDeleteDialog,
-              child: _isDeleting 
-                ? const CircularProgressIndicator(color: Colors.red)
-                : Text(ref.tr('delete_account'), style: const TextStyle(color: Colors.redAccent, fontSize: 12)),
+              child: _isDeleting
+                  ? const CircularProgressIndicator(color: Colors.red)
+                  : Text(ref.tr('delete_account'), style: const TextStyle(color: Colors.redAccent, fontSize: 12)),
             ),
           ),
         ],

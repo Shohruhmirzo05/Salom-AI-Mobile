@@ -1,15 +1,15 @@
 import 'package:flutter/material.dart';
 import 'package:salom_ai/core/theme/app_theme.dart';
 
-class ShimmerEffect extends StatefulWidget {
+class AppShimmer extends StatefulWidget {
   final Widget child;
-  const ShimmerEffect({super.key, required this.child});
+  const AppShimmer({super.key, required this.child});
 
   @override
-  State<ShimmerEffect> createState() => _ShimmerEffectState();
+  State<AppShimmer> createState() => _AppShimmerState();
 }
 
-class _ShimmerEffectState extends State<ShimmerEffect>
+class _AppShimmerState extends State<AppShimmer>
     with SingleTickerProviderStateMixin {
   late AnimationController _controller;
 
@@ -66,7 +66,7 @@ class ShimmerMessagePlaceholder extends StatelessWidget {
   Widget build(BuildContext context) {
     return Align(
       alignment: isUser ? Alignment.centerRight : Alignment.centerLeft,
-      child: ShimmerEffect(
+      child: AppShimmer(
         child: Container(
           margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
           padding: const EdgeInsets.all(16),

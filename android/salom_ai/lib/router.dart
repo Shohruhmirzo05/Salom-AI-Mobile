@@ -40,8 +40,8 @@ final routerProvider = Provider<GoRouter>((ref) {
 
       // Logic for Onboarding
       if (!hasCompletedOnboarding) {
-         if (isOnboarding) return null;
-         return '/onboarding';
+        if (isOnboarding) return null;
+        return '/onboarding';
       }
 
       // Logic for Auth

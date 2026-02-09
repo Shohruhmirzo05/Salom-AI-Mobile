@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:salom_ai/core/theme/app_theme.dart';
 import 'package:salom_ai/core/services/subscription_manager.dart';
+import 'package:salom_ai/core/api/api_models.dart';
 import 'package:salom_ai/core/constants/localization.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:google_fonts/google_fonts.dart';
