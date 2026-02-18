@@ -42,34 +42,39 @@ final class AuthViewModel: ObservableObject {
         print("🔵 [Google Auth] Presenting Google Sign-In UI...")
         
         GIDSignIn.sharedInstance.signIn(withPresenting: presenting) { [weak self] result, error in
-            guard let self else { 
+            guard let self else {
                 print("❌ [Google Auth] Self deallocated")
-                return 
+                return
             }
-            
+
             Task { @MainActor in
-                defer { 
-                    self.isLoadingGoogle = false 
+                defer {
+                    self.isLoadingGoogle = false
                     print("🔵 [Google Auth] Loading state cleared")
                 }
-                
+
                 if let error = error {
                     print("❌ [Google Auth] Sign-in error: \(error.localizedDescription)")
                     self.errorMessage = error.localizedDescription
                     return
                 }
-                
+
                 print("✅ [Google Auth] User signed in with Google")
-                
+
                 guard let idToken = result?.user.idToken?.tokenString else {
                     print("❌ [Google Auth] Failed to get ID token")
                     self.errorMessage = "Google ID token olinmadi."
                     return
                 }
-                
+
+                // Extract name and email from Google profile
+                let googleName = result?.user.profile?.name ?? ""
+                let googleEmail = result?.user.profile?.email ?? ""
+                print("✅ [Google Auth] Name: \(googleName), Email: \(googleEmail)")
+
                 print("✅ [Google Auth] ID token received: \(idToken.prefix(30))...")
                 print("🔵 [Google Auth] Starting token exchange with backend...")
-                await self.exchangeOAuthToken(idToken, provider: .google)
+                await self.exchangeOAuthToken(idToken, provider: .google, displayName: googleName, email: googleEmail)
             }
         }
     }
@@ -108,18 +113,19 @@ final class AuthViewModel: ObservableObject {
             
             print("✅ [Apple Auth] Identity token decoded: \(token.prefix(30))...")
             
-            if let email = credential.email {
-                print("✅ [Apple Auth] User email: \(email)")
-            }
-            if let fullName = credential.fullName {
-                print("✅ [Apple Auth] User name: \(fullName.givenName ?? "") \(fullName.familyName ?? "")")
-            }
-            
+            // Extract name and email from Apple credential (only available on first sign-in)
+            let appleEmail = credential.email ?? ""
+            let firstName = credential.fullName?.givenName ?? ""
+            let lastName = credential.fullName?.familyName ?? ""
+            let appleName = [firstName, lastName].filter { !$0.isEmpty }.joined(separator: " ")
+            if !appleEmail.isEmpty { print("✅ [Apple Auth] User email: \(appleEmail)") }
+            if !appleName.isEmpty { print("✅ [Apple Auth] User name: \(appleName)") }
+
             isLoadingApple = true
             print("🍎 [Apple Auth] Starting token exchange with backend...")
-            
+
             Task { @MainActor in
-                await exchangeOAuthToken(token, provider: .apple)
+                await exchangeOAuthToken(token, provider: .apple, displayName: appleName, email: appleEmail)
                 isLoadingApple = false
             }
             
@@ -129,17 +135,17 @@ final class AuthViewModel: ObservableObject {
         }
     }
     
-    private func exchangeOAuthToken(_ token: String, provider: OAuthProvider) async {
+    private func exchangeOAuthToken(_ token: String, provider: OAuthProvider, displayName: String = "", email: String = "") async {
         print("🔐 [\(provider.displayName)] Starting OAuth token exchange...")
         print("🔐 [\(provider.displayName)] Token length: \(token.count) characters")
-        
+
         errorMessage = nil
-        
+
         do {
             // Skip Supabase exchange for iOS - send ID token directly to backend
             // The backend now supports verifying Google/Apple ID tokens directly
             print("🔐 [\(provider.displayName)] Sending ID token directly to /auth/oauth/verify...")
-            
+
             let tokens = try await client.request(
                 .oauthVerify(accessToken: token), // Send ID token as access_token
                 decodeTo: TokenPair.self
@@ -147,22 +153,46 @@ final class AuthViewModel: ObservableObject {
             print("✅ [\(provider.displayName)] Backend returned access & refresh tokens")
             print("✅ [\(provider.displayName)] Access token: \(tokens.accessToken.prefix(30))...")
             print("✅ [\(provider.displayName)] Refresh token: \(tokens.refreshToken.prefix(30))...")
-            
+
             print("💾 [\(provider.displayName)] Saving tokens to keychain...")
             TokenStore.shared.save(accessToken: tokens.accessToken, refreshToken: tokens.refreshToken)
             print("✅ [\(provider.displayName)] Tokens saved successfully")
-            
-            // Fetch user info (non-blocking)
+
+            // Save name/email from OAuth provider immediately (before backend call)
+            if !displayName.isEmpty {
+                UserDefaults.standard.set(displayName, forKey: AppStorageKeys.displayName)
+                print("✅ [\(provider.displayName)] Saved display name: \(displayName)")
+            }
+            if !email.isEmpty {
+                UserDefaults.standard.set(email, forKey: AppStorageKeys.userEmail)
+            }
+
+            // Fetch user info from backend and update stored name
             print("👤 [\(provider.displayName)] Fetching user info from backend...")
             Task.detached {
                 do {
                     let user = try await self.client.request(.oauthUser, decodeTo: OAuthUser.self)
-                    print("✅ [\(provider.displayName)] User info fetched: \(user.email ?? "no email")")
+                    print("✅ [\(provider.displayName)] User info fetched: \(user.email ?? "no email"), name: \(user.displayName ?? "nil")")
+                    await MainActor.run {
+                        // Prefer backend display_name; fall back to email-derived name
+                        if let backendName = user.displayName, !backendName.isEmpty {
+                            UserDefaults.standard.set(backendName, forKey: AppStorageKeys.displayName)
+                        } else {
+                            let current = UserDefaults.standard.string(forKey: AppStorageKeys.displayName) ?? ""
+                            if current.isEmpty, let emailVal = user.email {
+                                let derived = emailVal.components(separatedBy: "@").first ?? emailVal
+                                UserDefaults.standard.set(derived, forKey: AppStorageKeys.displayName)
+                            }
+                        }
+                        if let backendEmail = user.email, !backendEmail.isEmpty {
+                            UserDefaults.standard.set(backendEmail, forKey: AppStorageKeys.userEmail)
+                        }
+                    }
                 } catch {
                     print("⚠️ [\(provider.displayName)] Failed to fetch user info: \(error.localizedDescription)")
                 }
             }
-            
+
             // Set authenticated state
             print("🎉 [\(provider.displayName)] Setting authenticated state...")
             await MainActor.run {
@@ -248,8 +278,8 @@ struct AuthView: View {
             Text("Keling, kirib olamiz")
                 .font(.system(size: 26, weight: .semibold))
                 .foregroundColor(SalomTheme.Colors.textPrimary)
-            
-            Text("Telefon raqamingiz bilan tezda kirishingiz mumkin.")
+
+            Text("Google yoki Apple orqali tezda kiring.")
                 .font(.subheadline)
                 .foregroundColor(SalomTheme.Colors.textSecondary)
         }
@@ -270,7 +300,7 @@ struct AuthView: View {
                         .frame(width: 24, height: 24)
                         .font(.system(size: 20, weight: .semibold))
                         .foregroundColor(.white)
-                    Text("Continue with Google")
+                    Text("Google orqali kirish")
                         .font(.system(size: 16, weight: .semibold))
                 }
                 .foregroundColor(.white.opacity(viewModel.isLoadingGoogle ? 0.6 : 1))

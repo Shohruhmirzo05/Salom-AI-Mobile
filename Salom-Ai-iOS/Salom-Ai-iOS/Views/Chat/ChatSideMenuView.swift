@@ -20,7 +20,7 @@ enum MainSection: String, CaseIterable, Identifiable {
         switch self {
         case .chat: return "Salom AI"
 //        case .voice: return "Ovozli suhbat"
-        case .realtime: return "Real-time Voice"
+        case .realtime: return "Ovozli suhbat"
         case .notifications: return "Bildirishnomalar"
         case .settings: return "Sozlamalar"
         }
@@ -30,7 +30,7 @@ enum MainSection: String, CaseIterable, Identifiable {
         switch self {
         case .chat: return "O'zbekcha AI yordamchi"
 //        case .voice: return "Tez orada"
-        case .realtime: return "ChatGPT-like suhbat"
+        case .realtime: return "Real vaqt ovozli AI"
         case .notifications: return "Xabarlar tarixi"
         case .settings: return "Ilova sozlamalari"
         }
@@ -51,8 +51,27 @@ struct ChatSideMenuView: View {
     @ObservedObject var viewModel: ChatViewModel
     @Binding var isOpen: Bool
     @Binding var selectedSection: MainSection
-    
+
+    @AppStorage(AppStorageKeys.displayName) private var storedDisplayName: String = ""
+    @AppStorage(AppStorageKeys.userEmail) private var storedEmail: String = ""
+
     private let session = SessionManager.shared
+
+    private var profileDisplayName: String {
+        if !storedDisplayName.isEmpty { return storedDisplayName }
+        if !storedEmail.isEmpty { return storedEmail.components(separatedBy: "@").first ?? storedEmail }
+        return "Foydalanuvchi"
+    }
+
+    private var profileInitials: String {
+        let words = profileDisplayName.split(separator: " ")
+        if words.count >= 2,
+           let first = words[0].first,
+           let second = words[1].first {
+            return String(first).uppercased() + String(second).uppercased()
+        }
+        return String(profileDisplayName.prefix(2)).uppercased()
+    }
     
     var body: some View {
         GeometryReader { geo in
@@ -127,7 +146,7 @@ struct ChatSideMenuView: View {
                     .font(.system(size: 14, weight: .medium))
                     .foregroundColor(SalomTheme.Colors.textSecondary)
                 
-                TextField("Search messages", text: $viewModel.searchQuery)
+                TextField(String(localized: "Xabarlarni qidirish"), text: $viewModel.searchQuery)
                     .textFieldStyle(.plain)
                     .foregroundColor(.white)
                     .font(.system(size: 14))
@@ -297,22 +316,23 @@ struct ChatSideMenuView: View {
                     .fill(Color(hex: "#6366F1"))
                     .frame(width: 30, height: 30)
                     .overlay(
-                        Text("SA")
-                            .font(.system(size: 14, weight: .semibold))
+                        Text(profileInitials)
+                            .font(.system(size: 12, weight: .semibold))
                             .foregroundColor(.white)
                     )
-                
+
                 VStack(alignment: .leading, spacing: 2) {
-                    Text("Shohruhmirzo Alijonov")
+                    Text(profileDisplayName)
                         .font(.system(size: 14, weight: .semibold))
                         .foregroundColor(.white)
+                        .lineLimit(1)
                     Text("Sozlamalar")
                         .font(.caption2)
                         .foregroundColor(SalomTheme.Colors.textSecondary)
                 }
-                
+
                 Spacer()
-                
+
                 Image(systemName: "chevron.right")
                     .font(.system(size: 12, weight: .semibold))
                     .foregroundColor(SalomTheme.Colors.textSecondary)

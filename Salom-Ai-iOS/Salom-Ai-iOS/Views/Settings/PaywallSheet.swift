@@ -44,14 +44,14 @@ struct PaywallSheet: View {
                                 .font(.title.weight(.bold))
                                 .foregroundColor(.white)
                                 .multilineTextAlignment(.center)
-                            
+
                             Text("Salom AI Pro orqali sun'iy intellektning to'liq kuchidan foydalaning.")
                                 .font(.body)
                                 .foregroundColor(SalomTheme.Colors.textSecondary)
                                 .multilineTextAlignment(.center)
                                 .padding(.horizontal)
                         }
-                        
+
                         // Benefits List
                         VStack(spacing: 16) {
                             BenefitRow(icon: "message.fill", title: "Cheklovsiz xabarlar", subtitle: "Murosasiz muloqot")
@@ -132,9 +132,9 @@ struct PaywallSheet: View {
 
 struct BenefitRow: View {
     let icon: String
-    let title: String
-    let subtitle: String
-    
+    let title: LocalizedStringKey
+    let subtitle: LocalizedStringKey
+
     var body: some View {
         HStack(spacing: 16) {
             Image(systemName: icon)
@@ -143,7 +143,7 @@ struct BenefitRow: View {
                 .background(SalomTheme.Colors.accentPrimary.opacity(0.1))
                 .foregroundColor(SalomTheme.Colors.accentPrimary)
                 .clipShape(Circle())
-            
+
             VStack(alignment: .leading, spacing: 2) {
                 Text(title)
                     .font(.headline)

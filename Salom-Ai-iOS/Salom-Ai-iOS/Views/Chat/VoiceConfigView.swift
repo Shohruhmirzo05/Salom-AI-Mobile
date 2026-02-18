@@ -24,23 +24,23 @@ struct VoiceConfigView: View {
     
     let voices: [String: [(id: String, name: String, roles: [String])]] = [
         "uz-UZ": [
-            ("nigora", "Nigora (Ayol)", ["neutral"]),
-            ("zamira", "Zamira (Ayol)", ["neutral", "strict", "friendly"]),
-            ("yulduz", "Yulduz (Ayol)", ["neutral", "strict", "friendly", "whisper"])
+            ("nigora", "Nigora — Ayol", ["neutral"]),
+            ("zamira", "Zamira — Ayol", ["neutral", "strict", "friendly"]),
+            ("yulduz", "Yulduz — Ayol", ["neutral", "strict", "friendly", "whisper"])
         ],
         "ru-RU": [
-            ("alena", "Alena (Ayol)", ["neutral", "good"]),
-            ("filipp", "Filipp (Erkak)", ["neutral"]),
-            ("ermil", "Ermil (Erkak)", ["neutral", "good"]),
-            ("jane", "Jane (Ayol)", ["neutral"]),
-            ("madirus", "Madirus (Erkak)", ["neutral"]),
-            ("omazh", "Omazh (Ayol)", ["neutral"]),
-            ("zahar", "Zahar (Erkak)", ["neutral"])
+            ("alena", "Alena — Ayol", ["neutral", "good"]),
+            ("filipp", "Filipp — Erkak", ["neutral"]),
+            ("ermil", "Ermil — Erkak", ["neutral", "good"]),
+            ("jane", "Jane — Ayol", ["neutral"]),
+            ("madirus", "Madirus — Erkak", ["neutral"]),
+            ("omazh", "Omazh — Ayol", ["neutral"]),
+            ("zahar", "Zahar — Erkak", ["neutral"])
         ],
         "en-US": [
-            ("john", "John (Erkak)", ["neutral"]),
-            ("lea", "Lea (Ayol)", ["neutral"]),
-            ("naomi", "Naomi (Ayol)", ["neutral"]) // Assuming standard voices
+            ("john", "John — Erkak", ["neutral"]),
+            ("lea", "Lea — Ayol", ["neutral"]),
+            ("naomi", "Naomi — Ayol", ["neutral"])
         ]
     ]
     
@@ -55,8 +55,8 @@ struct VoiceConfigView: View {
     var body: some View {
         NavigationView {
             Form {
-                Section(header: Text("Til (Language)")) {
-                    Picker("Language", selection: $selectedLanguage) {
+                Section(header: Text("Til")) {
+                    Picker("Til", selection: $selectedLanguage) {
                         ForEach(languages, id: \.0) { lang in
                             Text(lang.1).tag(lang.0)
                         }
@@ -71,9 +71,9 @@ struct VoiceConfigView: View {
                         updateConfig()
                     }
                 }
-                
-                Section(header: Text("Ovoz (Voice)")) {
-                    Picker("Voice", selection: $selectedVoice) {
+
+                Section(header: Text("Ovoz")) {
+                    Picker("Ovoz", selection: $selectedVoice) {
                         ForEach(currentVoices, id: \.id) { voice in
                             Text(voice.name).tag(voice.id)
                         }
@@ -87,12 +87,12 @@ struct VoiceConfigView: View {
                         updateConfig()
                     }
                 }
-                
+
                 if currentRoles.count > 1 {
-                    Section(header: Text("Ohang (Tone)")) {
-                        Picker("Tone", selection: $selectedRole) {
+                    Section(header: Text("Ohang")) {
+                        Picker("Ohang", selection: $selectedRole) {
                             ForEach(currentRoles, id: \.self) { role in
-                                Text(role.capitalized).tag(role)
+                                Text(localizedRole(role)).tag(role)
                             }
                         }
                         .pickerStyle(.segmented)
@@ -101,7 +101,7 @@ struct VoiceConfigView: View {
                         }
                     }
                 }
-                
+
                 Section(footer: Text("O'zgarishlar darhol qo'llaniladi va namuna eshittiriladi.")) {
                     Button(action: {
                         updateConfig()
@@ -113,7 +113,7 @@ struct VoiceConfigView: View {
                             } else {
                                 Image(systemName: "play.circle.fill")
                             }
-                            Text(isPreviewLoading ? "Yuklanmoqda..." : "Namuna eshitish (Preview)")
+                            Text(isPreviewLoading ? "Yuklanmoqda..." : "Namuna eshitish")
                         }
                     }
                     .disabled(isPreviewLoading)
@@ -175,6 +175,17 @@ struct VoiceConfigView: View {
         }
     }
     
+    private func localizedRole(_ role: String) -> String {
+        switch role {
+        case "neutral":  return "Neytral"
+        case "strict":   return "Rasmiy"
+        case "friendly": return "Do'stona"
+        case "whisper":  return "Shivirlovchi"
+        case "good":     return "Iliq"
+        default:         return role.capitalized
+        }
+    }
+
     private func loadSavedSettings() {
         if let savedLang = UserDefaults.standard.string(forKey: "voice_language") {
             selectedLanguage = savedLang

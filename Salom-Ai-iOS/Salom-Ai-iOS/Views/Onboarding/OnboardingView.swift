@@ -10,7 +10,10 @@ import Combine
 
 struct OnboardingView: View {
     @StateObject private var viewModel = OnboardingViewModel()
-    
+
+    @AppStorage(AppStorageKeys.preferredLanguageCode)
+    private var languageCode: String = "uz"
+
     // Animations
     @State private var showContent: Bool = false
     @State private var backgroundRotation: Double = 0
@@ -93,27 +96,123 @@ struct OnboardingView: View {
     @ViewBuilder
     private func TopBar() -> some View {
         HStack {
+            // Logo
             HStack(spacing: 8) {
                 Image("app-icon-transparent")
                     .resizable()
                     .scaledToFit()
                     .frame(width: 28, height: 28)
-                
+
                 Text("Salom AI")
                     .font(.system(size: 20, weight: .bold))
                     .foregroundColor(.white)
             }
-            
+
             Spacer()
-            
-            Button {
-                viewModel.markAsCompleted()
-            } label: {
-                Text("O'tkazib yuborish")
-                    .font(.system(size: 15, weight: .medium))
-                    .foregroundColor(SalomTheme.Colors.textSecondary)
+
+            // Language picker + Skip
+            HStack(spacing: 10) {
+                LanguageMenuButton()
+
+                Button {
+                    viewModel.markAsCompleted()
+                } label: {
+                    Text("O'tkazib yuborish")
+                        .font(.system(size: 15, weight: .medium))
+                        .foregroundColor(SalomTheme.Colors.textSecondary)
+                }
             }
         }
+    }
+
+    // MARK: - Language Menu
+
+    private var currentFlag: String {
+        switch languageCode {
+        case "ru":      return "🇷🇺"
+        case "en":      return "🇬🇧"
+        case "uz-Cyrl": return "🇺🇿"
+        default:        return "🇺🇿"
+        }
+    }
+
+    @ViewBuilder
+    private func LanguageMenuButton() -> some View {
+        Menu {
+            Button {
+                withAnimation(.spring(response: 0.35, dampingFraction: 0.75)) {
+                    languageCode = "uz"
+                }
+            } label: {
+                Label {
+                    Text("Oʻzbekcha")
+                } icon: {
+                    Text("🇺🇿")
+                }
+            }
+            .disabled(languageCode == "uz")
+
+            Button {
+                withAnimation(.spring(response: 0.35, dampingFraction: 0.75)) {
+                    languageCode = "uz-Cyrl"
+                }
+            } label: {
+                Label {
+                    Text("Кириллча")
+                } icon: {
+                    Text("🇺🇿")
+                }
+            }
+            .disabled(languageCode == "uz-Cyrl")
+
+            Button {
+                withAnimation(.spring(response: 0.35, dampingFraction: 0.75)) {
+                    languageCode = "ru"
+                }
+            } label: {
+                Label {
+                    Text("Русский")
+                } icon: {
+                    Text("🇷🇺")
+                }
+            }
+            .disabled(languageCode == "ru")
+
+            Button {
+                withAnimation(.spring(response: 0.35, dampingFraction: 0.75)) {
+                    languageCode = "en"
+                }
+            } label: {
+                Label {
+                    Text("English")
+                } icon: {
+                    Text("🇬🇧")
+                }
+            }
+            .disabled(languageCode == "en")
+
+        } label: {
+            HStack(spacing: 4) {
+                Text(currentFlag)
+                    .font(.system(size: 16))
+                Image(systemName: "chevron.down")
+                    .font(.system(size: 10, weight: .semibold))
+                    .foregroundColor(.white.opacity(0.55))
+            }
+            .padding(.horizontal, 10)
+            .padding(.vertical, 6)
+            .background(
+                Capsule()
+                    .fill(Color.white.opacity(0.10))
+                    .overlay(
+                        Capsule()
+                            .stroke(Color.white.opacity(0.15), lineWidth: 0.5)
+                    )
+            )
+            .contentShape(Capsule())
+        }
+        .menuStyle(.automatic)
+        .animation(.spring(response: 0.35, dampingFraction: 0.75), value: languageCode)
     }
     
     @ViewBuilder

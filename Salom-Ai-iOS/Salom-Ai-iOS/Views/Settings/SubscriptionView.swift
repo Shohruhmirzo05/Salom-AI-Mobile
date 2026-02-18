@@ -194,7 +194,7 @@ struct SubscriptionView: View {
                         // Manager clears loading fast for fetch, but subscribe?
                         // Manager doesn't track specific subscribe loading yet in shared state except locally in view usually.
                         // We'll trust the flow or add local loading.
-                         Text(plan.priceUzs > 0 ? "Tanlash (Click)" : "Bepul")
+                         Text(plan.priceUzs > 0 ? "Tanlash" : "Bepul")
                             .fontWeight(.semibold)
                     } else {
                         if isCurrent {
@@ -206,7 +206,7 @@ struct SubscriptionView: View {
                                 .fontWeight(.semibold)
                                 .foregroundStyle(.white)
                         } else {
-                            Text("Tanlash (Click)")
+                            Text("Tanlash")
                                 .fontWeight(.semibold)
                                 .foregroundStyle(.white)
                         }

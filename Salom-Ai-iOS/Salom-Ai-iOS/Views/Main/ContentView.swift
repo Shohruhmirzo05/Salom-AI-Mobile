@@ -62,19 +62,25 @@ struct ContentView: View {
     
     private func checkAndShowPaywall() {
         guard !hasShownPaywall else { return }
-        guard !showSplash else {
-            return
-        }
-        
+        guard !showSplash else { return }
+
         Task {
-            // Data is preloaded in SplashView, so standard check is fast.
+            // Always await a fresh subscription check before deciding.
+            // During the splash path this is a no-op (data already loaded).
+            // After a fresh login the subscription check hasn't completed yet,
+            // so we must wait here to avoid a false-negative isPro = false.
+            await SubscriptionManager.shared.checkSubscriptionStatus()
+
             let isPro = SubscriptionManager.shared.isPro
-            
+
+            await MainActor.run {
+                hasShownPaywall = true  // mark regardless, so we never re-check
+            }
+
             if !isPro {
-                try? await Task.sleep(nanoseconds: 500_000_000) // 0.5s delay for smooth transition after splash
+                try? await Task.sleep(nanoseconds: 400_000_000)
                 await MainActor.run {
                     showPaywall = true
-                    hasShownPaywall = true
                 }
             }
         }

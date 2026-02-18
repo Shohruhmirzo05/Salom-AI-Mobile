@@ -59,5 +59,8 @@ final class SessionManager: ObservableObject {
         TokenStore.shared.clear()
         contentType = .onboarding
         UserDefaults.standard.set(false, forKey: AppStorageKeys.isAuthenticated)
+        UserDefaults.standard.removeObject(forKey: AppStorageKeys.displayName)
+        UserDefaults.standard.removeObject(forKey: AppStorageKeys.userEmail)
+        UserDefaults.standard.removeObject(forKey: AppStorageKeys.phoneNumber)
     }
 }

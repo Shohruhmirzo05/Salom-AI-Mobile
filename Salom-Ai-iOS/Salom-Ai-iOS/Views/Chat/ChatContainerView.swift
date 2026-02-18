@@ -11,6 +11,7 @@ struct ChatContainerView: View {
     @StateObject private var chatViewModel = ChatViewModel()
     @State private var isMenuOpen = false
     @State private var selectedSection: MainSection = .chat
+    @AppStorage(AppStorageKeys.preferredLanguageCode) private var languageCode: String = "uz"
     
     var body: some View {
         ZStack(alignment: .leading) {
@@ -77,7 +78,8 @@ struct ChatContainerView: View {
             SectionScaffold(
                 icon: MainSection.settings.icon,
                 title: "Sozlamalar",
-                subtitle: "Hisob va til sozlamalari"
+                subtitle: "Hisob va til sozlamalari",
+                trailing: { LanguageMenuButton() }
             ) {
                 SettingsScreen()
             }
@@ -85,27 +87,33 @@ struct ChatContainerView: View {
     }
     
     @ViewBuilder
-    private func SectionScaffold<Content: View>(
+    private func SectionScaffold<Content: View, Trailing: View>(
         icon: String,
         title: LocalizedStringKey,
         subtitle: LocalizedStringKey,
+        @ViewBuilder trailing: () -> Trailing = { EmptyView() },
         @ViewBuilder content: () -> Content
     ) -> some View {
         ZStack {
             SalomTheme.Gradients.background
                 .ignoresSafeArea()
-            
+
             VStack(spacing: 0) {
-                ShellHeader(icon: icon, title: title, subtitle: subtitle)
+                ShellHeader(icon: icon, title: title, subtitle: subtitle, trailing: trailing)
                 ShellSeparator()
                 content()
             }
             .ignoresSafeArea(.keyboard, edges: .bottom)
         }
     }
-    
+
     @ViewBuilder
-    private func ShellHeader(icon: String, title: LocalizedStringKey, subtitle: LocalizedStringKey) -> some View {
+    private func ShellHeader<Trailing: View>(
+        icon: String,
+        title: LocalizedStringKey,
+        subtitle: LocalizedStringKey,
+        @ViewBuilder trailing: () -> Trailing = { EmptyView() }
+    ) -> some View {
         HStack(spacing: 12) {
             Button {
                 HapticManager.shared.fire(.selection)
@@ -122,7 +130,7 @@ struct ChatContainerView: View {
                             .fill(Color.white.opacity(0.08))
                     )
             }
-            
+
             VStack(alignment: .leading, spacing: 2) {
                 HStack(spacing: 6) {
                     Image(systemName: icon)
@@ -132,17 +140,84 @@ struct ChatContainerView: View {
                         .font(.system(size: 17, weight: .semibold))
                         .foregroundColor(.white)
                 }
-                
+
                 Text(subtitle)
                     .font(.caption)
                     .foregroundColor(SalomTheme.Colors.textSecondary)
             }
-            
+
             Spacer()
+
+            trailing()
         }
         .padding(.horizontal, 16)
         .padding(.top, 12)
         .padding(.bottom, 10)
+    }
+
+    // MARK: - Language Menu Button (shown in Settings header)
+
+    @ViewBuilder
+    private func LanguageMenuButton() -> some View {
+        let currentFlag = languageFlag(for: languageCode)
+        Menu {
+            Button {
+                setLanguage("uz")
+            } label: {
+                Label("🇺🇿 Oʻzbekcha", systemImage: languageCode == "uz" ? "checkmark" : "")
+            }
+            Button {
+                setLanguage("uz-Cyrl")
+            } label: {
+                Label("🇺🇿 Кириллча", systemImage: languageCode == "uz-Cyrl" ? "checkmark" : "")
+            }
+            Button {
+                setLanguage("ru")
+            } label: {
+                Label("🇷🇺 Русский", systemImage: languageCode == "ru" ? "checkmark" : "")
+            }
+            Button {
+                setLanguage("en")
+            } label: {
+                Label("🇬🇧 English", systemImage: languageCode == "en" ? "checkmark" : "")
+            }
+        } label: {
+            HStack(spacing: 4) {
+                Text(currentFlag)
+                    .font(.system(size: 18))
+                Image(systemName: "chevron.down")
+                    .font(.system(size: 11, weight: .semibold))
+                    .foregroundColor(SalomTheme.Colors.textSecondary)
+            }
+            .padding(.horizontal, 10)
+            .padding(.vertical, 6)
+            .background(
+                Capsule()
+                    .fill(Color.white.opacity(0.08))
+            )
+        }
+    }
+
+    private func languageFlag(for code: String) -> String {
+        switch code {
+        case "ru":      return "🇷🇺"
+        case "en":      return "🇬🇧"
+        default:        return "🇺🇿"
+        }
+    }
+
+    private func setLanguage(_ code: String) {
+        languageCode = code
+        Task {
+            do {
+                let _: OAuthUser = try await APIClient.shared.request(
+                    .updateProfile(language: code, displayName: nil),
+                    decodeTo: OAuthUser.self
+                )
+            } catch {
+                print("Failed to update language: \(error)")
+            }
+        }
     }
     
     @ViewBuilder func ShellSeparator() -> some View {

@@ -13,14 +13,47 @@ struct SettingsScreen: View {
 
     @AppStorage(AppStorageKeys.preferredLanguageCode)
     private var languageCode: String = "uz"
-    
+
+    @AppStorage(AppStorageKeys.displayName)
+    private var storedDisplayName: String = ""
+
+    @AppStorage(AppStorageKeys.userEmail)
+    private var storedEmail: String = ""
+
     private let session = SessionManager.shared
-    
+
     @State private var showDeleteConfirmation = false
     @State private var isDeleting = false
     @State private var deleteError: String?
-    @State private var currentPlanName: String = "Yuklanmoqda..."
+    @State private var currentPlanName: String = ""
     @State private var isPremium: Bool = false
+
+    // MARK: - Computed helpers
+
+    private var profileName: String {
+        if !storedDisplayName.isEmpty { return storedDisplayName }
+        if !storedEmail.isEmpty {
+            return storedEmail.components(separatedBy: "@").first ?? storedEmail
+        }
+        if !phoneNumber.isEmpty { return phoneNumber }
+        return String(localized: "Foydalanuvchi")
+    }
+
+    private var profileSubtitle: String {
+        if !storedEmail.isEmpty { return storedEmail }
+        if !phoneNumber.isEmpty { return phoneNumber }
+        return String(localized: "Ma'lumot yo'q")
+    }
+
+    private var profileInitials: String {
+        let words = profileName.split(separator: " ")
+        if words.count >= 2,
+           let first = words[0].first,
+           let second = words[1].first {
+            return String(first).uppercased() + String(second).uppercased()
+        }
+        return String(profileName.prefix(2)).uppercased()
+    }
 
     var body: some View {
         ZStack {
@@ -30,78 +63,34 @@ struct SettingsScreen: View {
             FormContent()
                 .padding(.top, 12)
         }
-        .alert(deleteAccountTitle, isPresented: $showDeleteConfirmation) {
-            Button(cancelButton, role: .cancel) { }
-            Button(deleteButton, role: .destructive) {
-                Task {
-                    await deleteAccount()
-                }
+        .alert(String(localized: "Hisobni o'chirish"), isPresented: $showDeleteConfirmation) {
+            Button(String(localized: "Bekor qilish"), role: .cancel) { }
+            Button(String(localized: "O'chirish"), role: .destructive) {
+                Task { await deleteAccount() }
             }
         } message: {
-            Text(deleteAccountMessage)
+            Text("Hisobingizni butunlay o'chirishni xohlaysizmi? Bu amal barcha suhbatlar, xabarlar va ma'lumotlaringizni butunlay o'chiradi. Bu amalni bekor qilib bo'lmaydi!")
         }
-        .alert(errorTitle, isPresented: .init(
+        .alert(String(localized: "Xatolik"), isPresented: .init(
             get: { deleteError != nil },
             set: { if !$0 { deleteError = nil } }
         )) {
-            Button(okButton, role: .cancel) {
-                deleteError = nil
-            }
+            Button("OK", role: .cancel) { deleteError = nil }
         } message: {
-            if let error = deleteError {
-                Text(error)
-            }
+            if let error = deleteError { Text(error) }
         }
     }
-    
-    // MARK: - Localized Strings
-    
-    private var deleteAccountTitle: LocalizedStringKey {
-        "Hisobni o'chirish"
-    }
-    
-    private var deleteAccountMessage: LocalizedStringKey {
-        "Hisobingizni butunlay o'chirishni xohlaysizmi? Bu amal barcha suhbatlar, xabarlar va ma'lumotlaringizni butunlay o'chiradi. Bu amalni bekor qilib bo'lmaydi!"
-    }
-    
-    private var deleteButton: LocalizedStringKey {
-        "O'chirish"
-    }
-    
-    private var cancelButton: LocalizedStringKey {
-        "Bekor qilish"
-    }
-    
-    private var errorTitle: LocalizedStringKey {
-        "Xatolik"
-    }
-    
-    private var okButton: LocalizedStringKey {
-        "OK"
-    }
-    
-    private var deleteAccountButtonText: LocalizedStringKey {
-        "Hisobni o'chirish"
-    }
-    
-    private var deletingText: LocalizedStringKey {
-        "O'chirilmoqda..."
-    }
 
-    // MARK: - Components
+    // MARK: - Layout
 
     @ViewBuilder
     private func FormContent() -> some View {
         ScrollView {
             VStack(spacing: 20) {
                 ProfileCard()
-
                 SubscriptionSection()
-
                 SupportSection()
-
                 LanguageSection()
-
                 DangerZone()
             }
             .padding(.horizontal, 20)
@@ -109,37 +98,38 @@ struct SettingsScreen: View {
         }
     }
 
+    // MARK: - Profile Card
+
     @ViewBuilder
     private func ProfileCard() -> some View {
-        HStack(spacing: 14) {
+        HStack(spacing: 16) {
             ZStack {
                 Circle()
                     .fill(SalomTheme.Gradients.accent)
-                    .frame(width: 54, height: 54)
-                Text(initials)
-                    .font(.system(size: 22, weight: .semibold))
+                    .frame(width: 64, height: 64)
+                Text(profileInitials)
+                    .font(.system(size: 24, weight: .bold))
                     .foregroundColor(.white)
             }
 
-            VStack(alignment: .leading, spacing: 4) {
-                Text(displayName)
-                    .font(.system(size: 18, weight: .semibold))
+            VStack(alignment: .leading, spacing: 6) {
+                Text(profileName)
+                    .font(.system(size: 19, weight: .semibold))
                     .foregroundColor(.white)
-                if !phoneNumber.isEmpty {
-                    Text(phoneNumber)
-                        .font(.subheadline)
-                        .foregroundColor(SalomTheme.Colors.textSecondary)
-                } else {
-                    Text("Telefon raqam aniqlanmagan")
-                        .font(.subheadline)
-                        .foregroundColor(SalomTheme.Colors.textSecondary)
-                }
+                    .lineLimit(1)
+                Text(profileSubtitle)
+                    .font(.subheadline)
+                    .foregroundColor(SalomTheme.Colors.textSecondary)
+                    .lineLimit(1)
             }
 
             Spacer()
         }
+        .padding(.vertical, 8)
         .glassCard(cornerRadius: 24)
     }
+
+    // MARK: - Subscription Section
 
     @ViewBuilder
     private func SubscriptionSection() -> some View {
@@ -147,36 +137,41 @@ struct SettingsScreen: View {
             Text("Obuna")
                 .font(.footnote.weight(.semibold))
                 .foregroundColor(SalomTheme.Colors.textSecondary)
-            
+                .padding(.bottom, 2)
+
             NavigationLink {
                 SubscriptionView()
             } label: {
-                HStack {
-                    if isPremium {
-                        Image(systemName: "crown.fill")
-                            .foregroundColor(.yellow)
-                    } else {
-                        Image(systemName: "sparkles")
-                            .foregroundColor(.gray)
+                HStack(spacing: 12) {
+                    ZStack {
+                        Circle()
+                            .fill(isPremium ? Color.yellow.opacity(0.15) : Color.white.opacity(0.08))
+                            .frame(width: 40, height: 40)
+                        Image(systemName: isPremium ? "crown.fill" : "sparkles")
+                            .font(.system(size: 18))
+                            .foregroundColor(isPremium ? .yellow : .gray)
                     }
-                    Text(currentPlanName)
-                        .font(.body.weight(.semibold))
-                        .foregroundColor(.white)
+                    VStack(alignment: .leading, spacing: 2) {
+                        Text(currentPlanName.isEmpty ? String(localized: "Yuklanmoqda...") : currentPlanName)
+                            .font(.body.weight(.semibold))
+                            .foregroundColor(.white)
+                        Text(isPremium ? String(localized: "Faol obuna") : String(localized: "Bepul tarif"))
+                            .font(.caption)
+                            .foregroundColor(SalomTheme.Colors.textSecondary)
+                    }
                     Spacer()
                     Image(systemName: "chevron.right")
                         .font(.caption)
                         .foregroundColor(SalomTheme.Colors.textSecondary)
                 }
-                .padding()
-                .background(Color.white.opacity(0.05))
-                .cornerRadius(16)
+                .padding(.vertical, 6)
             }
         }
         .glassCard(cornerRadius: 24)
-        .task {
-            await fetchSubscriptionStatus()
-        }
+        .task { await fetchSubscriptionStatus() }
     }
+
+    // MARK: - Support Section
 
     @ViewBuilder
     private func SupportSection() -> some View {
@@ -184,148 +179,163 @@ struct SettingsScreen: View {
             Text("Yordam")
                 .font(.footnote.weight(.semibold))
                 .foregroundColor(SalomTheme.Colors.textSecondary)
-            
+                .padding(.bottom, 2)
+
             NavigationLink {
                 FeedbackView()
             } label: {
-                HStack {
-                    Image(systemName: "bubble.left.and.bubble.right.fill")
-                        .foregroundColor(.blue)
-                    Text("Fikr-mulohaza yuborish")
-                        .font(.body.weight(.semibold))
-                        .foregroundColor(.white)
+                HStack(spacing: 12) {
+                    ZStack {
+                        Circle()
+                            .fill(Color.blue.opacity(0.15))
+                            .frame(width: 40, height: 40)
+                        Image(systemName: "bubble.left.and.bubble.right.fill")
+                            .font(.system(size: 18))
+                            .foregroundColor(.blue)
+                    }
+                    VStack(alignment: .leading, spacing: 2) {
+                        Text("Fikr-mulohaza yuborish")
+                            .font(.body.weight(.semibold))
+                            .foregroundColor(.white)
+                        Text("Taklif va shikoyatlar")
+                            .font(.caption)
+                            .foregroundColor(SalomTheme.Colors.textSecondary)
+                    }
                     Spacer()
                     Image(systemName: "chevron.right")
                         .font(.caption)
                         .foregroundColor(SalomTheme.Colors.textSecondary)
                 }
-                .padding()
-                .background(Color.white.opacity(0.05))
-                .cornerRadius(16)
+                .padding(.vertical, 6)
             }
         }
         .glassCard(cornerRadius: 24)
     }
 
+    // MARK: - Language Section
+
     @ViewBuilder
     private func LanguageSection() -> some View {
-        VStack(alignment: .leading, spacing: 12) {
+        VStack(alignment: .leading, spacing: 14) {
             Text("Til")
                 .font(.footnote.weight(.semibold))
                 .foregroundColor(SalomTheme.Colors.textSecondary)
 
-            Picker("Til", selection: $languageCode) {
-                Text("Oʻzbekcha").tag("uz")
-                Text("Oʻzbekcha (Kirill)").tag("uz-Cyrl")
-                Text("Ruscha").tag("ru")
-                Text("Inglizcha").tag("en")
-            }
-            .pickerStyle(.segmented)
-            .onChange(of: languageCode) { newCode in
-                Task {
-                    await updateLanguage(code: newCode)
-                }
+            VStack(spacing: 8) {
+                LanguageRow(code: "uz",      label: "Oʻzbekcha",  flag: "🇺🇿")
+                LanguageRow(code: "uz-Cyrl", label: "Кириллча",   flag: "🇺🇿")
+                LanguageRow(code: "ru",      label: "Русский",     flag: "🇷🇺")
+                LanguageRow(code: "en",      label: "English",     flag: "🇬🇧")
             }
         }
         .glassCard(cornerRadius: 24)
     }
 
     @ViewBuilder
-    private func DangerZone() -> some View {
-        VStack(alignment: .leading, spacing: 16) {
-            Text("Kirish maʼlumotlari")
-                .font(.footnote.weight(.semibold))
-                .foregroundColor(SalomTheme.Colors.textSecondary)
+    private func LanguageRow(code: String, label: String, flag: String) -> some View {
+        Button {
+            if languageCode != code {
+                languageCode = code
+                Task { await updateLanguage(code: code) }
+            }
+        } label: {
+            HStack(spacing: 12) {
+                Text(flag)
+                    .font(.title3)
+                Text(label)
+                    .font(.body.weight(.medium))
+                    .foregroundColor(.white)
+                Spacer()
+                if languageCode == code {
+                    Image(systemName: "checkmark.circle.fill")
+                        .foregroundColor(SalomTheme.Colors.accentPrimary)
+                        .font(.system(size: 20))
+                } else {
+                    Circle()
+                        .stroke(Color.white.opacity(0.2), lineWidth: 1.5)
+                        .frame(width: 20, height: 20)
+                }
+            }
+            .padding(.vertical, 10)
+            .padding(.horizontal, 4)
+            .contentShape(Rectangle())
+        }
+        .buttonStyle(.plain)
+    }
 
+    // MARK: - Danger Zone
+
+    @ViewBuilder
+    private func DangerZone() -> some View {
+        VStack(spacing: 0) {
+            // Logout
             Button(role: .destructive) {
                 HapticManager.shared.fire(.warning)
                 session.logout()
             } label: {
-                HStack {
-                    Image(systemName: "rectangle.portrait.and.arrow.forward")
+                HStack(spacing: 10) {
+                    Image(systemName: "rectangle.portrait.and.arrow.right")
+                        .font(.system(size: 16))
                     Text("Chiqish")
                         .font(.body.weight(.semibold))
+                    Spacer()
                 }
                 .foregroundColor(.red)
-                .frame(maxWidth: .infinity, alignment: .center)
-                .padding(.vertical, 10)
-                .background(
-                    RoundedRectangle(cornerRadius: 16, style: .continuous)
-                        .fill(Color.red.opacity(0.08))
-                )
+                .padding(.vertical, 4)
             }
-            
+
+            Divider()
+                .background(Color.white.opacity(0.08))
+                .padding(.vertical, 10)
+
+            // Delete Account
             Button(role: .destructive) {
                 HapticManager.shared.fire(.warning)
                 showDeleteConfirmation = true
             } label: {
-                HStack {
+                HStack(spacing: 10) {
                     if isDeleting {
                         ProgressView()
                             .progressViewStyle(CircularProgressViewStyle(tint: .red))
-                            .scaleEffect(0.8)
+                            .scaleEffect(0.75)
+                    } else {
+                        Image(systemName: "trash")
+                            .font(.system(size: 14))
                     }
-                    Text(isDeleting ? deletingText : deleteAccountButtonText)
-                        .font(.footnote)
+                    Text(isDeleting ? String(localized: "O'chirilmoqda...") : String(localized: "Hisobni o'chirish"))
+                        .font(.footnote.weight(.medium))
+                    Spacer()
                 }
-                .foregroundColor(.red.opacity(0.8))
-                .padding(.vertical, 8)
+                .foregroundColor(.red.opacity(0.75))
             }
             .disabled(isDeleting)
-            .frame(maxWidth: .infinity, alignment: .center)
         }
         .glassCard(cornerRadius: 24)
     }
 
-    // MARK: - Helpers
-
-    private var displayName: String {
-        if !phoneNumber.isEmpty {
-            return "Salom foydalanuvchi"
-        }
-        return "Mehmon"
-    }
-
-    private var initials: String {
-        if !phoneNumber.isEmpty {
-            return "SA"
-        }
-        return "G"
-    }
-    
     // MARK: - Actions
-    
+
     private func deleteAccount() async {
         isDeleting = true
         deleteError = nil
-        
         do {
-            print("🗑️ [Settings] Starting account deletion...")
-            
-            // Call the delete account API
             let _: StatusMessageResponse = try await APIClient.shared.request(
                 .deleteAccount,
                 decodeTo: StatusMessageResponse.self
             )
-            
-            print("✅ [Settings] Account deleted successfully")
-            
-            // Logout and clear all data
             await MainActor.run {
                 HapticManager.shared.fire(.success)
                 session.logout()
             }
-            
         } catch {
-            print("❌ [Settings] Failed to delete account: \(error)")
             await MainActor.run {
                 isDeleting = false
-                deleteError = "Hisobni o'chirishda xatolik yuz berdi: \(error.localizedDescription)"
+                deleteError = String(localized: "Hisobni o'chirishda xatolik yuz berdi: ") + error.localizedDescription
                 HapticManager.shared.fire(.error)
             }
         }
     }
-    
+
     private func fetchSubscriptionStatus() async {
         do {
             let sub = try await APIClient.shared.request(.currentSubscription, decodeTo: CurrentSubscriptionResponse.self)
@@ -334,19 +344,18 @@ struct SettingsScreen: View {
                     self.currentPlanName = plan.capitalized
                     self.isPremium = true
                 } else {
-                    self.currentPlanName = "Bepul"
+                    self.currentPlanName = String(localized: "Bepul")
                     self.isPremium = false
                 }
             }
         } catch {
-            print("Failed to fetch subscription: \(error)")
             await MainActor.run {
-                self.currentPlanName = "Bepul"
+                self.currentPlanName = String(localized: "Bepul")
                 self.isPremium = false
             }
         }
     }
-    
+
     private func updateLanguage(code: String) async {
         do {
             let _: OAuthUser = try await APIClient.shared.request(
@@ -358,11 +367,3 @@ struct SettingsScreen: View {
         }
     }
 }
-
-// MARK: - Response Model
-//
-//struct StatusMessageResponse: Codable {
-//    let ok: Bool
-//    let message: String?
-//    let detail: String?
-//}

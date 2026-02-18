@@ -92,8 +92,8 @@ struct RealtimeVoiceView: View {
                             .padding(.vertical, 2)
                             .background(Color.yellow)
                             .cornerRadius(4)
-                        
-                        Text("Disclaimer")
+
+                        Text("Sinov rejimi — xatolar bo'lishi mumkin")
                             .font(.caption)
                             .foregroundColor(.white.opacity(0.5))
                     }
