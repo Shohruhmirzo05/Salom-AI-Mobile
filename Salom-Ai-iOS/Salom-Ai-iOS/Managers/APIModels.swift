@@ -407,3 +407,57 @@ struct FileUploadResponse: Codable {
     let url: String
     let filename: String
 }
+
+// MARK: - Card Tokenization
+
+struct TokenizeRequestResponse: Codable {
+    let requestId: String
+    let phoneHint: String
+}
+
+struct TokenizeVerifyResponse: Codable {
+    let success: Bool
+    let subscription: TokenizeSubscriptionInfo?
+    let savedCard: TokenizeSavedCard?
+
+    struct TokenizeSubscriptionInfo: Codable {
+        let plan: String
+        let active: Bool
+        let expiresAt: String
+        let autoRenew: Bool
+    }
+
+    struct TokenizeSavedCard: Codable {
+        let id: Int
+        let maskedNumber: String
+        let phoneHint: String
+    }
+}
+
+struct SavedCard: Codable, Identifiable {
+    let id: Int
+    let maskedNumber: String
+    let phoneHint: String
+    let createdAt: Date?
+}
+
+struct AutoRenewResponse: Codable {
+    let ok: Bool
+    let autoRenew: Bool
+    let savedCardId: Int?
+}
+
+struct CancelSubscriptionResponse: Codable {
+    let ok: Bool
+    let message: String?
+    let expiresAt: String?
+}
+
+struct CurrentSubscriptionFull: Codable {
+    let plan: String?
+    let active: Bool
+    let startedAt: Date?
+    let expiresAt: Date?
+    let autoRenew: Bool?
+    let savedCard: SavedCard?
+}

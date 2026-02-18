@@ -21,7 +21,7 @@ struct Salom_Ai_iOSApp: App {
             ContentView()
                 .environmentObject(session)
                 .environment(\.locale, Locale(identifier: languageCode))
-                .onChange(of: scenePhase) { newPhase in
+                .onChange(of: scenePhase) { _, newPhase in
                     if newPhase == .active {
                         Task {
                             // Check subscription whenever app comes to foreground
@@ -50,9 +50,3 @@ class AppDelegate: NSObject, UIApplicationDelegate {
        return true
     }
 }
-
-// yandex
-//Key ID
-//ajeiiva400k3hjb6p6ej
-//Your secret key
-//AQVN0pfUQAKDjNZsmdNYahJzdPpSYNmZN5fTRwN6

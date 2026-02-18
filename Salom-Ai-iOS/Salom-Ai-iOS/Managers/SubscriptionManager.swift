@@ -12,12 +12,14 @@ import SwiftUI
 @MainActor
 final class SubscriptionManager: ObservableObject {
     static let shared = SubscriptionManager()
-    
+
     @Published var isPro: Bool = false
-    @Published var currentPlan: CurrentSubscriptionResponse?
+    @Published var currentPlan: CurrentSubscriptionFull?
     @Published var plans: [SubscriptionPlan] = []
+    @Published var savedCards: [SavedCard] = []
     @Published var isLoading = false
-    
+    @Published var lastError: String?
+
     private init() {}
     
     /// Fetches the latest subscription status from the API
@@ -26,20 +28,14 @@ final class SubscriptionManager: ObservableObject {
             self.isPro = false
             return
         }
-        
+
         do {
-            let sub = try await APIClient.shared.request(.currentSubscription, decodeTo: CurrentSubscriptionResponse.self)
+            let sub = try await APIClient.shared.request(.currentSubscription, decodeTo: CurrentSubscriptionFull.self)
             self.currentPlan = sub
-            
-            // Logic to determine if user is Pro
-            // Adapting logic: if active and plan is not free/basic, or specific "pro" code
-            // Adjust based on your actual plan codes. Assuming 'pro' or any paid plan means isPro.
+
             if sub.active {
-                // If you have a specific list of pro plans, check against them.
-                // For now, if it's active and plan exists, we consider it valid.
-                // You might want to filter out a "free" plan if that exists and returns active=true.
                 if let code = sub.plan, code != "free" {
-                    if !self.isPro { HapticManager.shared.fire(.success) } // Fire only on state change to Pro
+                    if !self.isPro { HapticManager.shared.fire(.success) }
                     self.isPro = true
                 } else {
                     self.isPro = false
@@ -47,13 +43,11 @@ final class SubscriptionManager: ObservableObject {
             } else {
                 self.isPro = false
             }
-            
+
             print("💎 Subscription Status: \(self.isPro ? "PRO" : "FREE") (Plan: \(sub.plan ?? "none"))")
-            
+
         } catch {
             print("❌ Failed to fetch subscription status: \(error)")
-            // On error, we don't revoke access immediately unless we want strict checking.
-            // But usually safe to keep previous state or default to false if critical.
         }
     }
     
@@ -74,18 +68,113 @@ final class SubscriptionManager: ObservableObject {
         self.isLoading = false
     }
     
-    /// Initiates subscription for a given plan
-    /// Returns the payment URL if successful
-    func subscribe(planCode: String) async -> URL? {
+    /// Initiates subscription with card tokenization flow.
+    /// Returns true if the backend acknowledged the tokenize action.
+    func subscribe(planCode: String) async -> Bool {
         do {
-            let response = try await APIClient.shared.request(.subscribe(plan: planCode, provider: "click"), decodeTo: SubscribeResponse.self)
-            
-            if let urlString = response.checkoutUrl, let url = URL(string: urlString) {
-                return url
-            }
+            // Request with click_token provider — backend returns {action: "tokenize", ...}
+            let _ = try await APIClient.shared.requestData(.subscribe(plan: planCode, provider: "click_token"))
+            return true
         } catch {
             print("❌ Subscribe failed: \(error)")
+            return false
         }
-        return nil
+    }
+
+    // MARK: - Card Tokenization
+
+    /// Step 1: Send card details to Click for tokenization
+    func tokenizeCard(cardNumber: String, expireDate: String) async -> TokenizeRequestResponse? {
+        lastError = nil
+        do {
+            let response = try await APIClient.shared.request(
+                .tokenizeCardRequest(cardNumber: cardNumber, expireDate: expireDate),
+                decodeTo: TokenizeRequestResponse.self
+            )
+            return response
+        } catch let error as APIError {
+            if case .server(_, let message) = error {
+                lastError = message
+            }
+            print("❌ Tokenize card failed: \(error)")
+            return nil
+        } catch {
+            print("❌ Tokenize card failed: \(error)")
+            return nil
+        }
+    }
+
+    /// Step 2: Verify SMS code, save card, charge first payment
+    func verifySMS(requestId: String, smsCode: Int, planCode: String) async -> TokenizeVerifyResponse? {
+        lastError = nil
+        do {
+            let response = try await APIClient.shared.request(
+                .tokenizeCardVerify(requestId: requestId, smsCode: smsCode, planCode: planCode),
+                decodeTo: TokenizeVerifyResponse.self
+            )
+            return response
+        } catch let error as APIError {
+            if case .server(_, let message) = error {
+                lastError = message
+            }
+            print("❌ Verify SMS failed: \(error)")
+            return nil
+        } catch {
+            print("❌ Verify SMS failed: \(error)")
+            return nil
+        }
+    }
+
+    // MARK: - Saved Cards
+
+    func fetchSavedCards() async {
+        do {
+            let cards = try await APIClient.shared.request(.savedCards, decodeTo: [SavedCard].self)
+            self.savedCards = cards
+        } catch {
+            print("❌ Failed to fetch saved cards: \(error)")
+        }
+    }
+
+    func deleteCard(id: Int) async -> Bool {
+        do {
+            let _ = try await APIClient.shared.requestData(.deleteCard(id: id))
+            savedCards.removeAll { $0.id == id }
+            return true
+        } catch {
+            print("❌ Delete card failed: \(error)")
+            return false
+        }
+    }
+
+    // MARK: - Auto-Renew & Cancel
+
+    func toggleAutoRenew(cardId: Int?, enabled: Bool) async -> Bool {
+        do {
+            let response = try await APIClient.shared.request(
+                .autoRenew(cardId: cardId, enabled: enabled),
+                decodeTo: AutoRenewResponse.self
+            )
+            // Refresh subscription status
+            await checkSubscriptionStatus()
+            return response.ok
+        } catch {
+            print("❌ Toggle auto-renew failed: \(error)")
+            return false
+        }
+    }
+
+    func cancelSubscription() async -> Bool {
+        do {
+            let response = try await APIClient.shared.request(
+                .cancelSubscription,
+                decodeTo: CancelSubscriptionResponse.self
+            )
+            await checkSubscriptionStatus()
+            return response.ok
+        } catch {
+            print("❌ Cancel subscription failed: \(error)")
+            return false
+        }
     }
 }

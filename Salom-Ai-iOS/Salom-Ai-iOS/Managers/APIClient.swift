@@ -301,6 +301,14 @@ extension APIClient {
         case currentSubscription
         case subscribe(plan: String, provider: String)
         case getUsageStats
+        case autoRenew(cardId: Int?, enabled: Bool)
+        case cancelSubscription
+
+        // Cards
+        case tokenizeCardRequest(cardNumber: String, expireDate: String)
+        case tokenizeCardVerify(requestId: String, smsCode: Int, planCode: String)
+        case savedCards
+        case deleteCard(id: Int)
         
         // Settings
         case getSettings
@@ -312,9 +320,9 @@ extension APIClient {
         
         fileprivate var method: HTTPMethod {
             switch self {
-            case .listConversations, .getConversation, .getConversationMessages, .perplexityUsage, .currentSubscription, .getSettings, .getModels, .getUsageStats, .listPlans, .oauthUser:
+            case .listConversations, .getConversation, .getConversationMessages, .perplexityUsage, .currentSubscription, .getSettings, .getModels, .getUsageStats, .listPlans, .oauthUser, .savedCards:
                 return .get
-            case .deleteConversation, .deleteAccount:
+            case .deleteConversation, .deleteAccount, .deleteCard:
                 return .delete
             case .updateSettings, .updateProfile:
                 return .put
@@ -416,6 +424,18 @@ extension APIClient {
                 return "/subscriptions/subscribe"
             case .getUsageStats:
                 return "/subscriptions/usage"
+            case .autoRenew:
+                return "/subscriptions/auto-renew"
+            case .cancelSubscription:
+                return "/subscriptions/cancel"
+            case .tokenizeCardRequest:
+                return "/cards/tokenize/request"
+            case .tokenizeCardVerify:
+                return "/cards/tokenize/verify"
+            case .savedCards:
+                return "/cards"
+            case .deleteCard(let id):
+                return "/cards/\(id)"
             case .getSettings, .updateSettings:
                 return "/settings"
             case .deleteAccount:
@@ -488,7 +508,17 @@ extension APIClient {
                 if let conversationId { body["conversation_id"] = conversationId }
                 return body
             case .subscribe(let plan, let provider):
-                return ["plan": plan, "provider": provider]
+                return ["plan": plan, "provider": provider, "platform": "ios"]
+            case .autoRenew(let cardId, let enabled):
+                var body: [String: Any] = ["enabled": enabled]
+                if let cardId { body["card_id"] = cardId }
+                return body
+            case .cancelSubscription:
+                return [:]
+            case .tokenizeCardRequest(let cardNumber, let expireDate):
+                return ["card_number": cardNumber, "expire_date": expireDate]
+            case .tokenizeCardVerify(let requestId, let smsCode, let planCode):
+                return ["request_id": requestId, "sms_code": smsCode, "plan_code": planCode]
             case .updateSettings(let payload):
                 var body: [String: Any] = [:]
                 if let prompt = payload.systemPrompt { body["system_prompt"] = prompt }

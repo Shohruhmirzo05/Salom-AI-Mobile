@@ -5,8 +5,10 @@ import Combine
 struct SubscriptionView: View {
     @StateObject private var subscriptionManager = SubscriptionManager.shared
     @Environment(\.dismiss) var dismiss
-    @State private var showSafari = false
-    @State private var paymentUrl: URL?
+    
+    @State private var selectedPlanForPayment: IdentifiablePlanCode?
+    @State private var showCancelAlert = false
+    @State private var isTogglingAutoRenew = false
     
     @AppStorage(AppStorageKeys.preferredLanguageCode)
     private var languageCode: String = "uz"
@@ -26,6 +28,7 @@ struct SubscriptionView: View {
                             .padding(.top, 40)
                     } else {
                         CurrentPlanSection()
+                        AutoRenewSection()
                         PlansGrid()
                     }
                 }
@@ -44,19 +47,31 @@ struct SubscriptionView: View {
         .task {
             await subscriptionManager.fetchPlans()
             await subscriptionManager.checkSubscriptionStatus()
+            await subscriptionManager.fetchSavedCards()
         }
-        .sheet(isPresented: $showSafari) {
-            if let url = paymentUrl {
-                SafariView(url: url)
+        .fullScreenCover(item: $selectedPlanForPayment) { selection in
+            NavigationStack {
+                SubscriptionPaymentFlow(planCode: selection.code)
+                    .toolbar {
+                        ToolbarItem(placement: .topBarLeading) {
+                            Button {
+                                selectedPlanForPayment = nil
+                            } label: {
+                                Image(systemName: "xmark")
+                            }
+                        }
+                    }
             }
         }
-        .onChange(of: showSafari) { isPresented in
-            if !isPresented {
-                // Refresh subscription when returning from Safari
+        .alert("Obunani bekor qilish", isPresented: $showCancelAlert) {
+            Button("Bekor qilish", role: .destructive) {
                 Task {
-                    await subscriptionManager.checkSubscriptionStatus()
+                    let _ = await subscriptionManager.cancelSubscription()
                 }
             }
+            Button("Yo'q", role: .cancel) {}
+        } message: {
+            Text("Avtomatik yangilanish o'chiriladi. Obuna amal qilish muddati tugaguncha faol qoladi.")
         }
     }
     
@@ -110,6 +125,117 @@ struct SubscriptionView: View {
                                 .stroke(SalomTheme.Colors.accentPrimary.opacity(0.3), lineWidth: 1)
                         )
                 )
+            }
+        }
+    }
+    
+    @ViewBuilder
+    private func AutoRenewSection() -> some View {
+        if let current = subscriptionManager.currentPlan, current.active {
+            VStack(alignment: .leading, spacing: 12) {
+                // Auto-renew toggle
+                HStack {
+                    VStack(alignment: .leading, spacing: 3) {
+                        Text("Avtomatik yangilanish")
+                            .font(.subheadline.weight(.medium))
+                            .foregroundColor(.white)
+                        
+                        if let card = current.savedCard {
+                            Text(card.maskedNumber)
+                                .font(.caption)
+                                .foregroundColor(SalomTheme.Colors.textSecondary)
+                        }
+                    }
+                    
+                    Spacer()
+                    
+                    if isTogglingAutoRenew {
+                        ProgressView().tint(.white)
+                    } else {
+                        Toggle("", isOn: Binding(
+                            get: { current.autoRenew ?? false },
+                            set: { newValue in
+                                Task {
+                                    isTogglingAutoRenew = true
+                                    let cardId = current.savedCard?.id ?? subscriptionManager.savedCards.first?.id
+                                    let _ = await subscriptionManager.toggleAutoRenew(cardId: cardId, enabled: newValue)
+                                    isTogglingAutoRenew = false
+                                }
+                            }
+                        ))
+                        .labelsHidden()
+                        .tint(SalomTheme.Colors.accentPrimary)
+                    }
+                }
+                .padding(16)
+                .background(
+                    RoundedRectangle(cornerRadius: 16)
+                        .fill(Color.white.opacity(0.05))
+                )
+                
+                // Saved cards link
+                NavigationLink {
+                    SavedCardsView()
+                } label: {
+                    HStack {
+                        Image(systemName: "creditcard")
+                            .foregroundColor(SalomTheme.Colors.accentPrimary)
+                        Text("Saqlangan kartalar")
+                            .font(.subheadline)
+                            .foregroundColor(.white)
+                        Spacer()
+                        Text("\(subscriptionManager.savedCards.count)")
+                            .font(.caption)
+                            .foregroundColor(SalomTheme.Colors.textSecondary)
+                        Image(systemName: "chevron.right")
+                            .font(.caption)
+                            .foregroundColor(SalomTheme.Colors.textSecondary)
+                    }
+                    .padding(16)
+                    .background(
+                        RoundedRectangle(cornerRadius: 16)
+                            .fill(Color.white.opacity(0.05))
+                    )
+                }
+                
+                // Cancel subscription / expiry notice
+                if current.autoRenew == true {
+                    Button {
+                        showCancelAlert = true
+                    } label: {
+                        HStack {
+                            Image(systemName: "xmark.circle")
+                                .foregroundColor(.red.opacity(0.8))
+                            Text("Obunani bekor qilish")
+                                .font(.subheadline)
+                                .foregroundColor(.red.opacity(0.8))
+                            Spacer()
+                        }
+                        .padding(16)
+                        .background(
+                            RoundedRectangle(cornerRadius: 16)
+                                .fill(Color.white.opacity(0.05))
+                        )
+                    }
+                } else if let expires = current.expiresAt {
+                    HStack {
+                        Image(systemName: "clock")
+                            .foregroundColor(.orange)
+                        Text("Obunangiz \(expires.formatted(date: .abbreviated, time: .omitted)) da tugaydi")
+                            .font(.subheadline)
+                            .foregroundColor(.orange)
+                        Spacer()
+                    }
+                    .padding(16)
+                    .background(
+                        RoundedRectangle(cornerRadius: 16)
+                            .fill(Color.orange.opacity(0.05))
+                            .overlay(
+                                RoundedRectangle(cornerRadius: 16)
+                                    .stroke(Color.orange.opacity(0.2), lineWidth: 1)
+                            )
+                    )
+                }
             }
         }
     }
@@ -179,37 +305,22 @@ struct SubscriptionView: View {
             Button {
                 HapticManager.shared.fire(.mediumImpact)
                 if plan.priceUzs > 0 {
-                    Task {
-                        if let url = await subscriptionManager.subscribe(planCode: plan.code) {
-                            paymentUrl = url
-                            showSafari = true
-                        }
-                    }
+                    selectedPlanForPayment = IdentifiablePlanCode(code: plan.code)
                 }
             } label: {
                 HStack {
-                    if subscriptionManager.isLoading {
-                        // Ideal world: per-button loading state. 
-                        // For now we check globally or simply don't block.
-                        // Manager clears loading fast for fetch, but subscribe?
-                        // Manager doesn't track specific subscribe loading yet in shared state except locally in view usually.
-                        // We'll trust the flow or add local loading.
-                         Text(plan.priceUzs > 0 ? "Tanlash" : "Bepul")
+                    if isCurrent {
+                        Text("Faol")
                             .fontWeight(.semibold)
+                            .foregroundStyle(.white)
+                    } else if plan.priceUzs == 0 {
+                        Text("Bepul")
+                            .fontWeight(.semibold)
+                            .foregroundStyle(.white)
                     } else {
-                        if isCurrent {
-                            Text("Faol")
-                                .fontWeight(.semibold)
-                                .foregroundStyle(.white)
-                        } else if plan.priceUzs == 0 {
-                            Text("Bepul")
-                                .fontWeight(.semibold)
-                                .foregroundStyle(.white)
-                        } else {
-                            Text("Tanlash")
-                                .fontWeight(.semibold)
-                                .foregroundStyle(.white)
-                        }
+                        Text("Tanlash")
+                            .fontWeight(.semibold)
+                            .foregroundStyle(.white)
                     }
                 }
                 .frame(maxWidth: .infinity)
@@ -230,8 +341,12 @@ struct SubscriptionView: View {
     }
 }
 
-// Keep SafariView as it's used here and in PaywallSheet (if we don't move it)
-// Ideally move to Utils but keeping here for compilation safety based on previous file context.
+struct IdentifiablePlanCode: Identifiable {
+    let id = UUID()
+    let code: String
+}
+
+// Keep SafariView for backward compatibility
 struct SafariView: UIViewControllerRepresentable {
     let url: URL
     
