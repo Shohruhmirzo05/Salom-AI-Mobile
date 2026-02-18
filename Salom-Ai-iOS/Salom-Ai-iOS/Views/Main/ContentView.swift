@@ -63,6 +63,7 @@ struct ContentView: View {
     private func checkAndShowPaywall() {
         guard !hasShownPaywall else { return }
         guard !showSplash else { return }
+        guard session.contentType == .main else { return }
 
         Task {
             // Always await a fresh subscription check before deciding.
