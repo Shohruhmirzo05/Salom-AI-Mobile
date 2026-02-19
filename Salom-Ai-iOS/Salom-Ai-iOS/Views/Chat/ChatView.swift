@@ -1282,20 +1282,20 @@ struct ChatView: View {
     struct AttachmentImage: View {
         let url: String
         var onTap: (() -> Void)? = nil
-        
+
         var body: some View {
             Button {
                 onTap?()
             } label: {
                 ZStack(alignment: .bottomTrailing) {
                     CachedImage(imageUrl: url, contentMode: .fill)
-                        .frame(maxWidth: 260, maxHeight: 220)
+                        .frame(width: 260, height: 200)
                         .clipShape(RoundedRectangle(cornerRadius: 12, style: .continuous))
                         .overlay(
                             RoundedRectangle(cornerRadius: 12, style: .continuous)
                                 .stroke(Color.white.opacity(0.1))
                         )
-                    
+
                     if let link = URL(string: url) {
                         ShareLink(item: link) {
                             Image(systemName: "arrow.down.circle.fill")
