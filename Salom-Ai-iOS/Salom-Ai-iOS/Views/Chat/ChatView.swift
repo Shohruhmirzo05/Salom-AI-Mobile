@@ -564,6 +564,7 @@ struct ChatView: View {
     @State private var showUsageInfo = false
     @State private var selectedImage: ImageViewerItem?
     @State private var showRealtimeVoice = false
+    @State private var showPaywall = false
     
     var body: some View {
         ZStack {
@@ -606,7 +607,7 @@ struct ChatView: View {
             viewModel.bootstrap()
         }
         .alert("Xatolik", isPresented: Binding(
-            get: { viewModel.errorMessage != nil },
+            get: { viewModel.errorMessage != nil && !isLimitExceeded(viewModel.errorMessage) },
             set: { if !$0 { viewModel.errorMessage = nil } }
         ), presenting: viewModel.errorMessage) { _ in
             Button("OK", role: .cancel) {
@@ -614,6 +615,15 @@ struct ChatView: View {
             }
         } message: { error in
             Text(userFriendlyError(error))
+        }
+        .onChange(of: viewModel.errorMessage) { _, newValue in
+            if isLimitExceeded(newValue) {
+                viewModel.errorMessage = nil
+                showPaywall = true
+            }
+        }
+        .sheet(isPresented: $showPaywall) {
+            PaywallSheet()
         }
         .sheet(isPresented: $showUsageInfo) {
             if #available(iOS 16.0, *) {
@@ -649,8 +659,13 @@ struct ChatView: View {
         }
     }
     
+    private func isLimitExceeded(_ error: String?) -> Bool {
+        guard let error else { return false }
+        return error.contains("LIMIT_EXCEEDED") || error.contains("limitga yetdingiz")
+    }
+
     private func userFriendlyError(_ error: String) -> String {
-        if error.contains("Quota exceeded") {
+        if error.contains("LIMIT_EXCEEDED") || error.contains("limitga yetdingiz") || error.contains("Quota exceeded") {
             return "Sizning obuna limitingiz tugagan. Iltimos, obunangizni yangilang."
         } else if error.contains("Invalid token") || error.contains("unauthorized") {
             return "Sessiya muddati tugagan. Qaytadan kiring."

@@ -159,9 +159,23 @@ final class APIClient {
                     }
                     
                     guard (200...299).contains(httpResponse.statusCode) else {
+                        // Read error body from the byte stream
+                        var errorBody = Data()
+                        for try await byte in bytes {
+                            errorBody.append(byte)
+                            if errorBody.count > 4096 { break }
+                        }
                         var message = "Stream failed"
-                        // Try to read error body if possible, but bytes already consumed? 
-                        // For now keep it simple.
+                        if let json = try? JSONSerialization.jsonObject(with: errorBody) as? [String: Any] {
+                            if let detail = json["detail"] as? String {
+                                message = detail
+                            } else if let detail = json["detail"] as? [String: Any] {
+                                message = detail["message"] as? String ?? "Stream failed"
+                                if let code = detail["code"] as? String {
+                                    message = "[\(code)] \(message)"
+                                }
+                            }
+                        }
                         continuation.finish(throwing: APIError.server(status: httpResponse.statusCode, message: message))
                         return
                     }
