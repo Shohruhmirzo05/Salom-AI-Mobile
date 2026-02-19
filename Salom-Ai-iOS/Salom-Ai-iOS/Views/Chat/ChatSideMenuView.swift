@@ -125,6 +125,16 @@ struct ChatSideMenuView: View {
             }
         }
         .allowsHitTesting(isOpen)
+        .task(id: isOpen) {
+            guard isOpen else { return }
+            do {
+                let resp: UnreadCountResponse = try await APIClient.shared.request(
+                    .unreadNotificationCount,
+                    decodeTo: UnreadCountResponse.self
+                )
+                unreadNotificationCount = resp.count
+            } catch {}
+        }
     }
     
     // MARK: - Sections
@@ -162,6 +172,7 @@ struct ChatSideMenuView: View {
     
     @StateObject private var subscriptionManager = SubscriptionManager.shared
     @State private var showPaywall = false
+    @State private var unreadNotificationCount: Int = 0
     
     @ViewBuilder func PrimaryItemsSection() -> some View {
         VStack(alignment: .leading, spacing: 12) {
@@ -247,7 +258,8 @@ struct ChatSideMenuView: View {
                 systemName: MainSection.notifications.icon,
                 title: MainSection.notifications.title,
                 subtitle: MainSection.notifications.subtitle,
-                isHighlighted: selectedSection == .notifications
+                isHighlighted: selectedSection == .notifications,
+                badge: unreadNotificationCount
             ) {
                 select(.notifications)
             }
@@ -352,17 +364,29 @@ struct ChatSideMenuView: View {
         title: LocalizedStringKey,
         subtitle: LocalizedStringKey,
         isHighlighted: Bool = false,
+        badge: Int = 0,
         action: (() -> Void)? = nil
     ) -> some View {
         let row = HStack(spacing: 12) {
-            Image(systemName: systemName)
-                .font(.system(size: 16, weight: .semibold))
-                .foregroundColor(
-                    isHighlighted
-                    ? SalomTheme.Colors.accentPrimary
-                    : SalomTheme.Colors.textSecondary
-                )
-            
+            ZStack(alignment: .topTrailing) {
+                Image(systemName: systemName)
+                    .font(.system(size: 16, weight: .semibold))
+                    .foregroundColor(
+                        isHighlighted
+                        ? SalomTheme.Colors.accentPrimary
+                        : SalomTheme.Colors.textSecondary
+                    )
+                if badge > 0 {
+                    Text(badge > 99 ? "99+" : "\(badge)")
+                        .font(.system(size: 9, weight: .bold))
+                        .foregroundColor(.white)
+                        .padding(.horizontal, 4)
+                        .padding(.vertical, 1)
+                        .background(Capsule().fill(Color.red))
+                        .offset(x: 8, y: -6)
+                }
+            }
+
             VStack(alignment: .leading, spacing: 2) {
                 Text(title)
                     .font(.system(size: 17, weight: .semibold))
@@ -371,7 +395,7 @@ struct ChatSideMenuView: View {
                     .font(.system(size: 13))
                     .foregroundColor(SalomTheme.Colors.textSecondary)
             }
-            
+
             Spacer()
         }
             .padding(.horizontal, 14)

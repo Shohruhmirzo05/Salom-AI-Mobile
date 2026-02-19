@@ -76,6 +76,9 @@
     "%lld" : {
 
     },
+    "%lld ta o'qilmagan" : {
+
+    },
     "%lld xabar" : {
       "comment" : "Status subtitle showing the number of messages in the current conversation.",
       "localizations" : {
@@ -173,6 +176,9 @@
           }
         }
       }
+    },
+    "99+" : {
+
     },
     "8600 1234 5678 9012" : {
 
@@ -325,6 +331,9 @@
           }
         }
       }
+    },
+    "Bildirishnomalar yo'q" : {
+
     },
     "Bosib turing" : {
       "localizations" : {
@@ -748,6 +757,9 @@
 
     },
     "Google yoki Apple orqali tezda kiring." : {
+
+    },
+    "Hammasini o'qish" : {
 
     },
     "Hech narsa topilmadi" : {
@@ -1327,6 +1339,7 @@
       }
     },
     "No notifications yet" : {
+      "extractionState" : "stale",
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -2866,6 +2879,12 @@
           }
         }
       }
+    },
+    "Xatolik yuz berdi" : {
+
+    },
+    "Yangi xabarlar bu yerda ko'rinadi" : {
+
     },
     "Yangilanadi: %@" : {
       "localizations" : {

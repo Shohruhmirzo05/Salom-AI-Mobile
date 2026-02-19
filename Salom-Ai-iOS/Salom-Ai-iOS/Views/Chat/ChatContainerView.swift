@@ -72,6 +72,7 @@ struct ChatContainerView: View {
                 subtitle: "Xabarlar tarixi"
             ) {
                 NotificationHistoryView()
+                    .frame(maxWidth: .infinity, maxHeight: .infinity)
             }
             
         case .settings:

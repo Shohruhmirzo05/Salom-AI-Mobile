@@ -328,13 +328,19 @@ extension APIClient {
         case getSettings
         case updateSettings(SettingsPayload)
         
+        // Notifications
+        case notifications(limit: Int, offset: Int)
+        case unreadNotificationCount
+        case markNotificationRead(id: Int)
+        case markAllNotificationsRead
+
         // Account
         case deleteAccount
         case sendFeedback(content: String)
         
         fileprivate var method: HTTPMethod {
             switch self {
-            case .listConversations, .getConversation, .getConversationMessages, .perplexityUsage, .currentSubscription, .getSettings, .getModels, .getUsageStats, .listPlans, .oauthUser, .savedCards:
+            case .listConversations, .getConversation, .getConversationMessages, .perplexityUsage, .currentSubscription, .getSettings, .getModels, .getUsageStats, .listPlans, .oauthUser, .savedCards, .notifications, .unreadNotificationCount:
                 return .get
             case .deleteConversation, .deleteAccount, .deleteCard:
                 return .delete
@@ -450,6 +456,14 @@ extension APIClient {
                 return "/cards"
             case .deleteCard(let id):
                 return "/cards/\(id)"
+            case .notifications:
+                return "/notifications"
+            case .unreadNotificationCount:
+                return "/notifications/unread-count"
+            case .markNotificationRead(let id):
+                return "/notifications/\(id)/read"
+            case .markAllNotificationsRead:
+                return "/notifications/read-all"
             case .getSettings, .updateSettings:
                 return "/settings"
             case .deleteAccount:
@@ -462,6 +476,11 @@ extension APIClient {
         private var queryItems: [URLQueryItem] {
             switch self {
             case .listConversations(let limit, let offset):
+                return [
+                    URLQueryItem(name: "limit", value: "\(limit)"),
+                    URLQueryItem(name: "offset", value: "\(offset)")
+                ]
+            case .notifications(let limit, let offset):
                 return [
                     URLQueryItem(name: "limit", value: "\(limit)"),
                     URLQueryItem(name: "offset", value: "\(offset)")
