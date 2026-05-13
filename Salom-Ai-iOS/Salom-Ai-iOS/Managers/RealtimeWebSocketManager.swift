@@ -121,23 +121,37 @@ class RealtimeWebSocketManager: NSObject, ObservableObject {
     
     private func startPingTask() {
         pingTask?.cancel()
-        pingTask = Task {
+        pingTask = Task { [weak self] in
+            // Use a short interval (15s) for both protocol-level pings (to keep NAT/proxies alive)
+            // and app-level pings (so the backend knows we're still here).
             while !Task.isCancelled {
-                try? await Task.sleep(nanoseconds: 30_000_000_000) // 30 seconds
-                guard !Task.isCancelled, connectionState == .connected else { break }
-                
-                let pingMessage: [String: Any] = ["type": "ping", "timestamp": Date().timeIntervalSince1970]
-                if let jsonData = try? JSONSerialization.data(withJSONObject: pingMessage),
-                   let jsonString = String(data: jsonData, encoding: .utf8) {
-                    webSocket?.send(.string(jsonString)) { error in
-                        if let error = error {
-                            print("⚠️ [RealtimeWS] Ping failed: \(error.localizedDescription)")
-                        } else {
-                            self.lastPingTime = Date()
-                            print("🏓 [RealtimeWS] Ping sent")
+                try? await Task.sleep(nanoseconds: 15_000_000_000) // 15 seconds
+                guard let self, !Task.isCancelled else { return }
+
+                // Protocol-level ping — critical for cellular NAT + proxies that drop idle WS at 30-60s.
+                // Do this regardless of app-level connectionState so we keep the transport alive
+                // even before the server's "connected" JSON event arrives.
+                self.webSocket?.sendPing { error in
+                    if let error = error {
+                        print("⚠️ [RealtimeWS] Protocol ping failed: \(error.localizedDescription)")
+                    }
+                }
+
+                // App-level ping only after we're fully connected (server expects authed session).
+                if self.connectionState == .connected {
+                    let pingMessage: [String: Any] = ["type": "ping", "timestamp": Date().timeIntervalSince1970]
+                    if let jsonData = try? JSONSerialization.data(withJSONObject: pingMessage),
+                       let jsonString = String(data: jsonData, encoding: .utf8) {
+                        self.webSocket?.send(.string(jsonString)) { [weak self] error in
+                            if let error = error {
+                                print("⚠️ [RealtimeWS] App ping failed: \(error.localizedDescription)")
+                            } else {
+                                self?.lastPingTime = Date()
+                            }
                         }
                     }
                 }
+                // continue — never break out of the loop
             }
         }
     }
@@ -163,16 +177,19 @@ class RealtimeWebSocketManager: NSObject, ObservableObject {
     }
     
     func disconnect() {
-        print("🔌 [RealtimeWS] Disconnecting")
+        print("🔌 [RealtimeWS] Disconnecting (user-initiated)")
         pingTask?.cancel()
         pingTask = nil
         reconnectTask?.cancel()
         reconnectTask = nil
+        // .goingAway = 1001 — our didCloseWith handler treats this as user-initiated and skips auto-reconnect.
         webSocket?.cancel(with: .goingAway, reason: nil)
         webSocket = nil
-        connectionState = .disconnected
-        voiceState = .idle
-        reconnectAttempts = 0 // Reset attempts on manual disconnect
+        DispatchQueue.main.async {
+            self.connectionState = .disconnected
+            self.voiceState = .idle
+        }
+        reconnectAttempts = 0
     }
     
     func sendAudioChunk(_ data: Data) {
@@ -203,6 +220,22 @@ class RealtimeWebSocketManager: NSObject, ObservableObject {
     func sendInterruption() {
         let message = ["type": "interrupt"]
         sendJSON(message, debugMessage: "interrupt")
+    }
+
+    /// Switch language mid-call without dropping the WebSocket.
+    /// Sends a config_update so the backend rebuilds the system prompt with the new locale.
+    func changeLanguage(_ language: String, voice: String? = nil, role: String? = nil) {
+        DispatchQueue.main.async {
+            self.currentLanguage = language
+        }
+        guard connectionState == .connected else {
+            print("ℹ️ [RealtimeWS] changeLanguage queued — not connected yet")
+            return
+        }
+        var data: [String: Any] = ["language": language]
+        if let v = voice { data["voice"] = v }
+        if let r = role { data["role"] = r }
+        sendJSON(["type": "config_update", "data": data], debugMessage: "config_update(lang)")
     }
     
     // MARK: - Settings Sync
@@ -306,16 +339,29 @@ class RealtimeWebSocketManager: NSObject, ObservableObject {
     }
     
     private func receiveMessage() {
+        // Capture the task ID so a stale closure from an older socket cannot resurrect
+        // the receive loop after we've reconnected with a new task.
+        let activeTask = webSocket
         webSocket?.receive { [weak self] result in
             guard let self = self else { return }
-            
+            // If our underlying task changed (reconnect happened), stop this receive chain.
+            guard activeTask === self.webSocket else {
+                print("⚠️ [RealtimeWS] Stale receive callback ignored")
+                return
+            }
+
             switch result {
             case .success(let message):
                 self.handleMessage(message)
                 self.receiveMessage() // Continue receiving
-                
+
             case .failure(let error):
-                print("❌ [RealtimeWS] Receive error: \(error.localizedDescription)")
+                let nsErr = error as NSError
+                print("❌ [RealtimeWS] Receive error: \(error.localizedDescription) (code=\(nsErr.code))")
+                // Cancelled (user disconnect / new connect) — do not reconnect.
+                if nsErr.code == NSURLErrorCancelled {
+                    return
+                }
                 self.handleError(error)
             }
         }
@@ -413,18 +459,33 @@ class RealtimeWebSocketManager: NSObject, ObservableObject {
 extension RealtimeWebSocketManager: URLSessionWebSocketDelegate {
     func urlSession(_ session: URLSession, webSocketTask: URLSessionWebSocketTask, didOpenWithProtocol protocol: String?) {
         print("✅ [RealtimeWS] WebSocket transport opened")
-        // Don't set .connected here - wait for the "connected" JSON event from server
-        // which confirms authentication and session setup are complete
+        // Transport is up — reset the backoff counter so we don't burn attempts
+        // on silent auth failures that never produce a server "connected" event.
         DispatchQueue.main.async {
             self.connectionState = .connecting
+            self.reconnectAttempts = 0
         }
     }
-    
+
     func urlSession(_ session: URLSession, webSocketTask: URLSessionWebSocketTask, didCloseWith closeCode: URLSessionWebSocketTask.CloseCode, reason: Data?) {
-        print("🔌 [RealtimeWS] WebSocket closed: \(closeCode.rawValue)")
+        let reasonStr = reason.flatMap { String(data: $0, encoding: .utf8) } ?? ""
+        print("🔌 [RealtimeWS] WebSocket closed: code=\(closeCode.rawValue) reason=\(reasonStr)")
+        // Always cancel the ping task; a stale one would race with the next connect.
+        pingTask?.cancel()
+        pingTask = nil
+
         DispatchQueue.main.async {
             self.connectionState = .disconnected
             self.voiceState = .idle
+        }
+
+        // Auto-reconnect for unexpected closes (not user-initiated and not auth failures).
+        // 1000 = normal, 1001 = going away (we set this on disconnect()), 1008 = policy violation (auth).
+        let code = closeCode.rawValue
+        if code != 1000 && code != 1001 && code != 1008 {
+            DispatchQueue.main.async { [weak self] in
+                self?.scheduleReconnect()
+            }
         }
     }
 }

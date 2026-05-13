@@ -7,6 +7,7 @@
 
 import Foundation
 import Combine
+import AVFoundation
 internal import UIKit
 
 @MainActor
@@ -24,10 +25,108 @@ class RealtimeVoiceViewModel: ObservableObject {
     let wsManager = RealtimeWebSocketManager()
     private let audioManager = RealtimeAudioManager()
     private var cancellables = Set<AnyCancellable>()
-    
+    private var wasConnectedBeforeBackground = false
+    private var notificationObservers: [NSObjectProtocol] = []
+
     init() {
         setupBindings()
         setupAudioHandling()
+        setupSystemObservers()
+    }
+
+    deinit {
+        notificationObservers.forEach { NotificationCenter.default.removeObserver($0) }
+    }
+
+    // MARK: - System Observers (audio interruptions, route changes, app lifecycle)
+    private func setupSystemObservers() {
+        let nc = NotificationCenter.default
+
+        // 1. Audio session interruption (phone calls, Siri, alarms)
+        let interruptionObs = nc.addObserver(
+            forName: AVAudioSession.interruptionNotification,
+            object: nil,
+            queue: .main
+        ) { [weak self] notification in
+            guard let self,
+                  let info = notification.userInfo,
+                  let typeRaw = info[AVAudioSessionInterruptionTypeKey] as? UInt,
+                  let type = AVAudioSession.InterruptionType(rawValue: typeRaw) else { return }
+
+            switch type {
+            case .began:
+                print("🔕 [RealtimeVM] Audio interrupted (phone/Siri/alarm) — pausing")
+                self.audioManager.stopRecording()
+                self.audioManager.stopPlayback()
+            case .ended:
+                let optionsRaw = info[AVAudioSessionInterruptionOptionKey] as? UInt ?? 0
+                let options = AVAudioSession.InterruptionOptions(rawValue: optionsRaw)
+                if options.contains(.shouldResume) {
+                    print("🔔 [RealtimeVM] Audio interruption ended — resuming")
+                    if self.connectionState == .connected && self.voiceState == .listening && !self.isMuted {
+                        Task { @MainActor in self.startRecording() }
+                    }
+                }
+            @unknown default:
+                break
+            }
+        }
+        notificationObservers.append(interruptionObs)
+
+        // 2. Audio route changes (Bluetooth connect/disconnect, headphones)
+        let routeObs = nc.addObserver(
+            forName: AVAudioSession.routeChangeNotification,
+            object: nil,
+            queue: .main
+        ) { [weak self] notification in
+            guard let self,
+                  let info = notification.userInfo,
+                  let reasonRaw = info[AVAudioSessionRouteChangeReasonKey] as? UInt,
+                  let reason = AVAudioSession.RouteChangeReason(rawValue: reasonRaw) else { return }
+
+            switch reason {
+            case .oldDeviceUnavailable:
+                // Headphones unplugged / Bluetooth disconnected — pause to be safe.
+                print("🎧 [RealtimeVM] Audio route changed: old device unavailable — pausing")
+                self.audioManager.stopRecording()
+                self.audioManager.stopPlayback()
+            case .newDeviceAvailable, .categoryChange, .override:
+                // Continue — just log.
+                print("🎧 [RealtimeVM] Audio route changed: \(reason.rawValue)")
+            default:
+                break
+            }
+        }
+        notificationObservers.append(routeObs)
+
+        // 3. App lifecycle — gracefully tear down on background, reconnect on foreground
+        let bgObs = nc.addObserver(
+            forName: UIApplication.didEnterBackgroundNotification,
+            object: nil,
+            queue: .main
+        ) { [weak self] _ in
+            guard let self else { return }
+            self.wasConnectedBeforeBackground = (self.connectionState == .connected || self.connectionState == .connecting)
+            print("📱 [RealtimeVM] App backgrounded; wasConnected=\(self.wasConnectedBeforeBackground) — disconnecting WS")
+            self.audioManager.stopRecording()
+            self.audioManager.stopPlayback()
+            self.wsManager.disconnect()
+        }
+        notificationObservers.append(bgObs)
+
+        let fgObs = nc.addObserver(
+            forName: UIApplication.willEnterForegroundNotification,
+            object: nil,
+            queue: .main
+        ) { [weak self] _ in
+            guard let self else { return }
+            if self.wasConnectedBeforeBackground {
+                print("📱 [RealtimeVM] App foregrounded — reconnecting WS")
+                self.wasConnectedBeforeBackground = false
+                self.connect()
+            }
+        }
+        notificationObservers.append(fgObs)
     }
     
     private func setupBindings() {
