@@ -279,7 +279,7 @@ extension APIClient {
         case verifyOTP(phone: String, code: String)
         case refresh(refreshToken: String)
         case logout(refreshToken: String)
-        case oauthVerify(accessToken: String)
+        case oauthVerify(provider: OAuthProvider, idToken: String, platform: String = "ios")
         case oauthUser
         case updateProfile(language: String?, displayName: String?)
         case updatePlatform(platform: String)
@@ -504,8 +504,8 @@ extension APIClient {
             case .refresh(let refreshToken),
                  .logout(let refreshToken):
                 return ["refresh_token": refreshToken]
-            case .oauthVerify(let accessToken):
-                return ["access_token": accessToken]
+            case .oauthVerify(let provider, let idToken, let platform):
+                return ["provider": provider.rawValue, "id_token": idToken, "platform": platform]
             case .chat(let conversationId, let text, let projectId, let model, let attachments),
                  .chatStream(let conversationId, let text, let projectId, let model, let attachments):
                 var body: [String: Any] = ["text": text]

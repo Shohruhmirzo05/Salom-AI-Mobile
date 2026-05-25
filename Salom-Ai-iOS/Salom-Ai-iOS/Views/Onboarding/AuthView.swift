@@ -142,12 +142,10 @@ final class AuthViewModel: ObservableObject {
         errorMessage = nil
 
         do {
-            // Skip Supabase exchange for iOS - send ID token directly to backend
-            // The backend now supports verifying Google/Apple ID tokens directly
             print("🔐 [\(provider.displayName)] Sending ID token directly to /auth/oauth/verify...")
 
             let tokens = try await client.request(
-                .oauthVerify(accessToken: token), // Send ID token as access_token
+                .oauthVerify(provider: provider, idToken: token),
                 decodeTo: TokenPair.self
             )
             print("✅ [\(provider.displayName)] Backend returned access & refresh tokens")
@@ -206,10 +204,6 @@ final class AuthViewModel: ObservableObject {
             if let apiError = error as? APIError {
                 print("❌ [\(provider.displayName)] API Error details: \(apiError)")
             }
-            if let supabaseError = error as? SupabaseAuthError {
-                print("❌ [\(provider.displayName)] Supabase Error: \(supabaseError)")
-            }
-            
             await MainActor.run {
                 errorMessage = "Kirish xatosi: \(error.localizedDescription)"
                 print("❌ [\(provider.displayName)] Error message shown to user")

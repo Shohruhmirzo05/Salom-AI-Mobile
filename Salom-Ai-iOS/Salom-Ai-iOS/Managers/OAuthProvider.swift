@@ -19,6 +19,4 @@ enum OAuthProvider: String {
             return "Apple"
         }
     }
-    
-    var supabaseValue: String { rawValue }
 }
