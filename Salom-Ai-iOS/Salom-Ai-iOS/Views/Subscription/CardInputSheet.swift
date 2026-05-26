@@ -293,20 +293,20 @@ struct CardInputSheet: View {
     }
 }
 
-#Preview("Paywall – plans loaded") {
-    let manager = SubscriptionManager.shared
-    manager.plans = [
-        SubscriptionPlan(
-            code: "pro_monthly",
-            name: "Pro",
-            priceUzs: 49_000,
-            monthlyMessages: nil,
-            monthlyTokens: nil,
-            benefits: nil
-        )
-    ]
-    return NavigationStack { PaywallSheet() }
-}
+//#Preview("Paywall – plans loaded") {
+//    let manager = SubscriptionManager.shared
+//    manager.plans = [
+//        SubscriptionPlan(
+//            code: "pro_monthly",
+//            name: "Pro",
+//            priceUzs: 49_000,
+//            monthlyMessages: nil,
+//            monthlyTokens: nil,
+//            benefits: nil
+//        )
+//    ]
+//    return NavigationStack { PaywallSheet() }
+//}
 
 #Preview("Paywall – loading") {
     let manager = SubscriptionManager.shared

@@ -6,6 +6,7 @@ import 'package:salom_ai/core/api/api_client.dart';
 import 'package:salom_ai/core/api/token_store.dart';
 import 'package:salom_ai/core/api/api_models.dart';
 import 'package:salom_ai/core/constants/config.dart';
+import 'package:salom_ai/core/services/push_notification_service.dart';
 import 'package:google_sign_in/google_sign_in.dart' as google_lib;
 
 // Make AuthService a ChangeNotifier to notify Router
@@ -72,10 +73,28 @@ class AuthService extends ChangeNotifier {
     });
   }
 
+  /// Call after externally writing tokens to TokenStore (e.g. after phone-OTP verify)
+  /// so the router and rest of the app pick up the new authenticated state.
+  Future<void> reloadFromTokens() async {
+    final token = await TokenStore.shared.getAccessToken();
+    if (token != null && token.isNotEmpty) {
+      _isAuthenticated = true;
+      notifyListeners();
+      await _fetchBackendUser();
+    }
+  }
+
   Future<void> _fetchBackendUser() async {
     try {
       _backendUser = await _apiClient.getMe();
       notifyListeners();
+      // Bind OneSignal subscription to backend user id so push targeting works.
+      final uid = _backendUser?.id;
+      if (uid != null) {
+        await PushNotificationService.instance.setExternalUserId(uid.toString());
+        // Best-effort: ask for notification permission once after first login.
+        unawaited(PushNotificationService.instance.requestPermission());
+      }
     } catch (e) {
       print("⚠️ Failed to fetch user profile: $e");
     }
@@ -144,7 +163,8 @@ class AuthService extends ChangeNotifier {
     try {
       await google_lib.GoogleSignIn().signOut();
     } catch(_) {}
-    
+
+    await PushNotificationService.instance.clearExternalUserId();
     await TokenStore.shared.clear();
     _isAuthenticated = false;
     _backendUser = null;

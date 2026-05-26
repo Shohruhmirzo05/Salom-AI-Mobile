@@ -192,6 +192,7 @@ class SubscriptionPlan {
   final String code;
   final String name;
   final int priceUzs;
+  final int? durationDays;
   final int? monthlyMessages;
   final int? monthlyTokens;
   final List<Map<String, String>>? benefits;
@@ -200,6 +201,7 @@ class SubscriptionPlan {
     required this.code,
     required this.name,
     required this.priceUzs,
+    this.durationDays,
     this.monthlyMessages,
     this.monthlyTokens,
     this.benefits,
@@ -210,12 +212,30 @@ class SubscriptionPlan {
       code: json['code'] as String,
       name: json['name'] as String,
       priceUzs: json['price_uzs'] as int,
+      durationDays: json['duration_days'] as int?,
       monthlyMessages: json['monthly_messages'] as int?,
       monthlyTokens: json['monthly_tokens'] as int?,
       benefits: (json['benefits'] as List?)
           ?.map((e) => Map<String, String>.from(e as Map))
           .toList(),
     );
+  }
+
+  /// Cost per day, derived from priceUzs / durationDays. Reads what the
+  /// admin configured — falls back to 30 only if the API omits it.
+  double get pricePerDay {
+    final days = (durationDays ?? 30).clamp(1, 365);
+    return priceUzs / days;
+  }
+
+  bool get isPaid => priceUzs > 0;
+
+  /// Localized benefit string for a given UI language. Falls back uz → en.
+  String? benefitAt(int index, String lang) {
+    if (benefits == null || index >= benefits!.length) return null;
+    final row = benefits![index];
+    final short = lang.length >= 2 ? lang.substring(0, 2).toLowerCase() : 'uz';
+    return row[short] ?? row['uz'] ?? row['en'] ?? row.values.first;
   }
 }
 

@@ -21,14 +21,32 @@ class RealtimeVoiceViewModel: ObservableObject {
     @Published var audioLevel: Float = 0.0
     @Published var errorMessage: String?
     @Published var showError = false
+
+    // Pre-connect eligibility — set by `preflight()` before any WS attempt.
+    // When non-nil, the View routes to the paywall instead of dialing OpenAI.
+    @Published var blockedReason: String? = nil
+    @Published var preflightInFlight = false
     
-    let wsManager = RealtimeWebSocketManager()
-    private let audioManager = RealtimeAudioManager()
+    // Provider is chosen by RealtimeProviderConfig (default: .openai).
+    // The protocol abstracts away whether we're talking to the Yandex pipeline
+    // or the OpenAI Realtime proxy — call sites below are provider-agnostic.
+    let wsManager: any RealtimeVoiceProviding = RealtimeProviderConfig.makeProvider()
+    // Mic sample rate matches the active provider:
+    //   • Yandex STT  → 16 kHz PCM16
+    //   • OpenAI Realtime → 24 kHz PCM16
+    private let audioManager = RealtimeAudioManager(
+        sampleRate: RealtimeProviderConfig.current == .openai ? 24000 : 16000
+    )
     private var cancellables = Set<AnyCancellable>()
     private var wasConnectedBeforeBackground = false
     private var notificationObservers: [NSObjectProtocol] = []
 
     init() {
+        // Share the audio manager's engine with the OpenAI provider so VPIO
+        // sees both mic input and speaker output — required for proper AEC.
+        if let openai = wsManager as? OpenAIRealtimeManager {
+            openai.attach(audioManager: audioManager)
+        }
         setupBindings()
         setupAudioHandling()
         setupSystemObservers()
@@ -130,30 +148,45 @@ class RealtimeVoiceViewModel: ObservableObject {
     }
     
     private func setupBindings() {
-        // WebSocket state
-        wsManager.$connectionState
+        // WebSocket state (protocol-typed — works for either provider)
+        wsManager.connectionStatePublisher
             .receive(on: DispatchQueue.main)
             .sink { [weak self] state in
-                self?.connectionState = state
+                guard let self else { return }
+                self.connectionState = state
                 if case .error(let message) = state {
-                    self?.showErrorAlert(message)
+                    // The server sends a localized Uzbek error message on
+                    // quota / subscription refusals (e.g. "Siz xabar limitiga
+                    // yetdingiz. Rejangizni yangilang."). Surface it as a
+                    // paywall trigger by routing through blockedReason — that
+                    // way the View's existing block-alert + paywall flow
+                    // fires whether the refusal came at preflight time OR
+                    // mid-session via the WS gate.
+                    if Self.looksLikeQuotaRefusal(message) {
+                        self.blockedReason = message
+                    } else {
+                        self.showErrorAlert(message)
+                    }
                 }
             }
             .store(in: &cancellables)
-        
+
         // Voice state
-        wsManager.$voiceState
+        wsManager.voiceStatePublisher
             .receive(on: DispatchQueue.main)
             .sink { [weak self] state in
                 self?.voiceState = state
                 self?.handleVoiceStateChange(state)
             }
             .store(in: &cancellables)
-        
+
         // Messages
-        wsManager.$messages
+        wsManager.messagesPublisher
             .receive(on: DispatchQueue.main)
-            .assign(to: &$messages)
+            .sink { [weak self] msgs in
+                self?.messages = msgs
+            }
+            .store(in: &cancellables)
         
         // Audio recording state
         audioManager.$isRecording
@@ -173,67 +206,121 @@ class RealtimeVoiceViewModel: ObservableObject {
             }
             .store(in: &cancellables)
         
-        // Audio level
-        audioManager.$audioLevel
+        // Audio level — visualizer feed.
+        //
+        // For OpenAI: when the assistant is speaking we want the visualizer
+        // to pulse to its output voice, not the mic. We combine the mic
+        // level with the OpenAI player's output level and pick the one
+        // matching the current voice state.
+        if wsManager is OpenAIRealtimeManager {
+            // Visualizer feed: mic level during listening, streaming player
+            // level during speaking. Both come from the shared audioManager
+            // now that engines are consolidated.
+            Publishers.CombineLatest3(
+                audioManager.$audioLevel,
+                audioManager.$streamingPlayerLevel,
+                $voiceState
+            )
             .receive(on: DispatchQueue.main)
-            .assign(to: &$audioLevel)
+            .sink { [weak self] micLevel, outLevel, state in
+                self?.audioLevel = (state == .speaking) ? outLevel : micLevel
+            }
+            .store(in: &cancellables)
+        } else {
+            audioManager.$audioLevel
+                .receive(on: DispatchQueue.main)
+                .assign(to: &$audioLevel)
+        }
     }
     
     private func setupAudioHandling() {
-        // 1. Send CLEAN audio to WebSocket
+        // 1. Forward mic chunks to whichever provider is active.
         audioManager.onAudioChunk = { [weak self] data in
-            // Only send if we are in a state that allows it
-            guard self?.voiceState == .listening || self?.voiceState == .speaking else { return }
-            self?.wsManager.sendAudioChunk(data)
+            guard let self = self else { return }
+            if RealtimeProviderConfig.current == .openai {
+                // OpenAI: stream every chunk; server VAD handles turn-taking.
+                self.wsManager.sendAudioChunk(data)
+            } else {
+                // Yandex: only stream when we're in an utterance-active state.
+                guard self.voiceState == .listening || self.voiceState == .speaking else { return }
+                self.wsManager.sendAudioChunk(data)
+            }
         }
-        
-        // Play received audio
+
+        // Yandex provider plays MP3 chunks via the audio manager.
+        // OpenAI provider plays audio inside its own streaming engine and
+        // never invokes this callback.
         wsManager.onAudioReceived = { [weak self] data in
             self?.audioManager.playAudio(data: data)
         }
-        
-        // 2. User Started Talking
+
+        // 2. User Started Talking — Yandex-only barge-in path.
+        // OpenAI's server VAD detects speech on the continuous mic stream
+        // and interrupts the response itself (interrupt_response: true).
         audioManager.onSpeechDetected = { [weak self] in
             guard let self = self else { return }
+            guard RealtimeProviderConfig.current == .yandex else { return }
+
             print("🗣️ [ViewModel] User speaking - interrupting bot")
-            
-            // If bot was talking, shut it up immediately
             if self.isPlaying {
                 self.audioManager.stopPlayback()
-                self.wsManager.sendInterruption() // Send "stop" to backend
+                self.wsManager.sendInterruption()
             }
-            
-            self.voiceState = .listening // Update UI to show "Listening"
+            self.voiceState = .listening
             self.wsManager.sendSpeechStarted()
         }
-        
-        // 3. User Stopped Talking (Silence)
+
+        // 3. User Stopped Talking — Yandex-only commit path.
         audioManager.onSilenceDetected = { [weak self] in
+            guard let self = self else { return }
+            guard RealtimeProviderConfig.current == .yandex else { return }
+
             print("🤫 [ViewModel] User finished - waiting for response")
-            // The library already waited for silence, so we can commit immediately
-            self?.wsManager.sendEndUtterance() 
-            self?.voiceState = .thinking // Update UI to show "Thinking"
+            self.wsManager.sendEndUtterance()
+            self.voiceState = .thinking
         }
     }
     
     private func handleVoiceStateChange(_ state: RealtimeVoiceState) {
         print("🔄 [RealtimeVM] State changed to: \(state.rawValue)")
-        
+
+        // OpenAI uses server-side VAD on a continuous mic stream — the mic
+        // must stay on for the entire session so OpenAI can detect both
+        // end-of-turn and mid-response barge-in. Voice state is purely UI;
+        // the only mic transition we handle is full teardown on .idle.
+        // iOS hardware echo cancellation (.voiceChat mode) prevents the
+        // assistant's voice from being re-captured as user speech.
+        if RealtimeProviderConfig.current == .openai {
+            switch state {
+            case .idle:
+                audioManager.stopRecording()
+            case .listening:
+                if !audioManager.isRecording && !isMuted && connectionState == .connected {
+                    startRecording()
+                }
+            case .transcribing, .thinking, .speaking:
+                // Keep mic running — server VAD listens for barge-in.
+                break
+            }
+            return
+        }
+
+        // Yandex provider: explicit utterance boundaries, mic pauses during AI turn.
         switch state {
         case .idle:
             audioManager.stopRecording()
             audioManager.stopPlayback()
-            
+
         case .listening:
             // Start recording if not already and not playing audio
             if !audioManager.isRecording && !isPlaying {
                 startRecording()
             }
-            
+
         case .transcribing, .thinking:
             // Stop recording, wait for response
             audioManager.stopRecording()
-            
+
         case .speaking:
             // Audio playback handled by onAudioReceived callback
             break
@@ -245,10 +332,111 @@ class RealtimeVoiceViewModel: ObservableObject {
             showErrorAlert("No authentication token found")
             return
         }
-        
+
         print("🔌 [RealtimeVM] Connecting...")
         Task {
             await wsManager.connect(token: token)
+        }
+    }
+
+    /// Pre-connect eligibility check.
+    /// Returns true if the user is allowed to start a voice session right now.
+    /// On false, `blockedReason` is set to a user-facing localized message.
+    /// Fails OPEN on network/server errors (the WS gate is the source of truth).
+    func preflight() async -> Bool {
+        preflightInFlight = true
+        blockedReason = nil
+        defer { preflightInFlight = false }
+
+        guard let token = TokenStore.shared.accessToken else {
+            // Auth issue — let the normal connect path surface it.
+            return true
+        }
+
+        do {
+            let url = URL(string: "https://api.salom-ai.uz/realtime/voice-status")!
+            var req = URLRequest(url: url)
+            req.timeoutInterval = 8
+            req.setValue("Bearer \(token)", forHTTPHeaderField: "Authorization")
+            req.setValue("application/json", forHTTPHeaderField: "Accept")
+            let (data, response) = try await URLSession.shared.data(for: req)
+
+            guard let http = response as? HTTPURLResponse, http.statusCode == 200,
+                  let json = try? JSONSerialization.jsonObject(with: data) as? [String: Any],
+                  let allowed = json["allowed"] as? Bool else {
+                print("⚠️ [RealtimeVM] Preflight: unexpected response — failing open")
+                return true
+            }
+
+            if allowed {
+                print("✅ [RealtimeVM] Preflight passed")
+                return true
+            }
+
+            let reason = (json["reason"] as? String) ?? "voice_disabled"
+            let used = (json["used_minutes"] as? Double) ?? 0
+            let limit = (json["limit_minutes"] as? Int) ?? 0
+            let resetISO = json["reset_at"] as? String
+            print("🚫 [RealtimeVM] Preflight blocked: \(reason) (\(used)/\(limit) min) reset=\(resetISO ?? "?")")
+            blockedReason = Self.localizedBlockMessage(
+                for: reason,
+                used: used,
+                limit: limit,
+                resetISO: resetISO
+            )
+            return false
+        } catch {
+            print("⚠️ [RealtimeVM] Preflight failed: \(error.localizedDescription) — failing open")
+            return true
+        }
+    }
+
+    /// Detect whether a server error message represents a quota / subscription
+    /// refusal (vs a generic network error). Matches localized Uzbek + English
+    /// keywords from the backend's error responses. If true, the View routes
+    /// to the paywall instead of showing a transient error alert.
+    private static func looksLikeQuotaRefusal(_ message: String) -> Bool {
+        let m = message.lowercased()
+        // Uzbek: "limit", "limiti", "rejangizni yangilang", "obuna", "daqiqa", "ovozli"
+        // English: "limit", "quota", "upgrade", "voice"
+        let needles = [
+            "limit",        // matches "limiti", "limitiga", "limit exceeded"
+            "quota",
+            "rejangiz",     // matches "rejangizni"
+            "obuna",        // matches "obunangizda"
+            "ovozli rejim", // "voice mode not in plan"
+            "upgrade",
+            "voice mode",
+        ]
+        return needles.contains { m.contains($0) }
+    }
+
+    private static func localizedBlockMessage(
+        for reason: String,
+        used: Double,
+        limit: Int,
+        resetISO: String?
+    ) -> String {
+        let resetSuffix: String = {
+            guard let resetISO else { return "" }
+            let iso = ISO8601DateFormatter()
+            iso.formatOptions = [.withInternetDateTime, .withFractionalSeconds]
+            let date = iso.date(from: resetISO) ?? ISO8601DateFormatter().date(from: resetISO)
+            guard let date else { return "" }
+            let fmt = DateFormatter()
+            fmt.dateStyle = .medium
+            fmt.timeStyle = .none
+            fmt.locale = Locale(identifier: "uz")
+            return " Limit \(fmt.string(from: date)) kuni yangilanadi."
+        }()
+
+        switch reason {
+        case "minutes_exceeded":
+            return "Oylik ovozli daqiqalar limiti tugadi (\(Int(used))/\(limit) daq).\(resetSuffix) Rejangizni yangilang yoki keyinroq qaytib keling."
+        case "voice_disabled":
+            return "Ovozli rejim ushbu obunada mavjud emas. Premium rejaga o'ting."
+        default:
+            return "Ovozli rejim hozircha mavjud emas."
         }
     }
     
@@ -262,6 +450,13 @@ class RealtimeVoiceViewModel: ObservableObject {
     func stopAudio() {
         print("🔇 [RealtimeVM] Stopping audio playback")
         audioManager.stopPlayback()
+    }
+
+    /// Play a preview clip (MP3) returned by `GET /realtime/voice-preview`.
+    /// Routes through `RealtimeAudioManager.playAudio(data:)` which already
+    /// handles MP3 natively.
+    func playPreview(data: Data) {
+        audioManager.playAudio(data: data)
     }
     
     func toggleRecording() {

@@ -13,25 +13,47 @@ class RealtimeAudioManager: NSObject, ObservableObject {
     @Published var isRecording = false
     @Published var isPlaying = false
     @Published var audioLevel: Float = 0.0
-    
+    /// RMS of the streaming PCM playback (assistant voice). Drives the
+    /// visualizer when the OpenAI provider is speaking.
+    @Published var streamingPlayerLevel: Float = 0.0
+
     private var audioEngine: AVAudioEngine?
     private var inputNode: AVAudioInputNode?
     private var audioPlayer: AVAudioPlayer?
-    private let sampleRate: Double = 16000
+    // Streaming output: OpenAI Realtime sends 24 kHz PCM16 deltas which we
+    // schedule on this player node. CRITICAL: the player node is attached to
+    // the SAME engine as the mic — that's what gives iOS Voice Processing IO
+    // (VPIO) a reference signal so AEC actually works and the assistant
+    // doesn't cut itself off from its own speaker output.
+    private var streamingPlayerNode: AVAudioPlayerNode?
+    private var streamingFormat: AVAudioFormat?
+    private var pendingStreamingChunks: Int = 0
+    /// 24 kHz PCM16 — matches OpenAI Realtime's audio.output.format.
+    private let streamingOutputRate: Double = 24000
+
+    // Recording sample rate is provider-configurable:
+    //   Yandex STT expects 16 kHz PCM16
+    //   OpenAI Realtime expects 24 kHz PCM16
+    private let sampleRate: Double
     private let channelCount: AVAudioChannelCount = 1
     private var shouldResumeRecording = false
-    
+
     // HPF State
     private var prevX: Int16 = 0
     private var prevY: Float = 0.0
-    
+
     var onAudioChunk: ((Data) -> Void)?
     var onSpeechDetected: (() -> Void)?
     var onSilenceDetected: (() -> Void)?
+    /// Fires when the streaming player drains (all queued chunks played).
+    /// OpenAIRealtimeManager uses this to flip voice state back to .listening.
+    var onStreamingDrained: (() -> Void)?
     
-    override init() {
+    init(sampleRate: Double = 16000) {
+        self.sampleRate = sampleRate
         super.init()
         setupAudioSession()
+        print("🎚️ [RealtimeAudio] Configured @ \(Int(sampleRate)) Hz")
     }
     
     private func setupAudioSession() {
@@ -75,12 +97,50 @@ class RealtimeAudioManager: NSObject, ObservableObject {
             print("❌ [RealtimeAudio] No input node available")
             return
         }
-        
-        // Configure input format (16kHz, mono, PCM)
-        // Use outputFormat(forBus: 0) because InputNode is a Source
+
+        // -------------------------------------------------------------------
+        // Voice Processing IO (VPIO) — the real fix for assistant self-cutoff.
+        //
+        // VPIO is iOS's hardware-accelerated AEC + noise suppression + AGC.
+        // It replaces the underlying audio unit on the inputNode. Without it,
+        // we only have session-level `.voiceChat` AEC, which on iPhone speaker
+        // is too weak: the assistant's voice leaks back through the mic and
+        // triggers OpenAI's server VAD → response gets cancelled mid-word.
+        //
+        // VPIO requires BOTH buses of the audio unit to be connected (input
+        // for the mic, output for the speaker reference signal). That's why
+        // we attach a player node to mainMixerNode BEFORE enabling VPIO —
+        // otherwise the output bus has nothing to render and the unit spams
+        // `auou/vpio/appl, render err: -1` continuously.
+        // -------------------------------------------------------------------
+
+        // 1) Attach the streaming player BEFORE enabling VPIO so the engine
+        //    has a complete output graph at the moment VPIO turns on.
+        let outFormat = AVAudioFormat(
+            standardFormatWithSampleRate: streamingOutputRate,
+            channels: 1
+        )
+        if let outFormat = outFormat {
+            let player = AVAudioPlayerNode()
+            streamingPlayerNode = player
+            streamingFormat = outFormat
+            audioEngine.attach(player)
+            audioEngine.connect(player, to: audioEngine.mainMixerNode, format: outFormat)
+        }
+
+        // 2) Enable VPIO on the input chain.
+        do {
+            try inputNode.setVoiceProcessingEnabled(true)
+            print("✅ [RealtimeAudio] VPIO (hardware AEC + NS + AGC) enabled")
+        } catch {
+            print("⚠️ [RealtimeAudio] setVoiceProcessingEnabled failed: \(error.localizedDescription) — falling back to session-level AEC")
+        }
+
+        // Configure input format (mono, PCM, sample rate from init).
+        // Use outputFormat(forBus: 0) because InputNode is a source.
         let inputFormat = inputNode.outputFormat(forBus: 0)
-        
-        // CRITICAL: Check if format is valid to prevent crash
+
+        // CRITICAL: Check if format is valid to prevent crash.
         if inputFormat.sampleRate == 0 || inputFormat.channelCount == 0 {
             print("❌ [RealtimeAudio] Invalid input format: \(inputFormat). Retrying in 100ms...")
             DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
@@ -88,53 +148,122 @@ class RealtimeAudioManager: NSObject, ObservableObject {
             }
             return
         }
-        
+
         let recordingFormat = AVAudioFormat(
             commonFormat: .pcmFormatInt16,
             sampleRate: sampleRate,
             channels: channelCount,
             interleaved: false
         )
-        
+
         guard let recordingFormat = recordingFormat else {
             print("❌ [RealtimeAudio] Failed to create recording format")
             return
         }
-        
-        // Install tap on input node
+
+        // 3) Install tap on input node.
         let bufferSize: AVAudioFrameCount = 4096
-        inputNode.installTap(onBus: 0, bufferSize: bufferSize, format: inputFormat) { [weak self] buffer, time in
+        inputNode.installTap(onBus: 0, bufferSize: bufferSize, format: inputFormat) { [weak self] buffer, _ in
             guard let self = self else { return }
-            
-            // Convert to target format if needed
             if let convertedBuffer = self.convertBuffer(buffer, to: recordingFormat) {
-                // Calculate audio level and VAD
                 self.calculateAudioLevel(from: convertedBuffer)
-                
-                // Convert to PCM data
                 if let pcmData = self.bufferToPCMData(convertedBuffer) {
                     self.onAudioChunk?(pcmData)
                 }
             }
         }
-        
+
+        // 4) Start engine + arm the streaming player so future schedule calls
+        //    begin playing immediately.
         do {
             try audioEngine.start()
-            DispatchQueue.main.async {
-                self.isRecording = true
-            }
-            print("✅ [RealtimeAudio] Recording started")
+            streamingPlayerNode?.play()
+            DispatchQueue.main.async { self.isRecording = true }
+            print("✅ [RealtimeAudio] Recording started (engine + streaming player armed)")
         } catch {
             print("❌ [RealtimeAudio] Failed to start audio engine: \(error.localizedDescription)")
+        }
+    }
+
+    // MARK: - Streaming PCM16 output (OpenAI Realtime)
+
+    /// Schedule a 24 kHz PCM16-LE chunk on the streaming player node. Safe
+    /// to call from anywhere — drops silently if the engine isn't running.
+    func enqueueStreamingPCM16(_ pcm16: Data) {
+        guard let player = streamingPlayerNode,
+              let format = streamingFormat,
+              audioEngine?.isRunning == true else {
+            return
+        }
+        let sampleCount = pcm16.count / 2
+        guard sampleCount > 0 else { return }
+        guard let buffer = AVAudioPCMBuffer(pcmFormat: format,
+                                            frameCapacity: AVAudioFrameCount(sampleCount)) else {
+            return
+        }
+        buffer.frameLength = AVAudioFrameCount(sampleCount)
+        guard let channel = buffer.floatChannelData?.pointee else { return }
+
+        var sumSq: Float = 0
+        pcm16.withUnsafeBytes { (raw: UnsafeRawBufferPointer) in
+            let ints = raw.bindMemory(to: Int16.self)
+            for i in 0..<sampleCount {
+                let f = Float(ints[i]) / Float(Int16.max)
+                channel[i] = f
+                sumSq += f * f
+            }
+        }
+        let rms = sqrt(sumSq / Float(sampleCount))
+
+        pendingStreamingChunks += 1
+        DispatchQueue.main.async {
+            self.streamingPlayerLevel = rms
+            self.isPlaying = true
+        }
+
+        player.scheduleBuffer(buffer, completionCallbackType: .dataPlayedBack) { [weak self] _ in
+            guard let self = self else { return }
+            DispatchQueue.main.async {
+                self.pendingStreamingChunks = max(0, self.pendingStreamingChunks - 1)
+                if self.pendingStreamingChunks == 0 {
+                    self.isPlaying = false
+                    self.streamingPlayerLevel = 0.0
+                    self.onStreamingDrained?()
+                }
+            }
+        }
+    }
+
+    /// Drop all queued playback (mid-response barge-in).
+    func flushStreaming() {
+        guard let player = streamingPlayerNode else { return }
+        player.stop()
+        player.reset()
+        pendingStreamingChunks = 0
+        if audioEngine?.isRunning == true {
+            player.play()  // re-arm for the next response
+        }
+        DispatchQueue.main.async {
+            self.isPlaying = false
+            self.streamingPlayerLevel = 0.0
         }
     }
     
     func stopRecording() {
         guard isRecording else { return }
-        
+
         print("🎤 [RealtimeAudio] Stopping recording")
-        
+
         inputNode?.removeTap(onBus: 0)
+        streamingPlayerNode?.stop()
+        if let player = streamingPlayerNode, let engine = audioEngine {
+            engine.detach(player)
+        }
+        streamingPlayerNode = nil
+        streamingFormat = nil
+        pendingStreamingChunks = 0
+        // Disable VPIO before tearing down so the audio unit cleanly resets.
+        try? inputNode?.setVoiceProcessingEnabled(false)
         audioEngine?.stop()
         audioEngine = nil
         inputNode = nil

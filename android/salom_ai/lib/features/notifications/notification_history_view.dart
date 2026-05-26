@@ -11,7 +11,9 @@ class NotificationHistoryView extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     return Container(
       decoration: const BoxDecoration(gradient: AppTheme.backgroundGradient),
-      child: Column(
+      child: SafeArea(
+        bottom: false,
+        child: Column(
         children: [
           // Top bar
           Container(
@@ -69,6 +71,7 @@ class NotificationHistoryView extends ConsumerWidget {
             ),
           ),
         ],
+        ),
       ),
     );
   }

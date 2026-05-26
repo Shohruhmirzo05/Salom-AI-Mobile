@@ -600,6 +600,9 @@ struct ChatView: View {
                     .onTapGesture {
                         UIApplication.shared.sendAction(#selector(UIResponder.resignFirstResponder), to: nil, from: nil, for: nil)
                     }
+                // Subtle floating upgrade hint — only renders for free users
+                // who've burned through ≥70% of any resource. No-op otherwise.
+                UpgradeNudge()
                 InputBar()
             }
         }

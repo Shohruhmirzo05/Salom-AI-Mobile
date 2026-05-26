@@ -81,6 +81,23 @@ final class SubscriptionManager: ObservableObject {
         }
     }
 
+    /// Initiates a one-time Click payment. Returns a checkout URL the caller should
+    /// open in Safari / SFSafariViewController. After the user returns to the app,
+    /// `checkSubscriptionStatus()` runs automatically on scenePhase == .active.
+    func subscribeOneTime(planCode: String) async -> String? {
+        do {
+            let response = try await APIClient.shared.request(
+                .subscribe(plan: planCode, provider: "click"),
+                decodeTo: SubscribeResponse.self
+            )
+            return response.checkoutUrl
+        } catch {
+            print("❌ One-time subscribe failed: \(error)")
+            lastError = "\(error)"
+            return nil
+        }
+    }
+
     // MARK: - Card Tokenization
 
     /// Step 1: Send card details to Click for tokenization

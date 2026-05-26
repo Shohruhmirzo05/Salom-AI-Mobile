@@ -4,6 +4,31 @@
     "" : {
 
     },
+    "·" : {
+
+    },
+    "/ kun" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "/ day"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "/ день"
+          }
+        },
+        "uz-Cyrl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "/ кун"
+          }
+        }
+      }
+    },
     "/ oyiga" : {
       "localizations" : {
         "en" : {
@@ -25,6 +50,22 @@
           }
         }
       }
+    },
+    "%@ / %@" : {
+      "localizations" : {
+        "uz" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "%1$@ / %2$@"
+          }
+        }
+      }
+    },
+    "%@ / kun" : {
+
+    },
+    "%@ imkoniyatlari" : {
+
     },
     "%@ kartasini o'chirmoqchimisiz? Avtomatik yangilanish o'chiriladi." : {
 
@@ -154,6 +195,52 @@
     "000000" : {
 
     },
+    "3 oylik" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Quarterly"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Квартальный"
+          }
+        },
+        "uz-Cyrl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "3 ойлик"
+          }
+        }
+      }
+    },
+    "3 oylik obuna" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Quarterly plan"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Подписка на 3 мес."
+          }
+        },
+        "uz-Cyrl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "3 ойлик обуна"
+          }
+        }
+      }
+    },
     "5 yulduz qo'yish" : {
       "extractionState" : "manual",
       "localizations" : {
@@ -227,6 +314,32 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Амал қилиш муддати: %@"
+          }
+        }
+      }
+    },
+    "Aqlli suhbatdosh" : {
+
+    },
+    "Avtomatik" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Hands-off"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Авто"
+          }
+        },
+        "uz-Cyrl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Автоматик"
           }
         }
       }
@@ -335,6 +448,80 @@
     "Bildirishnomalar yo'q" : {
 
     },
+    "Bir martalik" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "One-time"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Разовая оплата"
+          }
+        },
+        "uz-Cyrl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Бир марталик"
+          }
+        }
+      }
+    },
+    "Bir martalik to'lov" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "One-time payment"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Разовая оплата"
+          }
+        },
+        "uz-Cyrl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Бир марталик тўлов"
+          }
+        }
+      }
+    },
+    "Bir necha so'z bilan istalgan rasm — afisha, dizayn, illyustratsiya — yarating. Bir necha soniyada tayyor." : {
+
+    },
+    "Boshlash" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Start"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Начать"
+          }
+        },
+        "uz-Cyrl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Бошлаш"
+          }
+        }
+      }
+    },
+    "Boshlashga tayyormiz" : {
+
+    },
     "Bosib turing" : {
       "localizations" : {
         "en" : {
@@ -356,6 +543,9 @@
           }
         }
       }
+    },
+    "Chat" : {
+
     },
     "ChatGPT-like suhbat" : {
       "extractionState" : "stale",
@@ -403,6 +593,7 @@
       }
     },
     "Cheklovsiz Imkoniyatlar" : {
+      "extractionState" : "stale",
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -446,7 +637,30 @@
         }
       }
     },
+    "Cheklovsiz suhbat, ovoz va eng aqlli modellar." : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Unlimited chat, voice and the smartest models."
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Безлимитный чат, голос и самые умные модели."
+          }
+        },
+        "uz-Cyrl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Чексиз суҳбат, овоз ва энг ақлли моделлар."
+          }
+        }
+      }
+    },
     "Cheklovsiz xabarlar" : {
+      "extractionState" : "stale",
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -470,6 +684,7 @@
     },
     "Cheksiz imkoniyatlar olami" : {
       "comment" : "Onboarding slide title describing broad possibilities.",
+      "extractionState" : "stale",
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -511,6 +726,119 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Чиқиш"
+          }
+        }
+      }
+    },
+    "Click himoyasida. SSL / PCI DSS." : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Secured by Click. SSL / PCI DSS."
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Защищено Click. SSL / PCI DSS."
+          }
+        },
+        "uz-Cyrl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Click ҳимоясида. SSL / PCI DSS."
+          }
+        }
+      }
+    },
+    "Click orqali xavfsiz to'lov" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Secure payment via Click"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Безопасная оплата через Click"
+          }
+        },
+        "uz-Cyrl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Click орқали хавфсиз тўлов"
+          }
+        }
+      }
+    },
+    "Click orqali. Birini tanlang." : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Via Click. Pick one."
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Через Click. Выберите вариант."
+          }
+        },
+        "uz-Cyrl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Click орқали. Бирини танланг."
+          }
+        }
+      }
+    },
+    "Click sahifasiga o'tasiz" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "You'll go to the Click page"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Перейдёте на страницу Click"
+          }
+        },
+        "uz-Cyrl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Click саҳифасига ўтасиз"
+          }
+        }
+      }
+    },
+    "Click sahifasiga yo'naltiriladi. Karta ma'lumotlari saqlanmaydi — tezkor va sodda." : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "You'll be redirected to the Click page. No card is saved — fast and simple."
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Вас перенаправит на страницу Click. Карта не сохраняется — быстро и просто."
+          }
+        },
+        "uz-Cyrl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Click саҳифасига йўналтирилади. Карта маълумотлари сақланмайди — тезкор ва содда."
           }
         }
       }
@@ -589,6 +917,7 @@
       }
     },
     "Eng aqlli javoblar" : {
+      "extractionState" : "stale",
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -659,6 +988,9 @@
       }
     },
     "Faol obuna" : {
+
+    },
+    "Fayl tahlili" : {
 
     },
     "Fayl yuklash" : {
@@ -757,6 +1089,9 @@
 
     },
     "Google yoki Apple orqali tezda kiring." : {
+
+    },
+    "Hamma narsa tayyor. Salom AI bilan birinchi suhbatingizni boshlang — yangi imkoniyatlar olamiga xush kelibsiz." : {
 
     },
     "Hammasini o'qish" : {
@@ -904,6 +1239,9 @@
         }
       }
     },
+    "Hujjat va rasmlarni tahlil qilish" : {
+
+    },
     "Hujjatlar" : {
       "localizations" : {
         "en" : {
@@ -922,6 +1260,29 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Ҳужжатлар"
+          }
+        }
+      }
+    },
+    "Ikkala variant ham Click orqali. O'zingizga qulayini tanlang." : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Both options go through Click. Pick whatever fits."
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Оба варианта через Click. Выберите удобный."
+          }
+        },
+        "uz-Cyrl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ҳар иккала вариант ҳам Click орқали. Ўзингизга қулайини танланг."
           }
         }
       }
@@ -1003,6 +1364,51 @@
         }
       }
     },
+    "Istalgan vaqt bekor" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Cancel anytime"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Отмена в любое время"
+          }
+        },
+        "uz-Cyrl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Истаган вақт бекор"
+          }
+        }
+      }
+    },
+    "Istalgan vaqt bekor qilinadi" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Cancel anytime"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Отмена в любое время"
+          }
+        },
+        "uz-Cyrl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Истаган вақт бекор қилинади"
+          }
+        }
+      }
+    },
     "Javob tayyorlanmoqda..." : {
       "localizations" : {
         "en" : {
@@ -1026,6 +1432,7 @@
       }
     },
     "Jonli suhbatlar" : {
+      "extractionState" : "stale",
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -1069,11 +1476,103 @@
         }
       }
     },
+    "Karta Click tomonidan xavfsiz tokenlashtiriladi. Istalgan vaqt o'chirib yuborishingiz mumkin." : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Card is tokenized securely by Click. Remove it whenever you want."
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Карта токенизируется Click безопасно. Удалить можно когда угодно."
+          }
+        },
+        "uz-Cyrl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Карта Click томонидан хавфсиз токенлаштирилади. Истаган вақт ўчириб юборишингиз мумкин."
+          }
+        }
+      }
+    },
     "Karta ma'lumotlari" : {
 
     },
     "KARTA RAQAMI" : {
 
+    },
+    "Karta saqlamasdan faqat bir marta to'lamoqchi bo'lsangiz — shu variant." : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Best if you just want to pay once without saving your card."
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Подходит, если хотите оплатить один раз без сохранения карты."
+          }
+        },
+        "uz-Cyrl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Карта сақламасдан фақат бир марта тўламоқчи бўлсангиз — шу вариант."
+          }
+        }
+      }
+    },
+    "Karta saqlanadi va har davr oxirida o'zi yangilanadi. Istalgan vaqt bekor qilish mumkin." : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Save your card and renew automatically each period. Cancel anytime."
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Карта сохранится и продление произойдёт автоматически. Отменить можно в любое время."
+          }
+        },
+        "uz-Cyrl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Карта сақланади ва ҳар давр охирида ўзи янгиланади. Истаган вақт бекор қилиш мумкин."
+          }
+        }
+      }
+    },
+    "Karta saqlanadi, har oy o'zi yangilanadi" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Card saved, renews each month"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Карта сохранится, продление каждый месяц"
+          }
+        },
+        "uz-Cyrl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Карта сақланади, ҳар ой ўзи янгиланади"
+          }
+        }
+      }
     },
     "Kartani o'chirish" : {
 
@@ -1106,6 +1605,7 @@
       }
     },
     "Keyingi avlod modellari" : {
+      "extractionState" : "stale",
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -1128,6 +1628,7 @@
       }
     },
     "Keyinroq" : {
+      "extractionState" : "stale",
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -1262,10 +1763,40 @@
     "Ma'lumot yo'q" : {
 
     },
+    "Matematika, dasturlash, kunlik reja, sayohat marshruti — eng kerakli vazifalarni yo'lda hal qiling." : {
+
+    },
+    "Maxfiy" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Private"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Конфиденциально"
+          }
+        },
+        "uz-Cyrl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Махфий"
+          }
+        }
+      }
+    },
+    "Mikrofonni bosing va gapiring. Salom AI sizni eshitadi, tushunadi va o'z ovozi bilan javob beradi." : {
+
+    },
     "MM/YY" : {
 
     },
     "Murosasiz muloqot" : {
+      "extractionState" : "stale",
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -1288,9 +1819,6 @@
       }
     },
     "Muvaffaqiyatli!" : {
-
-    },
-    "Namuna eshitish" : {
 
     },
     "Namuna eshitish (Preview)" : {
@@ -1317,6 +1845,7 @@
       }
     },
     "Navbatsiz xizmat" : {
+      "extractionState" : "stale",
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -1437,6 +1966,7 @@
     },
     "O'qish, ish, ijod va shaxsiy rivojlanish. Salom AI sizga har qadamda yordam berishga tayyor." : {
       "comment" : "Onboarding slide subtitle describing productivity and growth support.",
+      "extractionState" : "stale",
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -1600,6 +2130,7 @@
       }
     },
     "O'zgarishlar darhol qo'llaniladi va namuna eshittiriladi." : {
+      "extractionState" : "stale",
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -1694,9 +2225,6 @@
 
     },
     "Obunani bekor qilish" : {
-
-    },
-    "Ohang" : {
 
     },
     "Ohang (Tone)" : {
@@ -1805,12 +2333,6 @@
         }
       }
     },
-    "Orqaga" : {
-
-    },
-    "Ovoz" : {
-
-    },
     "Ovoz (Voice)" : {
       "extractionState" : "stale",
       "localizations" : {
@@ -1833,6 +2355,9 @@
           }
         }
       }
+    },
+    "Ovoz / Voice" : {
+
     },
     "Ovoz o'chirish" : {
       "localizations" : {
@@ -1926,6 +2451,7 @@
     },
     "Ovozli Rejim" : {
       "comment" : "Onboarding slide tag for voice mode.",
+      "extractionState" : "stale",
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -1947,11 +2473,18 @@
         }
       }
     },
+    "Ovozli rejim mavjud emas" : {
+
+    },
     "Ovozli suhbat" : {
+
+    },
+    "Ovozli suhbat, real vaqtda" : {
 
     },
     "Ovozli suhbat, xuddi do'stingizdek" : {
       "comment" : "Onboarding slide title about voice chat.",
+      "extractionState" : "stale",
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -1973,8 +2506,58 @@
         }
       }
     },
+    "Oylik" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Monthly"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Месячный"
+          }
+        },
+        "uz-Cyrl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ойлик"
+          }
+        }
+      }
+    },
+    "Oylik obuna" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Monthly plan"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Месячная подписка"
+          }
+        },
+        "uz-Cyrl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ойлик обуна"
+          }
+        }
+      }
+    },
+    "PDF, rasm, kvitansiya, kontrakt — fayl yuboring, AI o'qiydi, tarjima qiladi va xulosa beradi." : {
+
+    },
     "Premium" : {
       "comment" : "Onboarding slide tag indicating premium features.",
+      "extractionState" : "stale",
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -2018,6 +2601,29 @@
         }
       }
     },
+    "Pro" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Pro"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Pro"
+          }
+        },
+        "uz-Cyrl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Pro"
+          }
+        }
+      }
+    },
     "Pro ga o'tish - %@ UZS/oy" : {
       "extractionState" : "stale",
       "localizations" : {
@@ -2040,9 +2646,6 @@
           }
         }
       }
-    },
-    "Pro ga o'tish — %@ UZS/oy" : {
-
     },
     "Pro imkoniyatlar" : {
       "localizations" : {
@@ -2137,6 +2740,9 @@
         }
       }
     },
+    "Rasm yaratish" : {
+
+    },
     "Real vaqt ovozli AI" : {
 
     },
@@ -2162,6 +2768,18 @@
           }
         }
       }
+    },
+    "Reja va hisob" : {
+
+    },
+    "Reja, hisob va muammolar yechimi" : {
+
+    },
+    "Rejani ko'rish →" : {
+
+    },
+    "Rejani yangilash" : {
+
     },
     "Ruscha" : {
       "comment" : "A language option in the settings menu.",
@@ -2243,7 +2861,11 @@
         }
       }
     },
+    "Salom AI Pro" : {
+
+    },
     "Salom AI Pro orqali sun'iy intellektning to'liq kuchidan foydalaning." : {
+      "extractionState" : "stale",
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -2397,8 +3019,12 @@
         }
       }
     },
+    "Sizning tilingizda, sizning madaniyatingizda. Salom AI bilan kundalik vazifalarni osonlashtiring." : {
+
+    },
     "Sizning tilingizda, sizning madaniyatingizda. Salom AI bilan muloqot qiling va kundalik vazifalaringizni osonlashtiring." : {
       "comment" : "Onboarding slide subtitle about cultural and language alignment.",
+      "extractionState" : "stale",
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -2422,6 +3048,29 @@
     },
     "SMS kodni kiriting" : {
 
+    },
+    "Sodda" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Simple"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Просто"
+          }
+        },
+        "uz-Cyrl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Содда"
+          }
+        }
+      }
     },
     "Sozlamalar" : {
       "comment" : "A label displayed below the user's name in the profile section of the chat side menu.",
@@ -2447,6 +3096,9 @@
         }
       }
     },
+    "SSL" : {
+
+    },
     "Suhbat" : {
       "comment" : "A placeholder text that could represent the last message time in a chat.",
       "isCommentAutoGenerated" : true,
@@ -2470,6 +3122,9 @@
           }
         }
       }
+    },
+    "Suhbat boshlanganidan keyin ovoz keyingi sessiyada qo'llaniladi." : {
+
     },
     "Taklif va shikoyatlar" : {
 
@@ -2522,8 +3177,33 @@
         }
       }
     },
+    "Tasavvuringizni chizamiz" : {
+
+    },
     "Tasdiqlash" : {
 
+    },
+    "Tavsiya" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Recommended"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Рекомендуем"
+          }
+        },
+        "uz-Cyrl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Тавсия"
+          }
+        }
+      }
     },
     "Tayyor" : {
 
@@ -2580,6 +3260,7 @@
       }
     },
     "Tezkor javoblar" : {
+      "extractionState" : "stale",
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -2644,6 +3325,122 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Тил (Лангуаге)"
+          }
+        }
+      }
+    },
+    "Til / Язык / Language" : {
+
+    },
+    "To'lov" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Payment"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Оплата"
+          }
+        },
+        "uz-Cyrl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Тўлов"
+          }
+        }
+      }
+    },
+    "To'lov havolasini olib bo'lmadi." : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Could not get a payment link."
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Не удалось получить ссылку на оплату."
+          }
+        },
+        "uz-Cyrl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Тўлов ҳаволасини олиб бўлмади."
+          }
+        }
+      }
+    },
+    "To'lov havolasini olib bo'lmadi. Qayta urinib ko'ring." : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Could not get a payment link. Try again."
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Не удалось получить ссылку на оплату. Попробуйте ещё раз."
+          }
+        },
+        "uz-Cyrl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Тўлов ҳаволасини олиб бўлмади. Қайта уриниб кўринг."
+          }
+        }
+      }
+    },
+    "To'lov turi" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Payment method"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Способ оплаты"
+          }
+        },
+        "uz-Cyrl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Тўлов тури"
+          }
+        }
+      }
+    },
+    "To'lov turini tanlang" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Choose payment method"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Выберите способ оплаты"
+          }
+        },
+        "uz-Cyrl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Тўлов турини танланг"
           }
         }
       }
@@ -2883,6 +3680,55 @@
     "Xatolik yuz berdi" : {
 
     },
+    "Xavfsiz" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Secure"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Безопасно"
+          }
+        },
+        "uz-Cyrl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Хавфсиз"
+          }
+        }
+      }
+    },
+    "Xavfsiz to'lov · Click" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Secure payment · Click"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Безопасная оплата · Click"
+          }
+        },
+        "uz-Cyrl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Хавфсиз тўлов · Click"
+          }
+        }
+      }
+    },
+    "Xush kelibsiz" : {
+
+    },
     "Yangi xabarlar bu yerda ko'rinadi" : {
 
     },
@@ -2928,6 +3774,52 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Яқинда суҳбатлар"
+          }
+        }
+      }
+    },
+    "Yillik" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Yearly"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Годовой"
+          }
+        },
+        "uz-Cyrl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Йиллик"
+          }
+        }
+      }
+    },
+    "Yillik obuna" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Yearly plan"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Годовая подписка"
+          }
+        },
+        "uz-Cyrl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Йиллик обуна"
           }
         }
       }
@@ -2979,8 +3871,12 @@
         }
       }
     },
+    "Yozing, savol bering, fikrlashing. AI sizning matnlaringizga aniq va tabiiy javob beradi — o'zbek, rus va ingliz tillarida." : {
+
+    },
     "Yozish shart emas. Shunchaki gapiring va tabiiy ovozda javob oling. Haqiqiy suhbatdosh kabi." : {
       "comment" : "Onboarding slide subtitle about speaking instead of typing.",
+      "extractionState" : "stale",
       "localizations" : {
         "en" : {
           "stringUnit" : {

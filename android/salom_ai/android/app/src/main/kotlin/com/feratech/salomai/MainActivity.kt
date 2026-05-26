@@ -1,4 +1,4 @@
-package com.example.salom_ai
+package com.feratech.salomai
 
 import io.flutter.embedding.android.FlutterActivity
 

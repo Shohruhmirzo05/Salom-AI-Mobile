@@ -4,6 +4,7 @@ import 'package:salom_ai/core/theme/app_theme.dart';
 import 'package:salom_ai/core/constants/localization.dart';
 import 'package:salom_ai/core/services/subscription_manager.dart';
 import 'package:salom_ai/core/api/api_models.dart';
+import 'package:salom_ai/features/settings/payment_method_sheet.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:google_fonts/google_fonts.dart';
 
@@ -110,15 +111,11 @@ class _SubscriptionViewState extends ConsumerState<SubscriptionView> {
 
   Future<void> _handleSubscribe(String planCode) async {
     setState(() => _processingPlan = planCode);
-    final url = await ref.read(subscriptionManagerProvider.notifier).subscribe(planCode);
-    if (url != null) {
-      final uri = Uri.parse(url);
-      if (await canLaunchUrl(uri)) {
-        await launchUrl(uri, mode: LaunchMode.externalApplication);
-      }
-    }
-    // Refresh status after returning from browser
-    await Future.delayed(const Duration(seconds: 2));
+    await Navigator.of(context).push(
+      MaterialPageRoute(
+        builder: (_) => PaymentMethodSheet(planCode: planCode),
+      ),
+    );
     await ref.read(subscriptionManagerProvider.notifier).checkSubscriptionStatus();
     if (mounted) setState(() => _processingPlan = null);
   }

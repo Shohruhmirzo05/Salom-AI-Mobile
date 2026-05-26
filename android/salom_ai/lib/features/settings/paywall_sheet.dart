@@ -1,19 +1,20 @@
+// Minimal premium paywall — Flutter / Android.
+// Daily price as hero (cheap framing), monthly small. Includes app logo,
+// mascot art, Click logo, trust strip, benefit checklist from API.
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:salom_ai/core/theme/app_theme.dart';
 import 'package:salom_ai/core/services/subscription_manager.dart';
 import 'package:salom_ai/core/api/api_models.dart';
 import 'package:salom_ai/core/constants/localization.dart';
-import 'package:url_launcher/url_launcher.dart';
-import 'package:google_fonts/google_fonts.dart';
+import 'package:salom_ai/features/settings/payment_method_sheet.dart';
 
 Future<void> showPaywallSheet(BuildContext context) {
-  return showModalBottomSheet(
-    context: context,
-    isScrollControlled: true,
-    backgroundColor: Colors.transparent,
-    isDismissible: true,
-    builder: (_) => const PaywallSheet(),
+  return Navigator.of(context, rootNavigator: true).push(
+    MaterialPageRoute(
+      fullscreenDialog: true,
+      builder: (_) => const PaywallSheet(),
+    ),
   );
 }
 
@@ -25,288 +26,567 @@ class PaywallSheet extends ConsumerStatefulWidget {
 }
 
 class _PaywallSheetState extends ConsumerState<PaywallSheet> {
-  bool _isProcessing = false;
+  String? _selectedCode;
 
   @override
   void initState() {
     super.initState();
-    Future.microtask(() {
-      ref.read(subscriptionManagerProvider.notifier).loadAll();
+    Future.microtask(() async {
+      await ref.read(subscriptionManagerProvider.notifier).loadAll();
+      if (!mounted) return;
+      final paid = _paidPlans;
+      if (paid.isNotEmpty) {
+        setState(() => _selectedCode = _recommended(paid)?.code);
+      }
     });
   }
 
-  @override
-  Widget build(BuildContext context) {
-    final subState = ref.watch(subscriptionManagerProvider);
+  List<SubscriptionPlan> get _paidPlans {
+    final all = ref.read(subscriptionManagerProvider).plans;
+    final paid = all.where((p) => p.priceUzs > 0).toList()
+      ..sort((a, b) => a.priceUzs.compareTo(b.priceUzs));
+    return paid;
+  }
 
-    // Auto-dismiss when user becomes pro
-    ref.listen<SubscriptionManagerState>(subscriptionManagerProvider,
-        (prev, next) {
-      if (next.isPro && !(prev?.isPro ?? false)) {
-        Navigator.of(context).pop();
-      }
-    });
+  SubscriptionPlan? _recommended(List<SubscriptionPlan> paid) {
+    if (paid.length >= 2) return paid[1];
+    return paid.isEmpty ? null : paid.first;
+  }
 
-    return Container(
-      height: MediaQuery.of(context).size.height * 0.92,
-      decoration: const BoxDecoration(
-        gradient: LinearGradient(
-          begin: Alignment.topCenter,
-          end: Alignment.bottomCenter,
-          colors: [Color(0xFF0A0D2E), Color(0xFF050617)],
-        ),
-        borderRadius: BorderRadius.vertical(top: Radius.circular(28)),
-      ),
-      child: Column(
-        children: [
-          // Handle bar
-          Container(
-            margin: const EdgeInsets.only(top: 12),
-            width: 40,
-            height: 4,
-            decoration: BoxDecoration(
-              color: Colors.white.withOpacity(0.3),
-              borderRadius: BorderRadius.circular(2),
-            ),
-          ),
-          Expanded(
-            child: SingleChildScrollView(
-              padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 20),
-              child: Column(
-                children: [
-                  // Premium header image placeholder
-                  Container(
-                    width: 120,
-                    height: 120,
-                    decoration: BoxDecoration(
-                      shape: BoxShape.circle,
-                      gradient: RadialGradient(
-                        colors: [
-                          AppTheme.accentPrimary.withOpacity(0.4),
-                          Colors.transparent,
-                        ],
-                      ),
-                    ),
-                    child: const Icon(Icons.workspace_premium,
-                        size: 64, color: Colors.amber),
-                  ),
-                  const SizedBox(height: 16),
-                  Text(
-                    'Salom AI Pro',
-                    style: GoogleFonts.outfit(
-                      fontSize: 28,
-                      fontWeight: FontWeight.bold,
-                      color: Colors.white,
-                    ),
-                  ),
-                  const SizedBox(height: 8),
-                  Text(
-                    ref.tr('unlimited_conv'),
-                    textAlign: TextAlign.center,
-                    style: GoogleFonts.inter(
-                      fontSize: 15,
-                      color: AppTheme.textSecondary,
-                    ),
-                  ),
-                  const SizedBox(height: 28),
+  SubscriptionPlan? get _selectedPlan {
+    final paid = _paidPlans;
+    if (paid.isEmpty) return null;
+    if (_selectedCode == null) return paid.first;
+    return paid.firstWhere((p) => p.code == _selectedCode, orElse: () => paid.first);
+  }
 
-                  // Benefit rows
-                  _BenefitRow(
-                    icon: Icons.all_inclusive,
-                    title: ref.tr('paywall_unlimited_messages'),
-                    subtitle: ref.tr('paywall_unlimited_messages_desc'),
-                  ),
-                  const SizedBox(height: 12),
-                  _BenefitRow(
-                    icon: Icons.auto_awesome,
-                    title: ref.tr('paywall_advanced_models'),
-                    subtitle: ref.tr('paywall_advanced_models_desc'),
-                  ),
-                  const SizedBox(height: 12),
-                  _BenefitRow(
-                    icon: Icons.record_voice_over,
-                    title: ref.tr('paywall_voice_chat'),
-                    subtitle: ref.tr('paywall_voice_chat_desc'),
-                  ),
-                  const SizedBox(height: 12),
-                  _BenefitRow(
-                    icon: Icons.image,
-                    title: ref.tr('paywall_image_gen'),
-                    subtitle: ref.tr('paywall_image_gen_desc'),
-                  ),
-
-                  const SizedBox(height: 28),
-
-                  // Plan selection / CTA
-                  if (subState.isLoading)
-                    const Padding(
-                      padding: EdgeInsets.all(20),
-                      child: CircularProgressIndicator(
-                          color: AppTheme.accentPrimary),
-                    )
-                  else
-                    ...subState.plans
-                        .where((p) => p.priceUzs > 0)
-                        .map((plan) => Padding(
-                              padding: const EdgeInsets.only(bottom: 12),
-                              child: _PlanCTA(
-                                plan: plan,
-                                isProcessing: _isProcessing,
-                                onTap: () => _handleSubscribe(plan.code),
-                              ),
-                            )),
-
-                  const SizedBox(height: 16),
-
-                  // Dismiss button
-                  TextButton(
-                    onPressed: () => Navigator.of(context).pop(),
-                    child: Text(
-                      ref.tr('paywall_later'),
-                      style: GoogleFonts.inter(
-                        fontSize: 15,
-                        color: AppTheme.textSecondary,
-                      ),
-                    ),
-                  ),
-                  const SizedBox(height: 20),
-                ],
-              ),
-            ),
-          ),
-        ],
-      ),
+  Future<void> _continue() async {
+    final plan = _selectedPlan;
+    if (plan == null) return;
+    await Navigator.of(context).push(
+      MaterialPageRoute(builder: (_) => PaymentMethodSheet(planCode: plan.code)),
     );
-  }
-
-  Future<void> _handleSubscribe(String planCode) async {
-    setState(() => _isProcessing = true);
-    final url =
-        await ref.read(subscriptionManagerProvider.notifier).subscribe(planCode);
-    if (url != null) {
-      final uri = Uri.parse(url);
-      if (await canLaunchUrl(uri)) {
-        await launchUrl(uri, mode: LaunchMode.externalApplication);
-      }
-    }
-    // Refresh status after returning from browser
-    await Future.delayed(const Duration(seconds: 2));
     await ref.read(subscriptionManagerProvider.notifier).checkSubscriptionStatus();
-    if (mounted) setState(() => _isProcessing = false);
   }
-}
 
-class _BenefitRow extends StatelessWidget {
-  final IconData icon;
-  final String title;
-  final String subtitle;
-
-  const _BenefitRow({
-    required this.icon,
-    required this.title,
-    required this.subtitle,
-  });
+  int _pricePerDay(SubscriptionPlan p) {
+    final days = (p.durationDays ?? 30).clamp(1, 366);
+    return (p.priceUzs / days).round();
+  }
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      padding: const EdgeInsets.all(16),
-      decoration: BoxDecoration(
-        color: Colors.white.withOpacity(0.05),
-        borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: Colors.white.withOpacity(0.06)),
-      ),
-      child: Row(
-        children: [
-          Container(
-            width: 44,
-            height: 44,
-            decoration: BoxDecoration(
-              shape: BoxShape.circle,
-              gradient: LinearGradient(
-                colors: [
-                  AppTheme.accentPrimary.withOpacity(0.3),
-                  AppTheme.accentSecondary.withOpacity(0.1),
-                ],
+    final state = ref.watch(subscriptionManagerProvider);
+    final locale = ref.watch(localeProvider);
+    final paid = state.plans.where((p) => p.priceUzs > 0).toList()
+      ..sort((a, b) => a.priceUzs.compareTo(b.priceUzs));
+    final recommendedCode = paid.length >= 2 ? paid[1].code : (paid.isEmpty ? null : paid.first.code);
+    final selected = _selectedPlan;
+
+    return Scaffold(
+      backgroundColor: Colors.black,
+      body: SafeArea(
+        child: Stack(
+          children: [
+            // Close button
+            Positioned(
+              top: 4, left: 10,
+              child: IconButton(
+                icon: const Icon(Icons.close_rounded, color: Colors.white54, size: 22),
+                onPressed: () => Navigator.of(context).pop(),
               ),
             ),
-            child: Icon(icon, color: AppTheme.accentSecondary, size: 22),
-          ),
-          const SizedBox(width: 14),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
+            ListView(
+              padding: const EdgeInsets.fromLTRB(22, 56, 22, 150),
               children: [
-                Text(title,
-                    style: GoogleFonts.inter(
-                        fontSize: 15,
+                // Mascot art
+                Center(
+                  child: Container(
+                    height: 160,
+                    alignment: Alignment.center,
+                    child: Image.asset(
+                      'assets/images/main_character.png',
+                      height: 160,
+                      fit: BoxFit.contain,
+                      errorBuilder: (_, __, ___) => const SizedBox.shrink(),
+                    ),
+                  ),
+                ),
+                const SizedBox(height: 20),
+
+                // Brand row
+                Row(
+                  children: [
+                    ClipRRect(
+                      borderRadius: BorderRadius.circular(8),
+                      child: Image.asset(
+                        'assets/images/app_icon_transparent.png',
+                        width: 26, height: 26,
+                        errorBuilder: (_, __, ___) => const SizedBox(width: 26, height: 26),
+                      ),
+                    ),
+                    const SizedBox(width: 10),
+                    const Text(
+                      'Salom AI Pro',
+                      style: TextStyle(
+                        color: Colors.white,
+                        fontSize: 20,
                         fontWeight: FontWeight.w600,
-                        color: Colors.white)),
-                const SizedBox(height: 2),
-                Text(subtitle,
-                    style: GoogleFonts.inter(
-                        fontSize: 13, color: AppTheme.textSecondary)),
+                        letterSpacing: -0.3,
+                      ),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 8),
+                Text(
+                  ref.tr('paywall_subtitle'),
+                  style: const TextStyle(color: Colors.white60, fontSize: 14, height: 1.4),
+                ),
+                const SizedBox(height: 28),
+
+                // Plan rows
+                if (state.isLoading && paid.isEmpty)
+                  const Padding(
+                    padding: EdgeInsets.symmetric(vertical: 60),
+                    child: Center(
+                      child: SizedBox(
+                        width: 22, height: 22,
+                        child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white54),
+                      ),
+                    ),
+                  )
+                else
+                  ...paid.map((plan) => Padding(
+                        padding: const EdgeInsets.only(bottom: 10),
+                        child: _DailyPriceRow(
+                          plan: plan,
+                          selected: (_selectedCode ?? recommendedCode) == plan.code,
+                          recommended: plan.code == recommendedCode,
+                          onTap: () => setState(() => _selectedCode = plan.code),
+                          locale: locale,
+                        ),
+                      )),
+
+                // Benefits checklist
+                if (selected != null && selected.benefits != null && selected.benefits!.isNotEmpty) ...[
+                  const SizedBox(height: 18),
+                  _BenefitsBlock(plan: selected, locale: locale),
+                ],
+
+                const SizedBox(height: 18),
+                _TrustStrip(),
               ],
             ),
-          ),
-        ],
-      ),
-    );
-  }
-}
 
-class _PlanCTA extends StatelessWidget {
-  final SubscriptionPlan plan;
-  final bool isProcessing;
-  final VoidCallback onTap;
-
-  const _PlanCTA({
-    required this.plan,
-    required this.isProcessing,
-    required this.onTap,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return GestureDetector(
-      onTap: isProcessing ? null : onTap,
-      child: Container(
-        width: double.infinity,
-        padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 20),
-        decoration: BoxDecoration(
-          gradient: const LinearGradient(
-            colors: [AppTheme.accentPrimary, Color(0xFF9333EA)],
-          ),
-          borderRadius: BorderRadius.circular(16),
-          boxShadow: [
-            BoxShadow(
-              color: AppTheme.accentPrimary.withOpacity(0.3),
-              blurRadius: 16,
-              offset: const Offset(0, 6),
+            // Sticky CTA
+            Positioned(
+              left: 22, right: 22, bottom: 14,
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  SizedBox(
+                    height: 54,
+                    width: double.infinity,
+                    child: ElevatedButton(
+                      onPressed: selected == null ? null : _continue,
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: Colors.white,
+                        foregroundColor: Colors.black,
+                        disabledBackgroundColor: Colors.white.withOpacity(0.4),
+                        elevation: 0,
+                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
+                      ),
+                      child: selected == null
+                          ? const SizedBox.shrink()
+                          : Row(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: [
+                                Text(
+                                  _t(locale, 'paywall_cta_start'),
+                                  style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
+                                ),
+                                const SizedBox(width: 6),
+                                Text('·',
+                                    style: TextStyle(
+                                      fontSize: 16,
+                                      fontWeight: FontWeight.w600,
+                                      color: Colors.black.withOpacity(0.35),
+                                    )),
+                                const SizedBox(width: 6),
+                                Text(
+                                  '${_formatNum(_pricePerDay(selected))} ${_t(locale, 'per_day_short')}',
+                                  style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
+                                ),
+                              ],
+                            ),
+                    ),
+                  ),
+                  const SizedBox(height: 10),
+                  Text(
+                    ref.tr('paywall_footer'),
+                    style: const TextStyle(color: Colors.white30, fontSize: 11),
+                  ),
+                ],
+              ),
             ),
           ],
         ),
-        child: isProcessing
-            ? const Center(
-                child: SizedBox(
-                    width: 24,
-                    height: 24,
-                    child: CircularProgressIndicator(
-                        strokeWidth: 2, color: Colors.white)))
-            : Row(
-                mainAxisAlignment: MainAxisAlignment.center,
+      ),
+    );
+  }
+}
+
+// --------------------------------------------------------------------------
+
+class _DailyPriceRow extends StatelessWidget {
+  final SubscriptionPlan plan;
+  final bool selected;
+  final bool recommended;
+  final VoidCallback onTap;
+  final String locale;
+
+  const _DailyPriceRow({
+    required this.plan,
+    required this.selected,
+    required this.recommended,
+    required this.onTap,
+    required this.locale,
+  });
+
+  String get _periodLabel {
+    final days = plan.durationDays ?? 30;
+    if (days == 30) return _t(locale, 'monthly_sub');
+    if (days == 90) return _t(locale, 'quarterly_sub');
+    if (days == 365) return _t(locale, 'yearly_sub');
+    return '$days ${_t(locale, 'days')}';
+  }
+
+  String get _shortPeriod {
+    final days = plan.durationDays ?? 30;
+    if (days == 30) return _t(locale, 'period_month');
+    if (days == 90) return _t(locale, 'period_3months');
+    if (days == 365) return _t(locale, 'period_year');
+    return '$days ${_t(locale, 'days')}';
+  }
+
+  int get _perDay {
+    final days = (plan.durationDays ?? 30).clamp(1, 366);
+    return (plan.priceUzs / days).round();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return InkWell(
+      onTap: onTap,
+      borderRadius: BorderRadius.circular(16),
+      child: AnimatedContainer(
+        duration: const Duration(milliseconds: 150),
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
+        decoration: BoxDecoration(
+          color: selected ? Colors.white.withOpacity(0.06) : Colors.white.withOpacity(0.025),
+          border: Border.all(
+            color: selected ? Colors.white.withOpacity(0.9) : Colors.white.withOpacity(0.06),
+            width: selected ? 1 : 0.5,
+          ),
+          borderRadius: BorderRadius.circular(16),
+        ),
+        child: Row(
+          children: [
+            AnimatedContainer(
+              duration: const Duration(milliseconds: 150),
+              width: 18, height: 18,
+              decoration: BoxDecoration(
+                shape: BoxShape.circle,
+                border: Border.all(
+                  color: selected ? Colors.white : Colors.white.withOpacity(0.2),
+                  width: selected ? 5 : 1,
+                ),
+              ),
+            ),
+            const SizedBox(width: 14),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
+                  Row(
+                    children: [
+                      Flexible(
+                        child: Text(
+                          plan.name,
+                          style: const TextStyle(color: Colors.white, fontSize: 15, fontWeight: FontWeight.w600),
+                        ),
+                      ),
+                      if (recommended) ...[
+                        const SizedBox(width: 8),
+                        Container(
+                          padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                          decoration: BoxDecoration(
+                            color: Colors.white,
+                            borderRadius: BorderRadius.circular(99),
+                          ),
+                          child: Text(
+                            _t(locale, 'recommended_short'),
+                            style: const TextStyle(
+                              color: Colors.black,
+                              fontSize: 10,
+                              fontWeight: FontWeight.w600,
+                              letterSpacing: 0.3,
+                            ),
+                          ),
+                        ),
+                      ],
+                    ],
+                  ),
+                  const SizedBox(height: 3),
                   Text(
-                    '${plan.name} - ${plan.priceUzs} UZS',
-                    style: GoogleFonts.inter(
-                      fontSize: 16,
-                      fontWeight: FontWeight.bold,
-                      color: Colors.white,
+                    _periodLabel,
+                    style: const TextStyle(color: Colors.white38, fontSize: 11.5),
+                  ),
+                ],
+              ),
+            ),
+            const SizedBox(width: 8),
+            // BIG daily price
+            Column(
+              crossAxisAlignment: CrossAxisAlignment.end,
+              children: [
+                Row(
+                  crossAxisAlignment: CrossAxisAlignment.baseline,
+                  textBaseline: TextBaseline.alphabetic,
+                  children: [
+                    Text(
+                      _formatNum(_perDay),
+                      style: const TextStyle(
+                        color: Colors.white,
+                        fontSize: 22,
+                        fontWeight: FontWeight.w700,
+                        letterSpacing: -0.4,
+                      ),
+                    ),
+                    const SizedBox(width: 3),
+                    Text(
+                      _t(locale, 'uzs_per_day'),
+                      style: TextStyle(
+                        color: Colors.white.withOpacity(0.5),
+                        fontSize: 12,
+                        fontWeight: FontWeight.w500,
+                      ),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 1),
+                Text(
+                  '${_formatNum(plan.priceUzs)} UZS / $_shortPeriod',
+                  style: const TextStyle(color: Colors.white30, fontSize: 10.5),
+                ),
+              ],
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class _BenefitsBlock extends StatelessWidget {
+  final SubscriptionPlan plan;
+  final String locale;
+  const _BenefitsBlock({required this.plan, required this.locale});
+
+  @override
+  Widget build(BuildContext context) {
+    final benefits = plan.benefits ?? const [];
+    if (benefits.isEmpty) return const SizedBox.shrink();
+    final short = locale.substring(0, 2).toLowerCase();
+    final take = benefits.length < 6 ? benefits.length : 6;
+
+    return Container(
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: Colors.white.withOpacity(0.025),
+        border: Border.all(color: Colors.white.withOpacity(0.05), width: 0.5),
+        borderRadius: BorderRadius.circular(16),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            '${plan.name} ${_t(locale, 'benefits_title_suffix')}'.toUpperCase(),
+            style: const TextStyle(
+              color: Colors.white38,
+              fontSize: 11,
+              fontWeight: FontWeight.w600,
+              letterSpacing: 0.6,
+            ),
+          ),
+          const SizedBox(height: 12),
+          ...List.generate(take, (i) {
+            final row = benefits[i];
+            final text = row[short] ?? row['uz'] ?? row['en'] ?? row.values.first;
+            return Padding(
+              padding: const EdgeInsets.only(bottom: 9),
+              child: Row(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Container(
+                    margin: const EdgeInsets.only(top: 1),
+                    width: 18, height: 18,
+                    decoration: BoxDecoration(
+                      color: Colors.white.withOpacity(0.08),
+                      shape: BoxShape.circle,
+                    ),
+                    child: const Icon(Icons.check_rounded, size: 11, color: Colors.white),
+                  ),
+                  const SizedBox(width: 10),
+                  Expanded(
+                    child: Text(
+                      text,
+                      style: const TextStyle(color: Colors.white70, fontSize: 13.5, height: 1.4),
                     ),
                   ),
                 ],
               ),
+            );
+          }),
+        ],
       ),
     );
   }
+}
+
+class _TrustStrip extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    return Wrap(
+      spacing: 8,
+      runSpacing: 8,
+      children: [
+        _trustChip(Icons.lock_outline_rounded, 'Xavfsiz'),
+        _trustChip(Icons.replay_rounded, 'Istalgan vaqt bekor'),
+        _trustChip(Icons.verified_user_outlined, 'PCI DSS'),
+        _clickChip(),
+      ],
+    );
+  }
+
+  Widget _trustChip(IconData icon, String label) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+      decoration: BoxDecoration(
+        color: Colors.white.withOpacity(0.04),
+        borderRadius: BorderRadius.circular(99),
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Icon(icon, size: 11, color: Colors.white.withOpacity(0.5)),
+          const SizedBox(width: 5),
+          Text(label, style: const TextStyle(color: Colors.white54, fontSize: 11, fontWeight: FontWeight.w500)),
+        ],
+      ),
+    );
+  }
+
+  Widget _clickChip() {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+      decoration: BoxDecoration(
+        color: Colors.white.withOpacity(0.04),
+        borderRadius: BorderRadius.circular(99),
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          const Text(
+            'TO\'LOV',
+            style: TextStyle(color: Colors.white38, fontSize: 9.5, fontWeight: FontWeight.w600, letterSpacing: 0.8),
+          ),
+          const SizedBox(width: 7),
+          Image.asset(
+            'assets/images/click_logo.png',
+            height: 14,
+            errorBuilder: (_, __, ___) => const Text(
+              'Click',
+              style: TextStyle(color: Colors.white, fontSize: 12, fontWeight: FontWeight.w600),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+// --------------------------------------------------------------------------
+// Helpers
+
+String _formatNum(int n) {
+  final s = n.toString();
+  final buf = StringBuffer();
+  for (int i = 0; i < s.length; i++) {
+    if (i > 0 && (s.length - i) % 3 == 0) buf.write(' ');
+    buf.write(s[i]);
+  }
+  return buf.toString();
+}
+
+String _t(String locale, String key) {
+  const map = <String, Map<String, String>>{
+    'uz': {
+      'monthly_sub': 'Oylik obuna',
+      'quarterly_sub': '3 oylik obuna',
+      'yearly_sub': 'Yillik obuna',
+      'period_month': 'oy',
+      'period_3months': '3 oy',
+      'period_year': 'yil',
+      'days': 'kun',
+      'uzs_per_day': 'UZS / kun',
+      'per_day_short': '/ kun',
+      'recommended_short': 'Tavsiya',
+      'benefits_title_suffix': 'imkoniyatlari',
+      'paywall_cta_start': 'Boshlash',
+    },
+    'ru': {
+      'monthly_sub': 'Ежемесячно',
+      'quarterly_sub': 'Каждые 3 мес.',
+      'yearly_sub': 'Ежегодно',
+      'period_month': 'мес',
+      'period_3months': '3 мес',
+      'period_year': 'год',
+      'days': 'дн.',
+      'uzs_per_day': 'UZS / день',
+      'per_day_short': '/ день',
+      'recommended_short': 'Хит',
+      'benefits_title_suffix': '— что входит',
+      'paywall_cta_start': 'Начать',
+    },
+    'en': {
+      'monthly_sub': 'Monthly',
+      'quarterly_sub': 'Quarterly',
+      'yearly_sub': 'Yearly',
+      'period_month': 'mo',
+      'period_3months': '3 mo',
+      'period_year': 'yr',
+      'days': 'days',
+      'uzs_per_day': 'UZS / day',
+      'per_day_short': '/ day',
+      'recommended_short': 'Top',
+      'benefits_title_suffix': "— what's included",
+      'paywall_cta_start': 'Start',
+    },
+    'uz-Cyrl': {
+      'monthly_sub': 'Ойлик обуна',
+      'quarterly_sub': '3 ойлик обуна',
+      'yearly_sub': 'Йиллик обуна',
+      'period_month': 'ой',
+      'period_3months': '3 ой',
+      'period_year': 'йил',
+      'days': 'кун',
+      'uzs_per_day': 'UZS / кун',
+      'per_day_short': '/ кун',
+      'recommended_short': 'Тавсия',
+      'benefits_title_suffix': 'имкониятлари',
+      'paywall_cta_start': 'Бошлаш',
+    },
+  };
+  return map[locale]?[key] ?? map['uz']![key] ?? key;
 }

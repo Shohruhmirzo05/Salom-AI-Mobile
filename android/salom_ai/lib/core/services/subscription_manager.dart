@@ -75,12 +75,45 @@ class SubscriptionManager extends StateNotifier<SubscriptionManagerState> {
     state = state.copyWith(isLoading: false);
   }
 
-  Future<String?> subscribe(String planCode) async {
+  /// One-time payment — returns Click checkout URL to open in browser.
+  Future<String?> subscribeOneTime(String planCode) async {
     try {
       final response = await _client.subscribe(planCode, 'click');
       return response.checkoutUrl;
     } catch (e) {
-      debugPrint('Subscribe failed: $e');
+      debugPrint('One-time subscribe failed: $e');
+      return null;
+    }
+  }
+
+  /// Backwards-compatible alias for the old one-time entry point.
+  Future<String?> subscribe(String planCode) => subscribeOneTime(planCode);
+
+  /// Step 1 of auto-renew: tokenize card via Click. Returns request_id + phone_hint.
+  Future<Map<String, dynamic>?> tokenizeCard({
+    required String cardNumber,
+    required String expireDate,
+  }) async {
+    try {
+      return await _client.tokenizeCardRequest(cardNumber, expireDate);
+    } catch (e) {
+      debugPrint('Tokenize card failed: $e');
+      return null;
+    }
+  }
+
+  /// Step 2 of auto-renew: verify SMS, save card, charge first payment.
+  Future<Map<String, dynamic>?> verifySms({
+    required String requestId,
+    required int smsCode,
+    required String planCode,
+  }) async {
+    try {
+      final result = await _client.tokenizeCardVerify(requestId, smsCode, planCode);
+      await checkSubscriptionStatus();
+      return result;
+    } catch (e) {
+      debugPrint('Verify SMS failed: $e');
       return null;
     }
   }

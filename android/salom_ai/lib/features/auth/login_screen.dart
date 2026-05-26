@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:glassmorphism_ui/glassmorphism_ui.dart';
+import 'package:go_router/go_router.dart';
 import 'package:salom_ai/core/theme/app_theme.dart';
 import 'package:salom_ai/features/auth/auth_service.dart';
 
@@ -50,10 +51,9 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                       child: Column(
                         mainAxisSize: MainAxisSize.min,
                         children: [
+                           _buildPhoneButton(),
+                           const SizedBox(height: 14),
                            _buildGoogleButton(),
-                           // Apple Sign In not supported on Android yet
-                           // const SizedBox(height: 14),
-                           // _buildAppleButton(),
                         ],
                       ),
                     ),
@@ -144,6 +144,35 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                 fontSize: 16,
                 fontWeight: FontWeight.w600,
                 color: Colors.white.withOpacity(_isLoadingGoogle ? 0.6 : 1),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildPhoneButton() {
+    return InkWell(
+      onTap: () => context.push('/phone'),
+      borderRadius: BorderRadius.circular(18),
+      child: Container(
+        height: 54,
+        decoration: BoxDecoration(
+          color: AppTheme.accentPrimary,
+          borderRadius: BorderRadius.circular(18),
+        ),
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            const Icon(Icons.phone_iphone, color: Colors.white, size: 22),
+            const SizedBox(width: 10),
+            const Text(
+              "Telefon raqami bilan",
+              style: TextStyle(
+                fontSize: 16,
+                fontWeight: FontWeight.w600,
+                color: Colors.white,
               ),
             ),
           ],

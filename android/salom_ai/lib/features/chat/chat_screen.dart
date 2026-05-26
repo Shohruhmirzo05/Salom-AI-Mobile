@@ -16,6 +16,7 @@ import 'package:salom_ai/features/chat/chat_view_model.dart';
 import 'package:salom_ai/features/chat/providers/models_provider.dart';
 import 'package:salom_ai/features/chat/providers/attachment_provider.dart';
 import 'package:salom_ai/features/chat/widgets/input_bar.dart';
+import 'package:salom_ai/features/chat/upgrade_nudge.dart';
 import 'package:salom_ai/features/chat/widgets/image_viewer.dart';
 import 'package:google_fonts/google_fonts.dart';
 
@@ -132,7 +133,9 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
 
     return Material(
       color: Colors.transparent,
-      child: Column(
+      child: SafeArea(
+        bottom: false,
+        child: Column(
         children: [
           _buildTopBar(state),
           Expanded(
@@ -152,20 +155,56 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
                               (state.isSending || state.isGeneratingImage)) {
                             return const ShimmerMessagePlaceholder();
                           }
-                          return _buildMessage(msg);
+                          final isLast = index == state.messages.length - 1;
+                          final showRegenerate = isLast &&
+                              msg.role == MessageRole.assistant &&
+                              !state.isSending &&
+                              !state.isGeneratingImage &&
+                              (msg.text != null && msg.text!.isNotEmpty);
+                          return Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              _buildMessage(msg),
+                              if (showRegenerate)
+                                Padding(
+                                  padding: const EdgeInsets.only(left: 16, top: 4, bottom: 8),
+                                  child: TextButton.icon(
+                                    onPressed: () => ref
+                                        .read(chatViewModelProvider.notifier)
+                                        .regenerateLast(),
+                                    icon: const Icon(Icons.refresh, size: 16),
+                                    label: const Text('Qayta yaratish'),
+                                    style: TextButton.styleFrom(
+                                      foregroundColor: Colors.white70,
+                                      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                                      minimumSize: const Size(0, 28),
+                                      tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                                    ),
+                                  ),
+                                ),
+                            ],
+                          );
                         },
                       ),
           ),
-          ChatInputBar(
-            controller: _textController,
-            onSend: _sendMessage,
-            onVoiceRecord: _handleVoiceRecord,
-            isImageMode: state.isImageMode,
-            onImageModeChanged: (v) =>
-                ref.read(chatViewModelProvider.notifier).toggleImageMode(),
-            isSending: state.isSending || state.isGeneratingImage,
+          // Free-tier upgrade nudge (renders nothing for Pro / below threshold).
+          const UpgradeNudge(),
+          // Wrap the input bar with SafeArea(top:false) so its content sits above the
+          // system gesture/navigation bar on Android (and home indicator on iOS-Flutter web/desktop).
+          SafeArea(
+            top: false,
+            child: ChatInputBar(
+              controller: _textController,
+              onSend: _sendMessage,
+              onVoiceRecord: _handleVoiceRecord,
+              isImageMode: state.isImageMode,
+              onImageModeChanged: (v) =>
+                  ref.read(chatViewModelProvider.notifier).toggleImageMode(),
+              isSending: state.isSending || state.isGeneratingImage,
+            ),
           ),
         ],
+        ),
       ),
     );
   }

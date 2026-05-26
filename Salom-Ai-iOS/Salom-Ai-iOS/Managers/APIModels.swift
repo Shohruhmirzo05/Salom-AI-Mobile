@@ -269,10 +269,29 @@ struct SubscriptionPlan: Codable, Identifiable {
     let code: String
     let name: String
     let priceUzs: Int
+    let durationDays: Int?
     let monthlyMessages: Int?
     let monthlyTokens: Int?
     let benefits: [[String: String]]?
-}    
+
+    /// Cost per day, derived from priceUzs / durationDays. Never hardcodes 30 —
+    /// reads what the admin configured. Falls back to 30 only if API omits it.
+    var pricePerDay: Double {
+        let days = max(1, durationDays ?? 30)
+        return Double(priceUzs) / Double(days)
+    }
+
+    /// Is this plan paid (not the free tier)?
+    var isPaid: Bool { priceUzs > 0 }
+
+    /// Localized benefit string for a given UI language. Falls back through uz → en.
+    func benefit(at index: Int, lang: String) -> String? {
+        guard let benefits, index < benefits.count else { return nil }
+        let row = benefits[index]
+        let short = String(lang.prefix(2)).lowercased()
+        return row[short] ?? row["uz"] ?? row["en"] ?? row.values.first
+    }
+}
 
 struct CurrentSubscriptionResponse: Codable {
     let plan: String?

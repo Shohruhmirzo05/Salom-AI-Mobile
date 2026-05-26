@@ -6,6 +6,8 @@ import 'dart:async';
 
 import 'package:salom_ai/features/auth/auth_service.dart';
 import 'package:salom_ai/features/auth/login_screen.dart';
+import 'package:salom_ai/features/auth/otp_verify_screen.dart';
+import 'package:salom_ai/features/auth/phone_login_screen.dart';
 import 'package:salom_ai/features/home/home_screen.dart';
 import 'package:salom_ai/features/chat/chat_screen.dart';
 import 'package:salom_ai/features/onboarding/onboarding_screen.dart';
@@ -34,6 +36,8 @@ final routerProvider = Provider<GoRouter>((ref) {
       final isSplash = state.uri.path == '/splash';
       final isOnboarding = state.uri.path == '/onboarding';
       final isLogin = state.uri.path == '/login';
+      final isPhone = state.uri.path == '/phone';
+      final isOtp = state.uri.path == '/otp';
 
       // Always allow splash
       if (isSplash) return null;
@@ -44,14 +48,14 @@ final routerProvider = Provider<GoRouter>((ref) {
         return '/onboarding';
       }
 
-      // Logic for Auth
+      // Logic for Auth — allow login, phone, otp screens
       if (!isLoggedIn) {
-        if (isLogin) return null;
+        if (isLogin || isPhone || isOtp) return null;
         return '/login';
       }
 
-      // If logged in and trying to access login/onboarding, go to home
-      if (isLoggedIn && (isLogin || isOnboarding)) return '/';
+      // If logged in and trying to access auth/onboarding, go to home
+      if (isLoggedIn && (isLogin || isOnboarding || isPhone || isOtp)) return '/';
 
       return null;
     },
@@ -89,6 +93,17 @@ final routerProvider = Provider<GoRouter>((ref) {
       GoRoute(
         path: '/login',
         builder: (context, state) => const LoginScreen(),
+      ),
+      GoRoute(
+        path: '/phone',
+        builder: (context, state) => const PhoneLoginScreen(),
+      ),
+      GoRoute(
+        path: '/otp',
+        builder: (context, state) {
+          final phone = state.extra as String? ?? '';
+          return OtpVerifyScreen(phone: phone);
+        },
       ),
       GoRoute(
         path: '/settings',

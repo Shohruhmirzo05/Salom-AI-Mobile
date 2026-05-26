@@ -455,6 +455,16 @@ class RealtimeWebSocketManager: NSObject, ObservableObject {
     }
 }
 
+// MARK: - RealtimeVoiceProviding conformance
+// The existing methods on RealtimeWebSocketManager already satisfy the
+// protocol — `changeLanguage` and `sendConfigUpdate` accept the same
+// argument shapes. We only need to surface the @Published projectors.
+extension RealtimeWebSocketManager: RealtimeVoiceProviding {
+    var connectionStatePublisher: Published<RealtimeWebSocketState>.Publisher { $connectionState }
+    var voiceStatePublisher: Published<RealtimeVoiceState>.Publisher { $voiceState }
+    var messagesPublisher: Published<[RealtimeMessage]>.Publisher { $messages }
+}
+
 // MARK: - URLSessionWebSocketDelegate
 extension RealtimeWebSocketManager: URLSessionWebSocketDelegate {
     func urlSession(_ session: URLSession, webSocketTask: URLSessionWebSocketTask, didOpenWithProtocol protocol: String?) {

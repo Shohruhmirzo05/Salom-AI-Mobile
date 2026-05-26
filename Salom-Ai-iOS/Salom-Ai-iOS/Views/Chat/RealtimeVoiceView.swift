@@ -11,6 +11,9 @@ struct RealtimeVoiceView: View {
     @StateObject private var viewModel = RealtimeVoiceViewModel()
     @Environment(\.dismiss) var dismiss
     @State private var showSettings = false
+    @State private var showPaywall = false
+    @State private var showBlockAlert = false
+    @State private var didRunPreflight = false
     var onDismiss: (() -> Void)?
     
     var body: some View {
@@ -144,7 +147,40 @@ struct RealtimeVoiceView: View {
             }
         }
         .onAppear {
-            viewModel.connect()
+            // Preflight subscription check BEFORE opening any WS so a blocked
+            // user goes straight to the paywall instead of seeing a brief
+            // "connecting..." then a hard close.
+            guard !didRunPreflight else { return }
+            didRunPreflight = true
+            Task {
+                let allowed = await viewModel.preflight()
+                if allowed {
+                    viewModel.connect()
+                } else {
+                    // Surface the reason (limit reached + reset date OR plan-doesn't-include)
+                    // and queue the paywall to auto-open on dismiss.
+                    showBlockAlert = true
+                }
+            }
+        }
+        .alert("Ovozli rejim mavjud emas", isPresented: $showBlockAlert) {
+            Button("Rejani yangilash") {
+                showPaywall = true
+            }
+            Button("Yopish", role: .cancel) {
+                if let onDismiss = onDismiss { onDismiss() } else { dismiss() }
+            }
+        } message: {
+            Text(viewModel.blockedReason ?? "Ushbu hisobda real-vaqt ovozli suhbatlar mavjud emas.")
+        }
+        // Mid-session quota refusal: backend closes the WS with a 4xxx code,
+        // ViewModel populates `blockedReason`, we surface the same alert as
+        // the preflight-blocked path — no more "stuck on Connecting".
+        .onChange(of: viewModel.blockedReason) { _, newReason in
+            if newReason != nil && !showBlockAlert && !showPaywall {
+                viewModel.disconnect()  // make sure nothing is still trying
+                showBlockAlert = true
+            }
         }
         .onDisappear {
             viewModel.disconnect()
@@ -161,7 +197,14 @@ struct RealtimeVoiceView: View {
                 viewModel.connect()
             }
         }
-    }    
+        .fullScreenCover(isPresented: $showPaywall, onDismiss: {
+            // After the user dismisses the paywall — whether they upgraded
+            // or not — close the voice view. They can re-tap voice to retry.
+            if let onDismiss = onDismiss { onDismiss() } else { dismiss() }
+        }) {
+            PaywallSheet()
+        }
+    }
     
     private var statusText: String {
         switch viewModel.voiceState {

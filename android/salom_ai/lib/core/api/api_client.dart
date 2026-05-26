@@ -82,8 +82,16 @@ class ApiClient {
 
   // -- Auth --
 
+  Future<void> requestOtp(String phone) async {
+    await _dio.post('/auth/request-otp', data: {'phone': phone});
+  }
+
   Future<void> verifyOtp(String phone, String code) async {
-    final response = await _dio.post('/auth/verify-otp', data: {'phone': phone, 'code': code});
+    final response = await _dio.post('/auth/verify-otp', data: {
+      'phone': phone,
+      'code': code,
+      'platform': 'android',
+    });
     final tokens = TokenPair.fromJson(response.data);
     await TokenStore.shared.saveTokens(tokens.accessToken, tokens.refreshToken);
   }
@@ -225,8 +233,37 @@ class ApiClient {
   }
 
   Future<SubscribeResponse> subscribe(String plan, String provider) async {
-    final response = await _dio.post('/subscriptions/subscribe', data: {'plan': plan, 'provider': provider});
+    final response = await _dio.post(
+      '/subscriptions/subscribe',
+      data: {'plan': plan, 'provider': provider, 'platform': 'android'},
+    );
     return SubscribeResponse.fromJson(response.data);
+  }
+
+  // -- Click card tokenization (auto-renew flow) --
+
+  Future<Map<String, dynamic>> tokenizeCardRequest(String cardNumber, String expireDate) async {
+    final response = await _dio.post(
+      '/cards/tokenize/request',
+      data: {'card_number': cardNumber, 'expire_date': expireDate},
+    );
+    return Map<String, dynamic>.from(response.data as Map);
+  }
+
+  Future<Map<String, dynamic>> tokenizeCardVerify(
+    String requestId,
+    int smsCode,
+    String planCode,
+  ) async {
+    final response = await _dio.post(
+      '/cards/tokenize/verify',
+      data: {
+        'request_id': requestId,
+        'sms_code': smsCode,
+        'plan_code': planCode,
+      },
+    );
+    return Map<String, dynamic>.from(response.data as Map);
   }
 
   // -- File Upload --

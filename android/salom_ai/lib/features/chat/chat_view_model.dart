@@ -239,4 +239,37 @@ class ChatViewModel extends StateNotifier<ChatState> {
   void clearMessages() {
     state = state.copyWith(messages: [], currentConversation: null);
   }
+
+  /// Re-run the most recent user message. Drops the last assistant reply
+  /// from the local state and re-streams a fresh response into a new slot.
+  Future<void> regenerateLast({String? model}) async {
+    if (state.isSending) return;
+
+    // Find the last user message (and discard the most recent assistant message + everything after it).
+    int lastUserIdx = -1;
+    for (int i = state.messages.length - 1; i >= 0; i--) {
+      if (state.messages[i].role == MessageRole.user) {
+        lastUserIdx = i;
+        break;
+      }
+    }
+    if (lastUserIdx == -1) return;
+
+    final lastUser = state.messages[lastUserIdx];
+    final text = lastUser.text ?? '';
+    if (text.isEmpty) return;
+    final attachments = lastUser.imageUrls;
+    final convoId = state.currentConversation?.id;
+
+    // Drop the last user message AND its assistant reply — sendMessage() will re-append the user.
+    final trimmed = state.messages.sublist(0, lastUserIdx);
+    state = state.copyWith(messages: trimmed);
+
+    await sendMessage(
+      text,
+      conversationId: convoId,
+      model: model,
+      attachments: attachments,
+    );
+  }
 }
