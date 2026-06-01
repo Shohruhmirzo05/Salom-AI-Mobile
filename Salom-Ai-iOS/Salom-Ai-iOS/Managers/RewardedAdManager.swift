@@ -93,8 +93,16 @@ final class RewardedAdManager: NSObject, ObservableObject {
 
         didEarnReward = false
         self.onCloseHandler = onClose
-        ad.present(from: root) { [weak self] in
-            self?.didEarnReward = true
+        // Present on the NEXT runloop. present() is invoked from the sheet's
+        // onDismiss while UIKit is still unwinding the dismissal; presenting
+        // (and the delegate it fires) synchronously here overlaps that access
+        // and trips Swift's exclusive-access check. Deferring breaks the loop.
+        _ = root // hierarchy is re-fetched below once it settles
+        DispatchQueue.main.async {
+            guard let top = Self.rootViewController else { return }
+            ad.present(from: top) { [weak self] in
+                self?.didEarnReward = true
+            }
         }
         load() // preload the next one
     }
@@ -157,8 +165,11 @@ extension RewardedAdManager: FullScreenContentDelegate {
     func adDidDismissFullScreenContent(_ ad: FullScreenPresentingAd) {
         let rewarded = didEarnReward
         presentingAd = nil
-        onCloseHandler?(rewarded)
+        // Capture + clear before invoking so the callback can't reentrantly
+        // touch onCloseHandler (exclusive-access crash); fire it next runloop.
+        let handler = onCloseHandler
         onCloseHandler = nil
+        DispatchQueue.main.async { handler?(rewarded) }
         // present() already preloaded a replacement; only load if somehow none.
         if rewardedAd == nil { load() }
     }
@@ -166,8 +177,9 @@ extension RewardedAdManager: FullScreenContentDelegate {
     func ad(_ ad: FullScreenPresentingAd, didFailToPresentFullScreenContentWithError error: Error) {
         print("⚠️ Rewarded ad failed to present: \(error.localizedDescription)")
         presentingAd = nil
-        onCloseHandler?(false)
+        let handler = onCloseHandler
         onCloseHandler = nil
+        DispatchQueue.main.async { handler?(false) }
         if rewardedAd == nil { load() }
     }
 }
