@@ -21,6 +21,7 @@
 import Foundation
 import SwiftUI
 import GoogleMobileAds
+import Combine
 
 @MainActor
 final class RewardedAdManager: NSObject, ObservableObject {
@@ -136,7 +137,7 @@ final class RewardedAdManager: NSObject, ObservableObject {
 }
 
 extension RewardedAdManager: FullScreenContentDelegate {
-    func adDidDismissFullScreenContent(_ ad: FullScreenPresentableAd) {
+    func adDidDismissFullScreenContent(_ ad: FullScreenPresentingAd) {
         let rewarded = didEarnReward
         rewardedAd = nil
         isReady = false
@@ -145,7 +146,7 @@ extension RewardedAdManager: FullScreenContentDelegate {
         load() // preload the next one
     }
 
-    func ad(_ ad: FullScreenPresentableAd, didFailToPresentFullScreenContentWithError error: Error) {
+    func ad(_ ad: FullScreenPresentingAd, didFailToPresentFullScreenContentWithError error: Error) {
         print("⚠️ Rewarded ad failed to present: \(error.localizedDescription)")
         rewardedAd = nil
         isReady = false
