@@ -39,12 +39,9 @@
 	<array>
 		<string>remote-notification</string>
 	</array>
-	<!-- ⚠️ This is Google's SAMPLE App ID so the app runs + serves TEST ads now.
-	     REPLACE with your real AdMob App ID (AdMob ▸ App settings ▸ App ID,
-	     starts ca-app-pub-3378454853146779~) BEFORE submitting to the App Store,
-	     or you earn nothing and may violate AdMob policy. -->
+	<!-- Real AdMob App ID for Salom AI (iOS). -->
 	<key>GADApplicationIdentifier</key>
-	<string>ca-app-pub-3940256099942544~1458002511</string>
+	<string>ca-app-pub-3378454853146779~7102615495</string>
 	<key>NSUserTrackingUsageDescription</key>
 	<string>Sizga mosroq reklamalarni ko'rsatish uchun ruxsat so'raymiz. Bu bepul xabarlarni ko'paytirishga yordam beradi.</string>
 	<!-- SKAdNetwork identifiers for AdMob + common mediation networks.
