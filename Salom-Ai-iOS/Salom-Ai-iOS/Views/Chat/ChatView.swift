@@ -625,12 +625,11 @@ struct ChatView: View {
         .onChange(of: viewModel.errorMessage) { _, newValue in
             if isLimitExceeded(newValue) {
                 viewModel.errorMessage = nil
-                // Offer a rewarded ad first if one is ready; else go to paywall.
-                if rewardAds.isReady {
-                    showRewardSheet = true
-                } else {
-                    showPaywall = true
-                }
+                // Always present the single reward/upgrade sheet. Don't branch
+                // to a different sheet (that races SwiftUI's presentation and
+                // silently fails after a few cycles). Don't stack either.
+                guard !showRewardSheet && !showPaywall else { return }
+                showRewardSheet = true
             }
         }
         .sheet(isPresented: $showPaywall) {
@@ -638,6 +637,7 @@ struct ChatView: View {
         }
         .sheet(isPresented: $showRewardSheet) {
             RewardOptionSheet(
+                adReady: rewardAds.isReady,
                 onWatch: {
                     showRewardSheet = false
                     rewardAds.present { rewarded in
@@ -646,10 +646,14 @@ struct ChatView: View {
                 },
                 onUpgrade: {
                     showRewardSheet = false
-                    showPaywall = true
+                    // Present the paywall on the next runloop so we don't race
+                    // the reward sheet's dismissal (which would no-op the sheet).
+                    DispatchQueue.main.asyncAfter(deadline: .now() + 0.35) {
+                        showPaywall = true
+                    }
                 }
             )
-            .presentationDetents([.height(320)])
+            .presentationDetents([.height(340)])
         }
         .alert("+1 xabar qo'shildi", isPresented: $rewardConfirmation) {
             Button("OK", role: .cancel) { }

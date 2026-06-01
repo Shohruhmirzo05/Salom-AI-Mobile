@@ -9,6 +9,8 @@
 import SwiftUI
 
 struct RewardOptionSheet: View {
+    /// Whether a rewarded ad is loaded and ready to present.
+    var adReady: Bool = true
     let onWatch: () -> Void
     let onUpgrade: () -> Void
 
@@ -30,7 +32,9 @@ struct RewardOptionSheet: View {
                 Text("Limit tugadi")
                     .font(.headline)
                     .foregroundColor(.white)
-                Text("Bitta qisqa reklama ko'rib, yana 1 ta xabar yuboring.")
+                Text(adReady
+                     ? "Bitta qisqa reklama ko'rib, yana 1 ta xabar yuboring."
+                     : "Cheksiz xabarlar uchun Pro rejaga o'ting.")
                     .font(.subheadline)
                     .foregroundColor(.white.opacity(0.7))
                     .multilineTextAlignment(.center)
@@ -38,25 +42,29 @@ struct RewardOptionSheet: View {
             .padding(.horizontal, 24)
 
             VStack(spacing: 12) {
-                Button(action: onWatch) {
-                    HStack {
-                        Image(systemName: "play.rectangle.fill")
-                        Text("Reklama ko'rib +1 xabar")
-                            .fontWeight(.semibold)
+                // Only offer the ad when one is actually ready to show.
+                if adReady {
+                    Button(action: onWatch) {
+                        HStack {
+                            Image(systemName: "play.rectangle.fill")
+                            Text("Reklama ko'rib +1 xabar")
+                                .fontWeight(.semibold)
+                        }
+                        .frame(maxWidth: .infinity)
+                        .padding(.vertical, 14)
+                        .background(SalomTheme.Colors.accentPrimary)
+                        .foregroundColor(.white)
+                        .clipShape(RoundedRectangle(cornerRadius: 14))
                     }
-                    .frame(maxWidth: .infinity)
-                    .padding(.vertical, 14)
-                    .background(SalomTheme.Colors.accentPrimary)
-                    .foregroundColor(.white)
-                    .clipShape(RoundedRectangle(cornerRadius: 14))
                 }
 
                 Button(action: onUpgrade) {
                     Text("Pro rejaga o'tish")
-                        .fontWeight(.medium)
+                        .fontWeight(adReady ? .medium : .semibold)
                         .frame(maxWidth: .infinity)
                         .padding(.vertical, 14)
-                        .background(Color.white.opacity(0.08))
+                        // Primary styling when it's the only action available.
+                        .background(adReady ? Color.white.opacity(0.08) : SalomTheme.Colors.accentPrimary)
                         .foregroundColor(.white)
                         .clipShape(RoundedRectangle(cornerRadius: 14))
                 }
