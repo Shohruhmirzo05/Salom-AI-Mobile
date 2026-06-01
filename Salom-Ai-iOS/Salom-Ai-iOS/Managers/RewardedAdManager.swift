@@ -35,6 +35,7 @@ final class RewardedAdManager: NSObject, ObservableObject {
     @Published private(set) var isLoading = false
 
     private var rewardedAd: RewardedAd?
+    private var presentingAd: RewardedAd?   // strong ref while on screen
     private var unitID: String = RewardedAdManager.testUnitID
     private var didEarnReward = false
 
@@ -75,6 +76,13 @@ final class RewardedAdManager: NSObject, ObservableObject {
             return
         }
 
+        // A RewardedAd can be presented ONLY ONCE. Move it out of `rewardedAd`
+        // immediately (so it can never be reused → "ad object has been used"),
+        // hold a strong ref while it's on screen, and preload a replacement.
+        rewardedAd = nil
+        isReady = false
+        presentingAd = ad
+
         // Attach the user id so AdMob's SSV callback can credit the right user.
         if let userID = Self.currentUserID {
             let options = ServerSideVerificationOptions()
@@ -88,6 +96,7 @@ final class RewardedAdManager: NSObject, ObservableObject {
         ad.present(from: root) { [weak self] in
             self?.didEarnReward = true
         }
+        load() // preload the next one
     }
 
     private var onCloseHandler: ((Bool) -> Void)?
@@ -147,19 +156,18 @@ final class RewardedAdManager: NSObject, ObservableObject {
 extension RewardedAdManager: FullScreenContentDelegate {
     func adDidDismissFullScreenContent(_ ad: FullScreenPresentingAd) {
         let rewarded = didEarnReward
-        rewardedAd = nil
-        isReady = false
+        presentingAd = nil
         onCloseHandler?(rewarded)
         onCloseHandler = nil
-        load() // preload the next one
+        // present() already preloaded a replacement; only load if somehow none.
+        if rewardedAd == nil { load() }
     }
 
     func ad(_ ad: FullScreenPresentingAd, didFailToPresentFullScreenContentWithError error: Error) {
         print("⚠️ Rewarded ad failed to present: \(error.localizedDescription)")
-        rewardedAd = nil
-        isReady = false
+        presentingAd = nil
         onCloseHandler?(false)
         onCloseHandler = nil
-        load()
+        if rewardedAd == nil { load() }
     }
 }
