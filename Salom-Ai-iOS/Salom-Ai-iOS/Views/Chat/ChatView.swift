@@ -608,6 +608,8 @@ struct ChatView: View {
                 // Subtle floating upgrade hint — only renders for free users
                 // who've burned through ≥70% of any resource. No-op otherwise.
                 UpgradeNudge()
+                // Premium banner — free users only, hidden for Pro / when off.
+                BannerAdSlot()
                 InputBar()
             }
         }
