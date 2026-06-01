@@ -7,6 +7,7 @@
 
 import SwiftUI
 import OneSignalFramework
+import GoogleMobileAds
 
 @main
 struct Salom_Ai_iOSApp: App {
@@ -46,6 +47,14 @@ class AppDelegate: NSObject, UIApplicationDelegate {
        OneSignal.Notifications.requestPermission({ accepted in
          print("User accepted notifications: \(accepted)")
        }, fallbackToSettings: false)
+
+       // Initialize Google Mobile Ads (rewarded ads → +1 message).
+       MobileAds.shared.start { _ in
+           Task { @MainActor in
+               let unitID = await RewardedAdManager.fetchRewardedUnitID()
+               RewardedAdManager.shared.configure(unitID: unitID)
+           }
+       }
 
        return true
     }

@@ -565,7 +565,10 @@ struct ChatView: View {
     @State private var selectedImage: ImageViewerItem?
     @State private var showRealtimeVoice = false
     @State private var showPaywall = false
-    
+    @StateObject private var rewardAds = RewardedAdManager.shared
+    @State private var showRewardSheet = false
+    @State private var rewardConfirmation = false
+
     var body: some View {
         ZStack {
             SalomTheme.Gradients.background
@@ -622,11 +625,36 @@ struct ChatView: View {
         .onChange(of: viewModel.errorMessage) { _, newValue in
             if isLimitExceeded(newValue) {
                 viewModel.errorMessage = nil
-                showPaywall = true
+                // Offer a rewarded ad first if one is ready; else go to paywall.
+                if rewardAds.isReady {
+                    showRewardSheet = true
+                } else {
+                    showPaywall = true
+                }
             }
         }
         .sheet(isPresented: $showPaywall) {
             PaywallSheet()
+        }
+        .sheet(isPresented: $showRewardSheet) {
+            RewardOptionSheet(
+                onWatch: {
+                    showRewardSheet = false
+                    rewardAds.present { rewarded in
+                        if rewarded { rewardConfirmation = true }
+                    }
+                },
+                onUpgrade: {
+                    showRewardSheet = false
+                    showPaywall = true
+                }
+            )
+            .presentationDetents([.height(320)])
+        }
+        .alert("+1 xabar qo'shildi", isPresented: $rewardConfirmation) {
+            Button("OK", role: .cancel) { }
+        } message: {
+            Text("Reklama uchun rahmat! Endi xabaringizni qayta yuborishingiz mumkin.")
         }
         .sheet(isPresented: $showUsageInfo) {
             if #available(iOS 16.0, *) {
