@@ -568,6 +568,8 @@ struct ChatView: View {
     @StateObject private var rewardAds = RewardedAdManager.shared
     @State private var showRewardSheet = false
     @State private var rewardConfirmation = false
+    @State private var pendingWatchAd = false
+    @State private var pendingUpgrade = false
 
     var body: some View {
         ZStack {
@@ -635,26 +637,28 @@ struct ChatView: View {
         .sheet(isPresented: $showPaywall) {
             PaywallSheet()
         }
-        .sheet(isPresented: $showRewardSheet) {
+        .sheet(isPresented: $showRewardSheet, onDismiss: {
+            // Runs only AFTER the sheet is fully gone from the window — safe to
+            // present the full-screen ad (or the paywall) now without colliding.
+            if pendingWatchAd {
+                pendingWatchAd = false
+                rewardAds.present { rewarded in
+                    if rewarded { rewardConfirmation = true }
+                }
+            } else if pendingUpgrade {
+                pendingUpgrade = false
+                showPaywall = true
+            }
+        }) {
             RewardOptionSheet(
                 adReady: rewardAds.isReady,
                 onWatch: {
-                    showRewardSheet = false
-                    // Let the sheet finish dismissing before presenting the ad,
-                    // otherwise the root VC is "already presenting" and it fails.
-                    DispatchQueue.main.asyncAfter(deadline: .now() + 0.4) {
-                        rewardAds.present { rewarded in
-                            if rewarded { rewardConfirmation = true }
-                        }
-                    }
+                    pendingWatchAd = true
+                    showRewardSheet = false   // ad is presented in onDismiss
                 },
                 onUpgrade: {
-                    showRewardSheet = false
-                    // Present the paywall on the next runloop so we don't race
-                    // the reward sheet's dismissal (which would no-op the sheet).
-                    DispatchQueue.main.asyncAfter(deadline: .now() + 0.35) {
-                        showPaywall = true
-                    }
+                    pendingUpgrade = true
+                    showRewardSheet = false   // paywall is presented in onDismiss
                 }
             )
             .presentationDetents([.height(340)])
