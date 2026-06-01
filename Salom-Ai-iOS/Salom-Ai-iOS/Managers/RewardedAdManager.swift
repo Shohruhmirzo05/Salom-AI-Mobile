@@ -78,8 +78,8 @@ final class RewardedAdManager: NSObject, ObservableObject {
         // Attach the user id so AdMob's SSV callback can credit the right user.
         if let userID = Self.currentUserID {
             let options = ServerSideVerificationOptions()
-            // customRewardString → arrives as `custom_data` in the SSV callback.
-            options.customRewardString = userID
+            // customRewardText → arrives as `custom_data` in the SSV callback.
+            options.customRewardText = userID
             ad.serverSideVerificationOptions = options
         }
 
