@@ -129,11 +129,18 @@ final class RewardedAdManager: NSObject, ObservableObject {
     }
 
     static var rootViewController: UIViewController? {
-        UIApplication.shared.connectedScenes
+        let root = UIApplication.shared.connectedScenes
             .compactMap { $0 as? UIWindowScene }
             .flatMap { $0.windows }
             .first { $0.isKeyWindow }?
             .rootViewController
+        // Walk to the top-most presented controller so we never try to present
+        // the ad from a controller that is itself presenting something.
+        var top = root
+        while let presented = top?.presentedViewController {
+            top = presented
+        }
+        return top
     }
 }
 

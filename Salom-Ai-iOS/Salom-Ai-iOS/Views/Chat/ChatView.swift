@@ -640,8 +640,12 @@ struct ChatView: View {
                 adReady: rewardAds.isReady,
                 onWatch: {
                     showRewardSheet = false
-                    rewardAds.present { rewarded in
-                        if rewarded { rewardConfirmation = true }
+                    // Let the sheet finish dismissing before presenting the ad,
+                    // otherwise the root VC is "already presenting" and it fails.
+                    DispatchQueue.main.asyncAfter(deadline: .now() + 0.4) {
+                        rewardAds.present { rewarded in
+                            if rewarded { rewardConfirmation = true }
+                        }
                     }
                 },
                 onUpgrade: {
