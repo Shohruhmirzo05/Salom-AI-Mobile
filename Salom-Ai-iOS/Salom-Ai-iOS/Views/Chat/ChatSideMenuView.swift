@@ -11,16 +11,18 @@ enum MainSection: String, CaseIterable, Identifiable {
     case chat
 //    case voice
     case realtime
+    case presentations
     case notifications
     case settings
-    
+
     var id: String { rawValue }
-    
+
     var title: LocalizedStringKey {
         switch self {
         case .chat: return "Salom AI"
 //        case .voice: return "Ovozli suhbat"
         case .realtime: return "Ovozli suhbat"
+        case .presentations: return "Presentatsiyalar"
         case .notifications: return "Bildirishnomalar"
         case .settings: return "Sozlamalar"
         }
@@ -31,16 +33,18 @@ enum MainSection: String, CaseIterable, Identifiable {
         case .chat: return "O'zbekcha AI yordamchi"
 //        case .voice: return "Tez orada"
         case .realtime: return "Real vaqt ovozli AI"
+        case .presentations: return "AI presentatsiya yaratish"
         case .notifications: return "Xabarlar tarixi"
         case .settings: return "Ilova sozlamalari"
         }
     }
-    
+
     var icon: String {
         switch self {
         case .chat: return "sparkles"
 //        case .voice: return "waveform.and.mic"
         case .realtime: return "waveform.circle.fill"
+        case .presentations: return "rectangle.on.rectangle.angled"
         case .notifications: return "bell"
         case .settings: return "gearshape"
         }
@@ -253,7 +257,16 @@ struct ChatSideMenuView: View {
             ) {
                 select(.realtime)
             }
-            
+
+            MenuItemRow(
+                systemName: MainSection.presentations.icon,
+                title: MainSection.presentations.title,
+                subtitle: MainSection.presentations.subtitle,
+                isHighlighted: selectedSection == .presentations
+            ) {
+                select(.presentations)
+            }
+
             MenuItemRow(
                 systemName: MainSection.notifications.icon,
                 title: MainSection.notifications.title,

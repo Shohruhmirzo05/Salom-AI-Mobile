@@ -66,6 +66,7 @@ struct PaywallSheet: View {
                 VStack(alignment: .leading, spacing: 24) {
                     headerArt
                     headerCopy
+                    highlightsStrip
                     planList
                     if let selected = selectedPlan {
                         benefitsBlock(for: selected)
@@ -119,6 +120,34 @@ struct PaywallSheet: View {
                 .frame(height: 160)
         }
         .frame(maxWidth: .infinity)
+    }
+
+    // Always-visible premium highlights (independent of admin-managed benefits),
+    // so the NEW AI presentations feature is sold on the paywall.
+    @ViewBuilder private var highlightsStrip: some View {
+        let items: [(String, String)] = [
+            ("rectangle.on.rectangle.angled", "AI presentatsiyalar — PPTX va PDF"),
+            ("bolt.fill", "Kuchliroq modellar va yuqori limitlar"),
+            ("waveform", "Real vaqt ovozli AI"),
+        ]
+        VStack(alignment: .leading, spacing: 10) {
+            ForEach(items, id: \.1) { item in
+                HStack(spacing: 10) {
+                    ZStack {
+                        RoundedRectangle(cornerRadius: 9, style: .continuous)
+                            .fill(LinearGradient(colors: [.purple.opacity(0.5), .blue.opacity(0.5)], startPoint: .topLeading, endPoint: .bottomTrailing))
+                            .frame(width: 30, height: 30)
+                        Image(systemName: item.0).font(.system(size: 13, weight: .semibold)).foregroundColor(.white)
+                    }
+                    Text(item.1).font(.system(size: 14, weight: .medium)).foregroundColor(.white.opacity(0.85))
+                    Spacer()
+                }
+            }
+        }
+        .padding(14)
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .background(RoundedRectangle(cornerRadius: 16, style: .continuous).fill(Color.white.opacity(0.04)))
+        .overlay(RoundedRectangle(cornerRadius: 16, style: .continuous).strokeBorder(Color.white.opacity(0.06), lineWidth: 0.5))
     }
 
     @ViewBuilder private var headerCopy: some View {
@@ -274,9 +303,13 @@ struct PaywallSheet: View {
                 }
                 .buttonStyle(.plain)
 
-                Text("Istalgan vaqt bekor qilinadi")
+                Text("Obuna avtomatik yangilanadi · to'lovlar qaytarilmaydi")
                     .font(.system(size: 11))
                     .foregroundColor(.white.opacity(0.35))
+                    .multilineTextAlignment(.center)
+                Link("Foydalanish shartlari", destination: URL(string: "https://salom-ai.uz/terms-of-service")!)
+                    .font(.system(size: 11, weight: .medium))
+                    .foregroundColor(.white.opacity(0.5))
             }
             .padding(.horizontal, 22)
             .padding(.bottom, 12)

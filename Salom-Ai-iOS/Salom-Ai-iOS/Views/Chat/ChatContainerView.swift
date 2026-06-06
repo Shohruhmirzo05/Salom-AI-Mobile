@@ -65,6 +65,16 @@ struct ChatContainerView: View {
             })
             .navigationBarHidden(true)
             
+        case .presentations:
+            SectionScaffold(
+                icon: MainSection.presentations.icon,
+                title: "Presentatsiyalar",
+                subtitle: "AI presentatsiya yaratish"
+            ) {
+                PresentationsListView()
+                    .frame(maxWidth: .infinity, maxHeight: .infinity)
+            }
+
         case .notifications:
             SectionScaffold(
                 icon: MainSection.notifications.icon,

@@ -59,3 +59,9 @@ class AppDelegate: NSObject, UIApplicationDelegate {
        return true
     }
 }
+/*
+ 
+ so i checked the ios app, the 
+ 
+ 
+ */

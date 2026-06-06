@@ -337,14 +337,26 @@ extension APIClient {
         // Account
         case deleteAccount
         case sendFeedback(content: String)
-        
+
+        // Presentations
+        case presentationsConfig
+        case listPresentations
+        case getPresentation(id: Int)
+        case createPresentation(topic: String, language: String, slideCount: Int, theme: String, audience: String?)
+        case updatePresentationTheme(id: Int, theme: String)
+        case deletePresentation(id: Int)
+        case chatEditPresentation(id: Int, instruction: String)
+        case exportPresentation(id: Int, format: String)
+        case getExportStatus(exportId: Int)
+
         fileprivate var method: HTTPMethod {
             switch self {
-            case .listConversations, .getConversation, .getConversationMessages, .perplexityUsage, .currentSubscription, .getSettings, .getModels, .getUsageStats, .listPlans, .oauthUser, .savedCards, .notifications, .unreadNotificationCount:
+            case .listConversations, .getConversation, .getConversationMessages, .perplexityUsage, .currentSubscription, .getSettings, .getModels, .getUsageStats, .listPlans, .oauthUser, .savedCards, .notifications, .unreadNotificationCount,
+                 .presentationsConfig, .listPresentations, .getPresentation, .getExportStatus:
                 return .get
-            case .deleteConversation, .deleteAccount, .deleteCard:
+            case .deleteConversation, .deleteAccount, .deleteCard, .deletePresentation:
                 return .delete
-            case .updateSettings, .updateProfile:
+            case .updateSettings, .updateProfile, .updatePresentationTheme:
                 return .put
             case .updatePlatform:
                 return .post
@@ -470,6 +482,18 @@ extension APIClient {
                 return "/account"
             case .sendFeedback:
                 return "/feedback"
+            case .presentationsConfig:
+                return "/presentations/config"
+            case .listPresentations, .createPresentation:
+                return "/presentations"
+            case .getPresentation(let id), .updatePresentationTheme(let id, _), .deletePresentation(let id):
+                return "/presentations/\(id)"
+            case .chatEditPresentation(let id, _):
+                return "/presentations/\(id)/chat"
+            case .exportPresentation(let id, _):
+                return "/presentations/\(id)/export"
+            case .getExportStatus(let exportId):
+                return "/presentations/exports/\(exportId)"
             }
         }
         
@@ -568,6 +592,16 @@ extension APIClient {
                 return ["content": content, "platform": "ios"]
             case .tts(let text), .ttsStream(let text):
                 return ["text": text]
+            case .createPresentation(let topic, let language, let slideCount, let theme, let audience):
+                var body: [String: Any] = ["topic": topic, "language": language, "slide_count": slideCount, "theme": theme]
+                if let audience, !audience.isEmpty { body["audience"] = audience }
+                return body
+            case .updatePresentationTheme(_, let theme):
+                return ["theme": theme]
+            case .chatEditPresentation(_, let instruction):
+                return ["instruction": instruction]
+            case .exportPresentation(_, let format):
+                return ["format": format]
             default:
                 return nil
             }
