@@ -27,16 +27,16 @@ import Combine
 final class RewardedAdManager: NSObject, ObservableObject {
     static let shared = RewardedAdManager()
 
-    /// Default test unit — replace via /ads/config or Constants for production.
-    /// Google's official rewarded test unit id:
-    private static let testUnitID = "ca-app-pub-3940256099942544/1712485313"
+    /// Production rewarded unit (Salom AI). Can be overridden remotely via
+    /// /ads/config. NOTE: never use Google's test unit in a released build.
+    private static let defaultUnitID = "ca-app-pub-3378454853146779/3371254046"
 
     @Published private(set) var isReady = false
     @Published private(set) var isLoading = false
 
     private var rewardedAd: RewardedAd?
     private var presentingAd: RewardedAd?   // strong ref while on screen
-    private var unitID: String = RewardedAdManager.testUnitID
+    private var unitID: String = RewardedAdManager.defaultUnitID
     private var didEarnReward = false
 
     private override init() { super.init() }

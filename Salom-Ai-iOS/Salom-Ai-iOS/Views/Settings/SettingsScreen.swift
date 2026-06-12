@@ -208,6 +208,29 @@ struct SettingsScreen: View {
                 }
                 .padding(.vertical, 6)
             }
+
+            Link(destination: URL(string: "https://t.me/salomAIsupport_bot")!) {
+                HStack(spacing: 12) {
+                    Image("TelegramLogo")
+                        .resizable()
+                        .scaledToFit()
+                        .frame(width: 40, height: 40)
+                        .clipShape(Circle())
+                    VStack(alignment: .leading, spacing: 2) {
+                        Text("Telegram orqali yordam")
+                            .font(.body.weight(.semibold))
+                            .foregroundColor(.white)
+                        Text("Jonli qo'llab-quvvatlash — bir tap")
+                            .font(.caption)
+                            .foregroundColor(SalomTheme.Colors.textSecondary)
+                    }
+                    Spacer()
+                    Image(systemName: "chevron.right")
+                        .font(.caption)
+                        .foregroundColor(SalomTheme.Colors.textSecondary)
+                }
+                .padding(.vertical, 6)
+            }
         }
         .glassCard(cornerRadius: 24)
     }

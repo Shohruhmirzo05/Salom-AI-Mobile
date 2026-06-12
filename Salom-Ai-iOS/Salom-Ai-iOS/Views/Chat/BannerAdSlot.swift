@@ -10,9 +10,9 @@
 import SwiftUI
 import GoogleMobileAds
 
-// Google's official test banner unit — used until the real unit fills (a brand
-// new unit / "limited ad serving" app can take ~1h to start returning ads).
-private let kTestBannerUnitID = "ca-app-pub-3940256099942544/2934735716"
+// Production banner unit (Salom AI), overridable via /ads/config.
+// NOTE: never ship Google's test banner unit in a released build.
+private let kDefaultBannerUnitID = "ca-app-pub-3378454853146779/5712979370"
 
 // MARK: - SwiftUI wrapper around GoogleMobileAds BannerView
 
@@ -52,18 +52,29 @@ struct BannerAdSlot: View {
     // Optimistic: render for free users immediately; only the unit id comes
     // from the backend (with a test fallback). ADS_ENABLED defaults true.
     @State private var unitID: String?
+    @State private var showPaywall = false
 
-    private var resolvedUnitID: String { unitID ?? kTestBannerUnitID }
+    private var resolvedUnitID: String { unitID ?? kDefaultBannerUnitID }
 
     var body: some View {
         Group {
             if !subs.isPro {
                 VStack(spacing: 4) {
-                    Text("Reklama")
-                        .font(.system(size: 9, weight: .medium))
-                        .tracking(0.5)
-                        .foregroundColor(.white.opacity(0.28))
-                        .frame(maxWidth: .infinity, alignment: .leading)
+                    HStack {
+                        Text("Reklama")
+                            .font(.system(size: 9, weight: .medium))
+                            .tracking(0.5)
+                            .foregroundColor(.white.opacity(0.28))
+                        Spacer()
+                        Button {
+                            HapticManager.shared.fire(.lightImpact)
+                            showPaywall = true
+                        } label: {
+                            Image(systemName: "xmark.circle.fill")
+                                .font(.system(size: 16))
+                                .foregroundColor(.white.opacity(0.4))
+                        }
+                    }
 
                     BannerAdView(adUnitID: resolvedUnitID,
                                  width: UIScreen.main.bounds.width - 32)
@@ -85,6 +96,7 @@ struct BannerAdSlot: View {
         }
         .task { await loadConfig() }
         .onAppear { print("🪧 BannerAdSlot appear — isPro=\(subs.isPro)") }
+        .fullScreenCover(isPresented: $showPaywall) { PaywallSheet() }
     }
 
     private func loadConfig() async {

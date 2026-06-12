@@ -1476,6 +1476,9 @@
         }
       }
     },
+    "Jonli qo'llab-quvvatlash — bir tap" : {
+
+    },
     "Jonli suhbatlar" : {
       "extractionState" : "stale",
       "localizations" : {
@@ -3332,6 +3335,9 @@
           }
         }
       }
+    },
+    "Telegram orqali yordam" : {
+
     },
     "Tezkor javoblar" : {
       "extractionState" : "stale",
