@@ -51,7 +51,7 @@ struct PresentationsListView: View {
             .padding(.bottom, 40)
         }
         .scrollDismissesKeyboard(.interactively)
-        .task { await reload() }
+        .task { await reload(); Analytics.shared.track("feature_opened", ["feature": "presentations"]) }
         .fullScreenCover(item: $openRef, onDismiss: { Task { await refreshList() } }) { ref in
             PresentationEditorView(presentationId: ref.id)
         }
@@ -273,6 +273,7 @@ struct PresentationsListView: View {
         creating = true; errorText = nil
         do {
             let res = try await PresentationService.create(topic: t, language: deckLang, slideCount: slideCount, theme: theme, audience: audience.isEmpty ? nil : audience)
+            Analytics.shared.track("presentation_created", ["slides": slideCount, "language": deckLang])
             creating = false
             topic = ""; audience = ""
             await refreshList()

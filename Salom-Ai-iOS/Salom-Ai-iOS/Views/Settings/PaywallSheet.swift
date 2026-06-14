@@ -46,6 +46,7 @@ struct PaywallSheet: View {
         }
         .environment(\.dismissAll, { dismiss() })
         .task {
+            Analytics.shared.track("paywall_shown", ["surface": "ios"])
             if subscriptionManager.plans.isEmpty {
                 await subscriptionManager.fetchPlans()
             }
@@ -284,6 +285,7 @@ struct PaywallSheet: View {
             VStack(spacing: 8) {
                 Button {
                     HapticManager.shared.fire(.mediumImpact)
+                    Analytics.shared.track("paywall_plan_clicked", ["plan": selected.code])
                     path.append(PaymentStep.methodChoice(planCode: selected.code))
                 } label: {
                     HStack(spacing: 6) {

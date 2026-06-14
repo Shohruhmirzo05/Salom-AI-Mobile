@@ -40,6 +40,7 @@ struct ContentView: View {
         .animation(.easeInOut(duration: 0.35), value: session.contentType)
         .onAppear {
             session.bootstrap(hasCompletedOnboarding: hasCompletedOnboarding)
+            Analytics.shared.track("feature_opened", ["feature": "ios_app"])
         }
         .fullScreenCover(isPresented: $showPaywall) {
             PaywallSheet()
