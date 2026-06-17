@@ -356,7 +356,8 @@ final class ChatViewModel: ObservableObject {
         
         isSending = true
         isTyping = true
-        
+        Analytics.shared.track("chat_message", ["has_image": !attachments.isEmpty, "length": trimmed.count])
+
         let currentAttachments = attachments
         attachments = []
         
