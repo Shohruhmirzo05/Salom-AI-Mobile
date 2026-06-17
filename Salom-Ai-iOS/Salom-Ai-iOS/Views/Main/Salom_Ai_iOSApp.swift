@@ -29,6 +29,8 @@ struct Salom_Ai_iOSApp: App {
                             // This handles the case where user paid in Safari/Click app and returned
                             await SubscriptionManager.shared.checkSubscriptionStatus()
                         }
+                        // Register OneSignal push id with backend so notifications deliver.
+                        PushManager.syncDevice()
                     }
                 }
         }

@@ -53,6 +53,8 @@ final class SessionManager: ObservableObject {
             try? await APIClient.shared.requestData(.updatePlatform(platform: "ios"))
             await SubscriptionManager.shared.checkSubscriptionStatus()
         }
+        // Register OneSignal push id with backend (fixes iOS notifications).
+        PushManager.syncDevice()
     }
     
     func logout() {

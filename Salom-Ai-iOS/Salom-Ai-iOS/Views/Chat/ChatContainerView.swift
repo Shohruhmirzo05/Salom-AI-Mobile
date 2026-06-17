@@ -75,6 +75,10 @@ struct ChatContainerView: View {
                     .frame(maxWidth: .infinity, maxHeight: .infinity)
             }
 
+        case .dtm:
+            DtmView()
+                .frame(maxWidth: .infinity, maxHeight: .infinity)
+
         case .notifications:
             SectionScaffold(
                 icon: MainSection.notifications.icon,

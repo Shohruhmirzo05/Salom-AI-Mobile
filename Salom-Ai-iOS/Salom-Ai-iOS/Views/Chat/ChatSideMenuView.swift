@@ -12,6 +12,7 @@ enum MainSection: String, CaseIterable, Identifiable {
 //    case voice
     case realtime
     case presentations
+    case dtm
     case notifications
     case settings
 
@@ -23,6 +24,7 @@ enum MainSection: String, CaseIterable, Identifiable {
 //        case .voice: return "Ovozli suhbat"
         case .realtime: return "Ovozli suhbat"
         case .presentations: return "Presentatsiyalar"
+        case .dtm: return "DTM testlar"
         case .notifications: return "Bildirishnomalar"
         case .settings: return "Sozlamalar"
         }
@@ -34,6 +36,7 @@ enum MainSection: String, CaseIterable, Identifiable {
 //        case .voice: return "Tez orada"
         case .realtime: return "Real vaqt ovozli AI"
         case .presentations: return "AI presentatsiya yaratish"
+        case .dtm: return "Moslashuvchan test tayyorgarlik"
         case .notifications: return "Xabarlar tarixi"
         case .settings: return "Ilova sozlamalari"
         }
@@ -45,6 +48,7 @@ enum MainSection: String, CaseIterable, Identifiable {
 //        case .voice: return "waveform.and.mic"
         case .realtime: return "waveform.circle.fill"
         case .presentations: return "rectangle.on.rectangle.angled"
+        case .dtm: return "graduationcap.fill"
         case .notifications: return "bell"
         case .settings: return "gearshape"
         }
@@ -265,6 +269,15 @@ struct ChatSideMenuView: View {
                 isHighlighted: selectedSection == .presentations
             ) {
                 select(.presentations)
+            }
+
+            MenuItemRow(
+                systemName: MainSection.dtm.icon,
+                title: MainSection.dtm.title,
+                subtitle: MainSection.dtm.subtitle,
+                isHighlighted: selectedSection == .dtm
+            ) {
+                select(.dtm)
             }
 
             MenuItemRow(

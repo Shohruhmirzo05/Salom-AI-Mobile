@@ -349,10 +349,26 @@ extension APIClient {
         case exportPresentation(id: Int, format: String)
         case getExportStatus(exportId: Int)
 
+        // DTM (adaptive test-prep)
+        case dtmSubjects
+        case dtmTopics(subject: String)
+        case dtmQuiz(subject: String, topic: String?)
+        case dtmAnswer(questionId: Int, chosenKey: String)
+        case dtmProgress
+
+        // Win-back + retention
+        case recoveryOffer
+        case cancelSurvey(reason: String)
+        case accountStreak
+
+        // Push registration (fixes iOS notifications: register OneSignal id)
+        case registerPushDevice(token: String, platform: String)
+
         fileprivate var method: HTTPMethod {
             switch self {
             case .listConversations, .getConversation, .getConversationMessages, .perplexityUsage, .currentSubscription, .getSettings, .getModels, .getUsageStats, .listPlans, .oauthUser, .savedCards, .notifications, .unreadNotificationCount,
-                 .presentationsConfig, .listPresentations, .getPresentation, .getExportStatus:
+                 .presentationsConfig, .listPresentations, .getPresentation, .getExportStatus,
+                 .dtmSubjects, .dtmTopics, .dtmQuiz, .dtmProgress, .recoveryOffer, .accountStreak:
                 return .get
             case .deleteConversation, .deleteAccount, .deleteCard, .deletePresentation:
                 return .delete
@@ -494,11 +510,35 @@ extension APIClient {
                 return "/presentations/\(id)/export"
             case .getExportStatus(let exportId):
                 return "/presentations/exports/\(exportId)"
+            case .dtmSubjects:
+                return "/dtm/subjects"
+            case .dtmTopics:
+                return "/dtm/topics"
+            case .dtmQuiz:
+                return "/dtm/quiz"
+            case .dtmAnswer:
+                return "/dtm/answer"
+            case .dtmProgress:
+                return "/dtm/progress"
+            case .recoveryOffer:
+                return "/subscriptions/recovery-offer"
+            case .cancelSurvey:
+                return "/subscriptions/cancel-survey"
+            case .accountStreak:
+                return "/account/streak"
+            case .registerPushDevice:
+                return "/notifications/device"
             }
         }
-        
+
         private var queryItems: [URLQueryItem] {
             switch self {
+            case .dtmTopics(let subject):
+                return [URLQueryItem(name: "subject", value: subject)]
+            case .dtmQuiz(let subject, let topic):
+                var q = [URLQueryItem(name: "subject", value: subject)]
+                if let topic, !topic.isEmpty { q.append(URLQueryItem(name: "topic", value: topic)) }
+                return q
             case .listConversations(let limit, let offset):
                 return [
                     URLQueryItem(name: "limit", value: "\(limit)"),
@@ -530,6 +570,12 @@ extension APIClient {
                 return ["refresh_token": refreshToken]
             case .oauthVerify(let provider, let idToken, let platform):
                 return ["provider": provider.rawValue, "id_token": idToken, "platform": platform]
+            case .dtmAnswer(let questionId, let chosenKey):
+                return ["question_id": questionId, "chosen_key": chosenKey]
+            case .cancelSurvey(let reason):
+                return ["reason": reason]
+            case .registerPushDevice(let token, let platform):
+                return ["token": token, "platform": platform]
             case .chat(let conversationId, let text, let projectId, let model, let attachments),
                  .chatStream(let conversationId, let text, let projectId, let model, let attachments):
                 var body: [String: Any] = ["text": text]
