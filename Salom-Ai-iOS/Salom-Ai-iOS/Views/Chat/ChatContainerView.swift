@@ -76,8 +76,14 @@ struct ChatContainerView: View {
             }
 
         case .dtm:
-            DtmView()
-                .frame(maxWidth: .infinity, maxHeight: .infinity)
+            SectionScaffold(
+                icon: MainSection.dtm.icon,
+                title: "DTM testlar",
+                subtitle: "Moslashuvchan test tayyorgarlik"
+            ) {
+                DtmView()
+                    .frame(maxWidth: .infinity, maxHeight: .infinity)
+            }
 
         case .notifications:
             SectionScaffold(

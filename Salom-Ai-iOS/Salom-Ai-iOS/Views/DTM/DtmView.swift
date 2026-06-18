@@ -63,9 +63,20 @@ struct DtmView: View {
     private var subjectsView: some View {
         ScrollView {
             VStack(alignment: .leading, spacing: 18) {
-                header(L.title, L.subtitle, icon: "graduationcap.fill")
+                Text(L.subtitle).font(.subheadline).foregroundColor(.white.opacity(0.6))
                 if loadingSubjects {
                     ProgressView().tint(.white).frame(maxWidth: .infinity).padding(.top, 50)
+                } else if subjects.isEmpty {
+                    VStack(spacing: 14) {
+                        Image(systemName: "wifi.exclamationmark").font(.system(size: 34)).foregroundColor(.white.opacity(0.4))
+                        Text(L.loadError).font(.subheadline).foregroundColor(.white.opacity(0.7)).multilineTextAlignment(.center)
+                        Button { Task { await loadSubjects() } } label: {
+                            Label(L.retry, systemImage: "arrow.clockwise").fontWeight(.semibold)
+                                .padding(.horizontal, 20).padding(.vertical, 12)
+                                .background(LinearGradient(colors: [cyan, .purple], startPoint: .leading, endPoint: .trailing))
+                                .foregroundColor(.white).clipShape(Capsule())
+                        }
+                    }.frame(maxWidth: .infinity).padding(.top, 50)
                 } else {
                     LazyVGrid(columns: [GridItem(.flexible()), GridItem(.flexible())], spacing: 12) {
                         ForEach(subjects) { s in

@@ -120,6 +120,16 @@
         }
       }
     },
+    "%@: %@" : {
+      "localizations" : {
+        "uz" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "%1$@: %2$@"
+          }
+        }
+      }
+    },
     "%lld" : {
 
     },
@@ -196,6 +206,9 @@
           }
         }
       }
+    },
+    "%lld%%" : {
+
     },
     "•" : {
 
@@ -956,6 +969,9 @@
           }
         }
       }
+    },
+    "DTM testlar" : {
+
     },
     "Eng aqlli javoblar" : {
       "extractionState" : "stale",
@@ -1844,6 +1860,9 @@
 
     },
     "MM/YY" : {
+
+    },
+    "Moslashuvchan test tayyorgarlik" : {
 
     },
     "Murosasiz muloqot" : {

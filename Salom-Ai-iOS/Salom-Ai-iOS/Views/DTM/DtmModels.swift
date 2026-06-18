@@ -125,6 +125,8 @@ struct DtmL {
     var freeDailyDone: String { pick("Bugungi bepul mashqlar tugadi. Pro bilan cheksiz.", "Бесплатные тесты на сегодня закончились. На Pro — без лимитов.", "Today's free practice is done. Pro = unlimited.") }
     var upgrade: String { pick("Pro tarifga o‘tish", "Перейти на Pro", "Upgrade to Pro") }
     var loading: String { pick("Yuklanmoqda…", "Загрузка…", "Loading…") }
+    var loadError: String { pick("Yuklab bo‘lmadi. Internet aloqangizni tekshirib, qayta urining.", "Не удалось загрузить. Проверьте интернет и повторите.", "Couldn't load. Check your connection and retry.") }
+    var retry: String { pick("Qayta urinish", "Повторить", "Retry") }
 }
 
 // MARK: - Uzbek Latin → Cyrillic transliteration (for `kr` locale)

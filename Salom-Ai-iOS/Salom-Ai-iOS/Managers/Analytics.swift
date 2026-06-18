@@ -1,5 +1,6 @@
 import Foundation
-import UIKit
+internal import UIKit
+import Combine
 
 /// Lightweight product-analytics client — mirrors the web (`track`) and the
 /// Telegram bot. Batches interaction events and POSTs them to `/events` (the
