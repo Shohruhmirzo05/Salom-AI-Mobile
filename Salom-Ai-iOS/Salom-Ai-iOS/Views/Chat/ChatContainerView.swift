@@ -76,14 +76,12 @@ struct ChatContainerView: View {
             }
 
         case .dtm:
-            SectionScaffold(
-                icon: MainSection.dtm.icon,
-                title: "DTM testlar",
-                subtitle: "Moslashuvchan test tayyorgarlik"
-            ) {
-                DtmView()
-                    .frame(maxWidth: .infinity, maxHeight: .infinity)
-            }
+            // DtmView owns its NavigationStack (native back) + a toolbar menu
+            // button that opens the side menu.
+            DtmView(onMenu: {
+                HapticManager.shared.fire(.selection)
+                withAnimation(.spring(response: 0.45, dampingFraction: 0.86)) { isMenuOpen = true }
+            })
 
         case .notifications:
             SectionScaffold(
