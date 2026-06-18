@@ -87,14 +87,22 @@ struct GlassIconButton: View {
     }
 }
 
-/// Primary/secondary button styling that adopts Liquid Glass on iOS 26+.
+/// Primary/secondary button surface. `prominent` = solid accent capsule;
+/// otherwise a glass pill (Liquid Glass on iOS 26+, material below). We apply
+/// the glass via background rather than `.buttonStyle(.glass)` for SDK safety.
 struct GlassButtonModifier: ViewModifier {
     var prominent: Bool
     func body(content: Content) -> some View {
-        if #available(iOS 26.0, *) {
-            content.buttonStyle(prominent ? .glassProminent : .glass)
+        if prominent {
+            content
+                .foregroundColor(.white)
+                .background(
+                    LinearGradient(colors: [Color(hex: "#1ED6FF"), Color(hex: "#7C3AED")],
+                                   startPoint: .leading, endPoint: .trailing),
+                    in: Capsule()
+                )
         } else {
-            content // keep existing custom button styling on older iOS
+            content.salomGlassPill()
         }
     }
 }
