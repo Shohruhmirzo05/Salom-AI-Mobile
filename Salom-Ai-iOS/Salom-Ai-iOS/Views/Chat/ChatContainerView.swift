@@ -20,6 +20,18 @@ struct ChatContainerView: View {
                     .animation(.easeInOut(duration: 0.25), value: selectedSection)
             }
             .disabled(isMenuOpen)
+            // Edge-swipe from the left to open the drawer (chat root only, so it
+            // doesn't fight pushed views' native back-swipe).
+            .simultaneousGesture(
+                DragGesture(minimumDistance: 18)
+                    .onEnded { v in
+                        guard selectedSection == .chat, !isMenuOpen else { return }
+                        if v.startLocation.x < 28, v.translation.width > 70, abs(v.translation.height) < 60 {
+                            HapticManager.shared.fire(.selection)
+                            withAnimation(.spring(response: 0.45, dampingFraction: 0.86)) { isMenuOpen = true }
+                        }
+                    }
+            )
             
             if isMenuOpen {
                 Color.black.opacity(0.45)
@@ -143,11 +155,7 @@ struct ChatContainerView: View {
                 Image(systemName: "line.3.horizontal")
                     .font(.system(size: 18, weight: .medium))
                     .foregroundColor(.white)
-                    .padding(8)
-                    .background(
-                        RoundedRectangle(cornerRadius: 999, style: .continuous)
-                            .fill(Color.white.opacity(0.08))
-                    )
+                    .salomGlassCircle(40)
             }
 
             VStack(alignment: .leading, spacing: 2) {

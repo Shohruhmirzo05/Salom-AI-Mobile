@@ -58,6 +58,7 @@ enum MainSection: String, CaseIterable, Identifiable {
 struct ChatSideMenuView: View {
     @ObservedObject var viewModel: ChatViewModel
     @Binding var isOpen: Bool
+    @State private var dragX: CGFloat = 0   // live drag-to-close translation
     @Binding var selectedSection: MainSection
 
     @AppStorage(AppStorageKeys.displayName) private var storedDisplayName: String = ""
@@ -126,9 +127,25 @@ struct ChatSideMenuView: View {
                     }
                 }
                 .frame(width: width, height: geo.size.height)
-                .offset(x: isOpen ? 0 : -width)
+                .offset(x: isOpen ? dragX : -width)
                 .animation(.spring(response: 0.45, dampingFraction: 0.86), value: isOpen)
-                
+                // Interactive drag-to-close: follow the finger leftward, then
+                // close on a far-enough drag or a fast flick (ChatGPT-style).
+                .gesture(
+                    DragGesture(minimumDistance: 8)
+                        .onChanged { v in if isOpen { dragX = min(0, v.translation.width) } }
+                        .onEnded { v in
+                            guard isOpen else { return }
+                            let shouldClose = v.translation.width < -width * 0.33
+                                || v.predictedEndTranslation.width < -width * 0.6
+                            if shouldClose { HapticManager.shared.fire(.selection) }
+                            withAnimation(.spring(response: 0.42, dampingFraction: 0.86)) {
+                                if shouldClose { isOpen = false }
+                                dragX = 0
+                            }
+                        }
+                )
+
                 Spacer(minLength: 0)
             }
         }
