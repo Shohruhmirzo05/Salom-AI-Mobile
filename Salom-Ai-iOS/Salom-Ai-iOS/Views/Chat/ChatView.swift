@@ -340,7 +340,8 @@ final class ChatViewModel: ObservableObject {
     @MainActor
     func sendMessage() {
         let trimmed = inputText.trimmingCharacters(in: .whitespacesAndNewlines)
-        guard !trimmed.isEmpty, !isSending else { return }
+        // Allow sending an attachment with no text (image-only send).
+        guard !isSending, (!trimmed.isEmpty || !attachments.isEmpty) else { return }
         
         inputText = ""
         let userMessage = ChatMessage(
@@ -564,9 +565,9 @@ struct ChatView: View {
     @Binding var isMenuOpen: Bool
     @State private var showUsageInfo = false
     @State private var selectedImage: ImageViewerItem?
-    @State private var showRealtimeVoice = false
     @State private var showPaywall = false
     @StateObject private var rewardAds = RewardedAdManager.shared
+    @StateObject private var subs = SubscriptionManager.shared
     @State private var showRewardSheet = false
     @State private var rewardConfirmation = false
     @State private var pendingWatchAd = false
@@ -672,10 +673,17 @@ struct ChatView: View {
             Text("Reklama uchun rahmat! Endi xabaringizni qayta yuborishingiz mumkin.")
         }
         .sheet(isPresented: $showUsageInfo) {
-            if #available(iOS 16.0, *) {
-                UsageInfoView()
-            } else {
-                Text("Usage info requires iOS 16+")
+            NavigationStack {
+                SubscriptionView()
+                    .toolbar {
+                        ToolbarItem(placement: .topBarLeading) {
+                            Button { showUsageInfo = false } label: {
+                                Image(systemName: "xmark")
+                                    .font(.system(size: 13, weight: .semibold))
+                                    .foregroundColor(.white.opacity(0.6))
+                            }
+                        }
+                    }
             }
         }
         .confirmationDialog("Fayl yuklash", isPresented: $viewModel.showAttachmentPicker) {
@@ -734,11 +742,7 @@ struct ChatView: View {
                 Image(systemName: "line.3.horizontal")
                     .font(.system(size: 18, weight: .medium))
                     .foregroundColor(.white)
-                    .padding(8)
-                    .background(
-                        RoundedRectangle(cornerRadius: 999, style: .continuous)
-                            .fill(Color.white.opacity(0.08))
-                    )
+                    .salomGlassCircle(40)
             }
             
             VStack(alignment: .leading, spacing: 2) {
@@ -783,19 +787,17 @@ struct ChatView: View {
                 }
                 .padding(.horizontal, 12)
                 .padding(.vertical, 6)
-                .background(
-                    RoundedRectangle(cornerRadius: 999, style: .continuous)
-                        .fill(Color.white.opacity(0.08))
-                )
+                .salomGlassPill()
                 .lineLimit(1)
             }
             
             Button {
+                HapticManager.shared.fire(.selection)
                 showUsageInfo = true
             } label: {
-                Image(systemName: "info.circle")
-                    .font(.system(size: 20))
-                    .foregroundColor(.white.opacity(0.8))
+                Image(systemName: subs.isPro ? "crown.fill" : "crown")
+                    .font(.system(size: 17, weight: .semibold))
+                    .foregroundColor(subs.isPro ? .yellow : .white.opacity(0.8))
             }
         }
         .padding(.horizontal, 16)
@@ -1166,20 +1168,7 @@ struct ChatView: View {
                             )
                     }
                     .disabled(viewModel.isRecording || viewModel.isProcessingVoice || viewModel.isUploading || viewModel.isImageMode)
-                    
-                    Button {
-                        HapticManager.shared.fire(.mediumImpact)
-                        showRealtimeVoice = true
-                    } label: {
-                        Image(systemName: "waveform.circle.fill")
-                            .font(.system(size: 28))
-                            .foregroundColor(SalomTheme.Colors.accentPrimary)
-                    }
-                    .disabled(viewModel.isProcessingVoice || viewModel.isImageMode)
-                    .fullScreenCover(isPresented: $showRealtimeVoice) {
-                        RealtimeVoiceView()
-                    }
-                    
+
                     Spacer()
                 }
                 
@@ -1243,7 +1232,13 @@ struct ChatView: View {
                             }
                         }
                     }
-                    .disabled(viewModel.isRecording || viewModel.isProcessingVoice || viewModel.inputText.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty)
+                    .disabled(
+                        viewModel.isRecording || viewModel.isProcessingVoice ||
+                        // Image-gen needs a prompt; normal send allows image-only.
+                        (viewModel.isImageMode
+                            ? viewModel.inputText.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
+                            : (viewModel.inputText.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty && viewModel.attachments.isEmpty))
+                    )
                 }
             }
             .padding(10)
@@ -1265,24 +1260,25 @@ struct ChatView: View {
         
         var body: some View {
             Button(action: action) {
-                Image(systemName: systemName)
-                    .font(.system(size: 18, weight: .semibold))
-                    .foregroundColor(isActive ? .white : activeTint)
-                    .frame(width: 40, height: 40)
-                    .background(
-                        Group {
-                            if isActive {
-                                LinearGradient(
-                                    colors: [SalomTheme.Colors.accentPrimary, SalomTheme.Colors.accentSecondary],
-                                    startPoint: .topLeading,
-                                    endPoint: .bottomTrailing
-                                )
-                            } else {
-                                Color.white.opacity(0.08)
-                            }
-                        }
-                    )
-                    .clipShape(Circle())
+                if isActive {
+                    Image(systemName: systemName)
+                        .font(.system(size: 18, weight: .semibold))
+                        .foregroundColor(.white)
+                        .frame(width: 40, height: 40)
+                        .background(
+                            LinearGradient(
+                                colors: [SalomTheme.Colors.accentPrimary, SalomTheme.Colors.accentSecondary],
+                                startPoint: .topLeading,
+                                endPoint: .bottomTrailing
+                            )
+                        )
+                        .clipShape(Circle())
+                } else {
+                    Image(systemName: systemName)
+                        .font(.system(size: 18, weight: .semibold))
+                        .foregroundColor(activeTint)
+                        .salomGlassCircle(40)
+                }
             }
             .buttonStyle(.plain)
         }
