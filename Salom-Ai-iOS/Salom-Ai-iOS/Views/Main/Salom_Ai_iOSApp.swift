@@ -33,6 +33,15 @@ struct Salom_Ai_iOSApp: App {
                         PushManager.syncDevice()
                     }
                 }
+                .onOpenURL { url in
+                    // Deep link from the web payment-result page after Payme/Click:
+                    //   salomai://payment/result?payment_id=...&status=paid
+                    // Brings the user straight back into the app and refreshes their plan.
+                    guard url.scheme == "salomai" else { return }
+                    if url.host == "payment" || url.path.contains("payment") {
+                        Task { await SubscriptionManager.shared.checkSubscriptionStatus() }
+                    }
+                }
         }
     }
 }

@@ -14,6 +14,16 @@
 				<string>com.googleusercontent.apps.347718573096-ki8ir8dmk06osats71t7qp3q2fcks8qm</string>
 			</array>
 		</dict>
+		<dict>
+			<key>CFBundleTypeRole</key>
+			<string>Editor</string>
+			<key>CFBundleURLName</key>
+			<string>com.fera-tech.salom-ai.deeplink</string>
+			<key>CFBundleURLSchemes</key>
+			<array>
+				<string>salomai</string>
+			</array>
+		</dict>
 	</array>
 	<key>GOOGLE_CLIENT_ID</key>
 	<string>347718573096-ki8ir8dmk06osats71t7qp3q2fcks8qm.apps.googleusercontent.com</string>
