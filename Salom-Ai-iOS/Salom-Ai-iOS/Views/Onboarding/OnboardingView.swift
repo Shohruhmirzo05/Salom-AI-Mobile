@@ -236,15 +236,25 @@ struct OnboardingView: View {
             }
         }
         .padding(28)
-        .background(
+        .background(bottomCardSurface)
+        .clipShape(RoundedRectangle(cornerRadius: 40, style: .continuous))
+        .edgesIgnoringSafeArea(.bottom)
+    }
+
+    @ViewBuilder
+    private var bottomCardSurface: some View {
+        if #available(iOS 26.0, *) {
+            // Liquid Glass over a subtle dark tint so the hero glows through.
+            Color(hex: "#0F172A").opacity(0.35)
+                .glassEffect(.regular, in: .rect(cornerRadius: 40, style: .continuous))
+                .shadow(color: .black.opacity(0.2), radius: 20, x: 0, y: -10)
+        } else {
             Rectangle()
                 .fill(Color(hex: "#0F172A").opacity(0.8))
                 .background(.ultraThinMaterial)
                 .mask(RoundedRectangle(cornerRadius: 40, style: .continuous))
                 .shadow(color: .black.opacity(0.2), radius: 20, x: 0, y: -10)
-        )
-        .clipShape(RoundedRectangle(cornerRadius: 40, style: .continuous))
-        .edgesIgnoringSafeArea(.bottom)
+        }
     }
 }
 

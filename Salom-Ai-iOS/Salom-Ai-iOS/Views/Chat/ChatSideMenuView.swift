@@ -188,10 +188,7 @@ struct ChatSideMenuView: View {
             }
             .padding(.horizontal, 10)
             .padding(.vertical, 12)
-            .background(
-                RoundedRectangle(cornerRadius: 999, style: .continuous)
-                    .fill(Color.white.opacity(0.08))
-            )
+            .salomGlassPill()
         }
     }
     
@@ -330,10 +327,7 @@ struct ChatSideMenuView: View {
                         .font(.system(size: 13, weight: .bold))
                         .foregroundColor(SalomTheme.Colors.accentPrimary)
                         .padding(8)
-                        .background(
-                            RoundedRectangle(cornerRadius: 10, style: .continuous)
-                                .fill(Color.white.opacity(0.06))
-                        )
+                        .salomGlassCard(10, interactive: true)
                 }
             }
             
@@ -394,10 +388,7 @@ struct ChatSideMenuView: View {
             }
             .padding(.horizontal, 10)
             .padding(.vertical, 8)
-            .background(
-                RoundedRectangle(cornerRadius: 14, style: .continuous)
-                    .fill(Color.white.opacity(0.04))
-            )
+            .salomGlassCard(14, interactive: true)
         }
         .buttonStyle(.plain)
     }

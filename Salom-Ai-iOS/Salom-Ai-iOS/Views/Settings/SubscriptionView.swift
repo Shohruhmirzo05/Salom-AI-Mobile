@@ -63,15 +63,11 @@ struct SubscriptionView: View {
                     }
             }
         }
-        .alert("Obunani bekor qilish", isPresented: $showCancelAlert) {
-            Button("Bekor qilish", role: .destructive) {
-                Task {
-                    let _ = await subscriptionManager.cancelSubscription()
-                }
-            }
-            Button("Yo'q", role: .cancel) {}
-        } message: {
-            Text("Avtomatik yangilanish o'chiriladi. Obuna amal qilish muddati tugaguncha faol qoladi.")
+        .sheet(isPresented: $showCancelAlert) {
+            CancelSurveySheet(onCancelled: {
+                Task { await subscriptionManager.checkSubscriptionStatus() }
+            })
+            .presentationDetents([.medium, .large])
         }
     }
     

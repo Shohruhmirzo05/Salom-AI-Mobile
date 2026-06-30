@@ -226,6 +226,7 @@ struct PresentationEditorView: View {
                 tries += 1
             }
             if status.status == "ready", let urlStr = status.fileUrl, let remote = URL(string: urlStr) {
+                Analytics.shared.track("presentation_exported", ["format": fmt])
                 // Download the real file so the share sheet shares the .pptx/.pdf
                 // itself (Save to Files, AirDrop, Telegram…) — not just a link.
                 let local = await downloadToFile(remote, format: fmt)

@@ -4,6 +4,9 @@
     "" : {
 
     },
+    "-%lld%% CHEGIRMA" : {
+
+    },
     "— %@" : {
 
     },
@@ -53,6 +56,16 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "/ ойига"
+          }
+        }
+      }
+    },
+    "%@ · %lld%%" : {
+      "localizations" : {
+        "uz" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "%1$@ · %2$lld%%"
           }
         }
       }
@@ -139,6 +152,16 @@
           "stringUnit" : {
             "state" : "new",
             "value" : "%1$lld / %2$lld"
+          }
+        }
+      }
+    },
+    "%lld / %lld · %@" : {
+      "localizations" : {
+        "uz" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "%1$lld / %2$lld · %3$@"
           }
         }
       }
@@ -395,10 +418,13 @@
     "Avtomatik yangilanish" : {
 
     },
-    "Avtomatik yangilanish o'chiriladi. Obuna amal qilish muddati tugaguncha faol qoladi." : {
+    "Barcha ma'lumotlar shifrlangan" : {
 
     },
-    "Barcha ma'lumotlar shifrlangan" : {
+    "Batafsil" : {
+
+    },
+    "Bekor qilinmoqda…" : {
 
     },
     "Bekor qilish" : {
@@ -423,6 +449,9 @@
           }
         }
       }
+    },
+    "Bekor qilishni tasdiqlash" : {
+
     },
     "Bepul" : {
       "localizations" : {
@@ -620,6 +649,9 @@
           }
         }
       }
+    },
+    "Chegirmani olish" : {
+
     },
     "Cheklovsiz imkoniyatlar" : {
       "localizations" : {
@@ -969,6 +1001,9 @@
           }
         }
       }
+    },
+    "DTM" : {
+
     },
     "DTM testlar" : {
 
@@ -1492,6 +1527,9 @@
         }
       }
     },
+    "Javobingiz xizmatni yaxshilashga yordam beradi." : {
+
+    },
     "Jonli qo'llab-quvvatlash — bir tap" : {
 
     },
@@ -1856,6 +1894,9 @@
         }
       }
     },
+    "Maxsus narx faqat siz uchun, cheklangan vaqtda." : {
+
+    },
     "Mikrofonni bosing va gapiring. Salom AI sizni eshitadi, tushunadi va o'z ovozi bilan javob beradi." : {
 
     },
@@ -1936,6 +1977,9 @@
           }
         }
       }
+    },
+    "Nega obunani bekor qilmoqchisiz?" : {
+
     },
     "No notifications yet" : {
       "extractionState" : "stale",
@@ -2296,6 +2340,9 @@
           }
         }
       }
+    },
+    "Obunamni saqlab qolaman" : {
+
     },
     "Obunangiz %@ da tugaydi" : {
 
@@ -2753,6 +2800,9 @@
         }
       }
     },
+    "Pro obunani maxsus, bir martalik chegirma bilan oching." : {
+
+    },
     "Pro rejaga o'tish" : {
 
     },
@@ -3114,6 +3164,9 @@
           }
         }
       }
+    },
+    "Sizni qaytarib olmoqchimiz! 🎁" : {
+
     },
     "Sizning tilingizda, sizning madaniyatingizda. Salom AI bilan kundalik vazifalarni osonlashtiring." : {
 
@@ -3661,6 +3714,7 @@
       }
     },
     "Usage info requires iOS 16+" : {
+      "extractionState" : "stale",
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -3922,9 +3976,6 @@
           }
         }
       }
-    },
-    "Yo'q" : {
-
     },
     "Yopish" : {
       "localizations" : {

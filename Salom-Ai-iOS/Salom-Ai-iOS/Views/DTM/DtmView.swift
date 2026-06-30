@@ -43,7 +43,7 @@ struct DtmView: View {
             .navigationBarTitleDisplayMode(.large)
             .toolbar {
                 ToolbarItem(placement: .topBarLeading) {
-                    GlassIconButton(systemName: "line.3.horizontal", size: 38) { onMenu() }
+                    GlassIconButton(systemName: "line.3.horizontal", size: 40) { onMenu() }
                 }
             }
             .navigationDestination(for: DtmRoute.self) { route in

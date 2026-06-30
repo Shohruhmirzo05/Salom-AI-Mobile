@@ -15,11 +15,12 @@ struct PaymentMethodSheet: View {
     @Environment(\.dismissAll) var dismissAll
     @StateObject private var subscriptionManager = SubscriptionManager.shared
 
-    @State private var selected: Method = .oneTime
+    @State private var selected: Method = .autoRenew
     @State private var isLoading = false
     @State private var errorMessage: String?
+    @State private var paymeEnabled = false
 
-    enum Method: Hashable { case oneTime, autoRenew }
+    enum Method: Hashable { case oneTime, autoRenew, payme }
 
     var body: some View {
         ZStack(alignment: .bottom) {
@@ -50,6 +51,20 @@ struct PaymentMethodSheet: View {
             }
         }
         .toolbarBackground(.hidden, for: .navigationBar)
+        .task { await loadPaymentConfig() }
+    }
+
+    /// Payme appears only when the backend enables it (off in production).
+    @MainActor
+    private func loadPaymentConfig() async {
+        let url = APIClient.shared.baseURL.appendingPathComponent("subscriptions/payment-config")
+        guard let token = TokenStore.shared.accessToken else { return }
+        var req = URLRequest(url: url)
+        req.setValue("Bearer \(token)", forHTTPHeaderField: "Authorization")
+        if let (data, _) = try? await URLSession.shared.data(for: req),
+           let json = try? JSONSerialization.jsonObject(with: data) as? [String: Any] {
+            paymeEnabled = (json["payme_enabled"] as? Bool) ?? false
+        }
     }
 
     // MARK: - Sections
@@ -84,11 +99,11 @@ struct PaymentMethodSheet: View {
 
     @ViewBuilder private var header: some View {
         VStack(alignment: .leading, spacing: 6) {
-            Text("To'lov turi")
+            Text("To'lov turini tanlang")
                 .font(.system(size: 28, weight: .semibold))
                 .foregroundColor(.white)
                 .tracking(-0.6)
-            Text("Click orqali. Birini tanlang.")
+            Text("Sizga qulay usulni tanlang.")
                 .font(.system(size: 14))
                 .foregroundColor(.white.opacity(0.45))
         }
@@ -97,22 +112,33 @@ struct PaymentMethodSheet: View {
     @ViewBuilder private var options: some View {
         VStack(spacing: 10) {
             MethodRow(
+                active: selected == .autoRenew,
+                icon: "arrow.triangle.2.circlepath",
+                title: "Karta (avto-yangilanish)",
+                subtitle: "Karta saqlanadi, har oy o'zi yangilanadi"
+            ) {
+                HapticManager.shared.fire(.lightImpact)
+                withAnimation(.easeOut(duration: 0.15)) { selected = .autoRenew }
+            }
+            MethodRow(
                 active: selected == .oneTime,
                 icon: "arrow.up.right.square.fill",
-                title: "Bir martalik",
+                title: "Click (bir martalik)",
                 subtitle: "Click sahifasiga o'tasiz"
             ) {
                 HapticManager.shared.fire(.lightImpact)
                 withAnimation(.easeOut(duration: 0.15)) { selected = .oneTime }
             }
-            MethodRow(
-                active: selected == .autoRenew,
-                icon: "arrow.triangle.2.circlepath",
-                title: "Avtomatik yangilanish",
-                subtitle: "Karta saqlanadi, har oy o'zi yangilanadi"
-            ) {
-                HapticManager.shared.fire(.lightImpact)
-                withAnimation(.easeOut(duration: 0.15)) { selected = .autoRenew }
+            if paymeEnabled {
+                MethodRow(
+                    active: selected == .payme,
+                    icon: "creditcard.fill",
+                    title: "Payme (bir martalik)",
+                    subtitle: "Payme sahifasiga o'tasiz"
+                ) {
+                    HapticManager.shared.fire(.lightImpact)
+                    withAnimation(.easeOut(duration: 0.15)) { selected = .payme }
+                }
             }
         }
     }
@@ -197,11 +223,25 @@ struct PaymentMethodSheet: View {
         errorMessage = nil
         switch selected {
         case .autoRenew:
+            Analytics.shared.track("payment_started", ["plan": planCode, "provider": "click_token"])
             onChooseAutoRenew()
         case .oneTime:
+            Analytics.shared.track("payment_started", ["plan": planCode, "provider": "click"])
             isLoading = true
             defer { isLoading = false }
             guard let urlString = await subscriptionManager.subscribeOneTime(planCode: planCode),
+                  let url = URL(string: urlString)
+            else {
+                errorMessage = "To'lov havolasini olib bo'lmadi."
+                return
+            }
+            await UIApplication.shared.open(url)
+            dismissAll()
+        case .payme:
+            Analytics.shared.track("payment_started", ["plan": planCode, "provider": "payme"])
+            isLoading = true
+            defer { isLoading = false }
+            guard let urlString = await subscriptionManager.subscribeCheckout(planCode: planCode, provider: "payme"),
                   let url = URL(string: urlString)
             else {
                 errorMessage = "To'lov havolasini olib bo'lmadi."

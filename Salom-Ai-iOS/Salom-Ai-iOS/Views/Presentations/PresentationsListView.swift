@@ -143,8 +143,7 @@ struct PresentationsListView: View {
             }
         }
         .padding(16)
-        .background(RoundedRectangle(cornerRadius: 24).fill(Color.white.opacity(0.05)))
-        .overlay(RoundedRectangle(cornerRadius: 24).stroke(Color.white.opacity(0.08)))
+        .salomGlassCard(24)
     }
 
     private func pickerLabel(_ text: String) -> some View {
@@ -234,8 +233,7 @@ struct PresentationsListView: View {
                 } label: { Image(systemName: "trash").font(.system(size: 13)).foregroundColor(.white.opacity(0.4)).padding(8) }
             }
             .padding(10)
-            .background(RoundedRectangle(cornerRadius: 16).fill(Color.white.opacity(0.05)))
-            .overlay(RoundedRectangle(cornerRadius: 16).stroke(Color.white.opacity(0.07)))
+            .salomGlassCard(16, interactive: true)
         }
         .buttonStyle(.plain)
     }

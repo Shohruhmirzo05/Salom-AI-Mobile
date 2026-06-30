@@ -293,6 +293,35 @@ struct SubscriptionPlan: Codable, Identifiable {
     }
 }
 
+// MARK: - Win-back / recovery offer (GET /subscriptions/recovery-offer)
+
+/// Returned only for users who started a payment but never finished and have no
+/// active sub. Mirrors the web win-back logic so iOS recovers abandoned payments.
+struct RecoveryOfferResponse: Codable {
+    let eligible: Bool
+    let askSurvey: Bool?
+    let offers: [RecoveryOffer]?
+}
+
+struct RecoveryOffer: Codable, Identifiable {
+    var id: String { promoCode }
+    let baseCode: String
+    let baseName: String
+    let basePrice: Int
+    let promoCode: String
+    let promoPrice: Int
+    let discountPct: Int
+    let benefits: [[String: String]]?
+
+    /// Localized benefit string, uz → en fallback (same contract as SubscriptionPlan).
+    func benefit(at index: Int, lang: String) -> String? {
+        guard let benefits, index < benefits.count else { return nil }
+        let row = benefits[index]
+        let short = String(lang.prefix(2)).lowercased()
+        return row[short] ?? row["uz"] ?? row["en"] ?? row.values.first
+    }
+}
+
 struct CurrentSubscriptionResponse: Codable {
     let plan: String?
     let active: Bool

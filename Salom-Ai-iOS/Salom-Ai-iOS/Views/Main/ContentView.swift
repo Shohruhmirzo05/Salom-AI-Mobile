@@ -45,6 +45,9 @@ struct ContentView: View {
         .fullScreenCover(isPresented: $showPaywall) {
             PaywallSheet()
         }
+        .fullScreenCover(item: $winBackOffer) { offer in
+            WinBackOfferSheet(offer: offer)
+        }
         .onChange(of: showSplash) { _, isSplashActive in
             if !isSplashActive {
                 print("DEBUG: Splash finished. Checking paywall.")
@@ -60,7 +63,9 @@ struct ContentView: View {
     
     @State private var showPaywall = false
     @State private var hasShownPaywall = false
-    
+    @State private var winBackOffer: RecoveryOffer?
+    @AppStorage("winback_last_shown_day") private var winBackLastShownDay: String = ""
+
     private func checkAndShowPaywall() {
         guard !hasShownPaywall else { return }
         guard !showSplash else { return }
@@ -79,12 +84,27 @@ struct ContentView: View {
                 hasShownPaywall = true  // mark regardless, so we never re-check
             }
 
-            if !isPro {
+            guard !isPro else { return }
+
+            // ONE decision: win-back (for abandoned-payment users, once/day) takes
+            // precedence; otherwise the generic paywall. Never both → no flash.
+            let today = Self.dayKey()
+            if winBackLastShownDay != today,
+               let resp = await SubscriptionManager.shared.fetchRecoveryOffer(),
+               resp.eligible, let best = resp.offers?.first {
+                await MainActor.run { winBackLastShownDay = today }
                 try? await Task.sleep(nanoseconds: 400_000_000)
-                await MainActor.run {
-                    showPaywall = true
-                }
+                await MainActor.run { winBackOffer = best }
+            } else {
+                try? await Task.sleep(nanoseconds: 400_000_000)
+                await MainActor.run { showPaywall = true }
             }
         }
+    }
+
+    private static func dayKey() -> String {
+        let f = DateFormatter()
+        f.dateFormat = "yyyy-MM-dd"
+        return f.string(from: Date())
     }
 }

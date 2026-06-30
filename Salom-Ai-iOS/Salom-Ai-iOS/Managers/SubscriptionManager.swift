@@ -85,14 +85,21 @@ final class SubscriptionManager: ObservableObject {
     /// open in Safari / SFSafariViewController. After the user returns to the app,
     /// `checkSubscriptionStatus()` runs automatically on scenePhase == .active.
     func subscribeOneTime(planCode: String) async -> String? {
+        await subscribeCheckout(planCode: planCode, provider: "click")
+    }
+
+    /// Generic redirect-checkout init for any provider (click | payme). Returns the
+    /// checkout URL the caller opens in Safari. After return, scenePhase .active
+    /// re-checks subscription status.
+    func subscribeCheckout(planCode: String, provider: String) async -> String? {
         do {
             let response = try await APIClient.shared.request(
-                .subscribe(plan: planCode, provider: "click"),
+                .subscribe(plan: planCode, provider: provider),
                 decodeTo: SubscribeResponse.self
             )
             return response.checkoutUrl
         } catch {
-            print("❌ One-time subscribe failed: \(error)")
+            print("❌ \(provider) subscribe failed: \(error)")
             lastError = "\(error)"
             return nil
         }
@@ -192,6 +199,33 @@ final class SubscriptionManager: ObservableObject {
         } catch {
             print("❌ Cancel subscription failed: \(error)")
             return false
+        }
+    }
+
+    // MARK: - Retention: cancel survey + win-back
+
+    /// Record WHY the user is leaving / didn't pay. Feeds the admin "Nega to'lov
+    /// qilishmadi?" breakdown. Also mirrors the web `cancel_survey` analytics event.
+    @discardableResult
+    func submitCancelSurvey(reason: String) async -> Bool {
+        Analytics.shared.track("cancel_survey", ["reason": reason])
+        do {
+            let _ = try await APIClient.shared.requestData(.cancelSurvey(reason: reason))
+            return true
+        } catch {
+            print("❌ Cancel survey failed: \(error)")
+            return false
+        }
+    }
+
+    /// Win-back: returns a discounted offer for users who abandoned a payment.
+    /// `nil`/`eligible == false` means show normal pricing (no popup).
+    func fetchRecoveryOffer() async -> RecoveryOfferResponse? {
+        do {
+            return try await APIClient.shared.request(.recoveryOffer, decodeTo: RecoveryOfferResponse.self)
+        } catch {
+            print("❌ Recovery offer fetch failed: \(error)")
+            return nil
         }
     }
 }

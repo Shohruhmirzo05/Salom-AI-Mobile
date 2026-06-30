@@ -12,7 +12,7 @@ struct ChatContainerView: View {
     @State private var isMenuOpen = false
     @State private var selectedSection: MainSection = .chat
     @AppStorage(AppStorageKeys.preferredLanguageCode) private var languageCode: String = "uz"
-    
+
     var body: some View {
         ZStack(alignment: .leading) {
             NavigationStack {
@@ -51,8 +51,12 @@ struct ChatContainerView: View {
             )
             .zIndex(2)
         }
+        .onAppear { Analytics.shared.track("screen_view", ["path": "/\(selectedSection.rawValue)"]) }
+        .onChange(of: selectedSection) { _, newValue in
+            Analytics.shared.track("screen_view", ["path": "/\(newValue.rawValue)"])
+        }
     }
-    
+
     @ViewBuilder
     private var contentView: some View {
         switch selectedSection {
