@@ -9,6 +9,7 @@ import SwiftUI
 import Combine
 import PhotosUI
 import Photos
+import UIKit
 
 struct ChatMessage: Identifiable {
     let id: UUID
@@ -161,12 +162,18 @@ final class ChatViewModel: ObservableObject {
                 )
                 
                 await MainActor.run {
-                    self.inputText = response.text
+                    let t = response.text.trimmingCharacters(in: .whitespacesAndNewlines)
+                    if !t.isEmpty {
+                        // Append to whatever's already typed, like ChatGPT dictation.
+                        self.inputText = self.inputText.isEmpty ? t : self.inputText + " " + t
+                    } else {
+                        self.errorMessage = "Ovoz aniqlanmadi, qayta urinib ko‘ring"
+                    }
                     self.isProcessingVoice = false
                 }
             } catch {
                 await MainActor.run {
-                    self.errorMessage = "Ovozni matnga aylantirishda xatolik: \(error.localizedDescription)"
+                    self.errorMessage = "Ovozni aniqlab bo‘lmadi, qayta urinib ko‘ring"
                     self.isProcessingVoice = false
                 }
             }
@@ -1069,17 +1076,22 @@ struct ChatView: View {
     @ViewBuilder func InputBar() -> some View {
         VStack(spacing: 12) {
             if viewModel.isRecording {
-                VoiceVisualizer(level: viewModel.audioLevel)
-                    .frame(height: 40)
-                    .padding(.horizontal, 20)
+                VStack(spacing: 6) {
+                    VoiceVisualizer(level: viewModel.audioLevel)
+                        .frame(height: 36)
+                        .padding(.horizontal, 20)
+                    HStack(spacing: 6) {
+                        Circle().fill(Color.red).frame(width: 7, height: 7)
+                        Text("Ovoz yozilmoqda…")
+                            .font(.caption).foregroundColor(SalomTheme.Colors.textSecondary)
+                    }
+                }
+                .padding(.bottom, 2)
             } else if viewModel.isProcessingVoice {
                 HStack(spacing: 8) {
-                    ProgressView()
-                        .scaleEffect(0.8)
-                        .tint(SalomTheme.Colors.accentPrimary)
-                    Text("Ovoz qayta ishlanmoqda...")
-                        .font(.caption)
-                        .foregroundColor(SalomTheme.Colors.textSecondary)
+                    ProgressView().scaleEffect(0.8).tint(SalomTheme.Colors.accentPrimary)
+                    Text("Matnga aylantirilmoqda…")
+                        .font(.caption).foregroundColor(SalomTheme.Colors.textSecondary)
                 }
                 .padding(.bottom, 4)
             }
@@ -1201,7 +1213,28 @@ struct ChatView: View {
                         .disabled(viewModel.isRecording || viewModel.isProcessingVoice)
                     }
                     .frame(maxHeight: 76)
-                    
+
+                    // Voice → text (dictation). Tap to record, tap to stop; the
+                    // transcription (OpenAI STT via /voice/stt) fills the field.
+                    Button {
+                        HapticManager.shared.fire(.mediumImpact)
+                        viewModel.toggleRecording()
+                    } label: {
+                        ZStack {
+                            Circle()
+                                .fill(viewModel.isRecording ? Color.red : Color.white.opacity(0.08))
+                                .frame(width: 44, height: 44)
+                            if viewModel.isProcessingVoice {
+                                ProgressView().tint(SalomTheme.Colors.accentPrimary)
+                            } else {
+                                Image(systemName: "mic.fill")
+                                    .font(.system(size: 18, weight: .semibold))
+                                    .foregroundColor(viewModel.isRecording ? .white : SalomTheme.Colors.accentPrimary)
+                            }
+                        }
+                    }
+                    .disabled(viewModel.isImageMode || viewModel.isProcessingVoice)
+
                     Button {
                         HapticManager.shared.fire(.lightImpact)
                         if viewModel.isImageMode {
@@ -1324,33 +1357,63 @@ struct ChatView: View {
     struct AttachmentImage: View {
         let url: String
         var onTap: (() -> Void)? = nil
+        @State private var saving = false
+        @State private var saved = false
 
         var body: some View {
-            Button {
-                onTap?()
-            } label: {
-                ZStack(alignment: .bottomTrailing) {
+            ZStack(alignment: .bottomTrailing) {
+                // Tap the image → open full-screen viewer.
+                Button { onTap?() } label: {
                     CachedImage(imageUrl: url, contentMode: .fill)
                         .frame(width: 260, height: 200)
-                        .clipShape(RoundedRectangle(cornerRadius: 12, style: .continuous))
-                        .overlay(
-                            RoundedRectangle(cornerRadius: 12, style: .continuous)
-                                .stroke(Color.white.opacity(0.1))
-                        )
+                        .clipShape(RoundedRectangle(cornerRadius: 16, style: .continuous))
+                }
+                .buttonStyle(.plain)
 
-                    if let link = URL(string: url) {
-                        ShareLink(item: link) {
-                            Image(systemName: "arrow.down.circle.fill")
-                                .font(.system(size: 18, weight: .semibold))
+                // Clean one-tap save to Photos (no share sheet). Checkmark on success.
+                Button {
+                    saveToPhotos()
+                } label: {
+                    Group {
+                        if saving {
+                            ProgressView().tint(.white)
+                        } else {
+                            Image(systemName: saved ? "checkmark" : "arrow.down")
+                                .font(.system(size: 15, weight: .bold))
                                 .foregroundColor(.white)
-                                .padding(10)
-                                .background(.ultraThinMaterial, in: Circle())
-                                .padding(8)
                         }
                     }
+                    .frame(width: 34, height: 34)
+                    .background(.ultraThinMaterial, in: Circle())
+                    .padding(10)
+                }
+                .buttonStyle(.plain)
+                .disabled(saving)
+            }
+        }
+
+        private func saveToPhotos() {
+            guard let u = URL(string: url), !saving else { return }
+            saving = true
+            Task {
+                do {
+                    let (data, _) = try await URLSession.shared.data(from: u)
+                    guard let img = UIImage(data: data) else { await MainActor.run { saving = false }; return }
+                    ImageSaver.shared.save(img)
+                    await MainActor.run { saving = false; saved = true; HapticManager.shared.fire(.mediumImpact) }
+                    try? await Task.sleep(nanoseconds: 1_600_000_000)
+                    await MainActor.run { saved = false }
+                } catch {
+                    await MainActor.run { saving = false }
                 }
             }
-            .buttonStyle(.plain)
+        }
+    }
+
+    final class ImageSaver: NSObject {
+        static let shared = ImageSaver()
+        func save(_ image: UIImage) {
+            UIImageWriteToSavedPhotosAlbum(image, nil, nil, nil)
         }
     }
     

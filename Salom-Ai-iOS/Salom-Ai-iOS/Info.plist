@@ -45,6 +45,8 @@
 			</dict>
 		</dict>
 	</dict>
+	<key>NSPhotoLibraryAddUsageDescription</key>
+	<string>Yaratilgan rasmlarni telefoningizga saqlash uchun ruxsat kerak.</string>
 	<key>UIBackgroundModes</key>
 	<array>
 		<string>remote-notification</string>
