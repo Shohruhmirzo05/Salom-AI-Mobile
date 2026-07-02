@@ -9,7 +9,7 @@ import SwiftUI
 import Combine
 import PhotosUI
 import Photos
-import UIKit
+internal import UIKit
 
 struct ChatMessage: Identifiable {
     let id: UUID

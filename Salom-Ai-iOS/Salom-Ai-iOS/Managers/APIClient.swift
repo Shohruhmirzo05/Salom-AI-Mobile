@@ -314,6 +314,7 @@ extension APIClient {
         case listPlans
         case currentSubscription
         case subscribe(plan: String, provider: String)
+        case paymentStatus(id: Int)
         case getUsageStats
         case autoRenew(cardId: Int?, enabled: Bool)
         case cancelSubscription
@@ -366,7 +367,7 @@ extension APIClient {
 
         fileprivate var method: HTTPMethod {
             switch self {
-            case .listConversations, .getConversation, .getConversationMessages, .perplexityUsage, .currentSubscription, .getSettings, .getModels, .getUsageStats, .listPlans, .oauthUser, .savedCards, .notifications, .unreadNotificationCount,
+            case .listConversations, .getConversation, .getConversationMessages, .perplexityUsage, .currentSubscription, .getSettings, .getModels, .getUsageStats, .listPlans, .oauthUser, .savedCards, .paymentStatus, .notifications, .unreadNotificationCount,
                  .presentationsConfig, .listPresentations, .getPresentation, .getExportStatus,
                  .dtmSubjects, .dtmTopics, .dtmQuiz, .dtmProgress, .recoveryOffer, .accountStreak:
                 return .get
@@ -470,6 +471,8 @@ extension APIClient {
                 return "/subscriptions/current"
             case .subscribe:
                 return "/subscriptions/subscribe"
+            case .paymentStatus(let id):
+                return "/subscriptions/payments/\(id)"
             case .getUsageStats:
                 return "/subscriptions/usage"
             case .autoRenew:

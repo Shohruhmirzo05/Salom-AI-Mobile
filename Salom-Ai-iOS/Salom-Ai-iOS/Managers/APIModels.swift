@@ -336,8 +336,17 @@ struct SubscribeResponse: Codable {
     let amountUzs: Int?
     let status: String?
     let checkoutUrl: String?
-    
+    let paymentId: Int?
+}
 
+/// Status of a single payment transaction (`GET /subscriptions/payments/{id}`).
+/// Mirrors the web `PaymentResult` polling source — the authoritative per-payment
+/// truth used to decide the post-checkout toast (never inferred from `isPro`).
+struct PaymentStatusResponse: Codable {
+    let id: Int
+    let status: String   // waiting_user | pending | pending_callback | paid | failed | cancelled
+    let plan: String?
+    let provider: String?
 }
 
 struct SettingsPayload: Codable {

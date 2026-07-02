@@ -840,6 +840,7 @@
       }
     },
     "Click orqali xavfsiz to'lov" : {
+      "extractionState" : "stale",
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -862,6 +863,7 @@
       }
     },
     "Click orqali. Birini tanlang." : {
+      "extractionState" : "stale",
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -1405,6 +1407,9 @@
           }
         }
       }
+    },
+    "Iltimos, qaytadan urinib ko'ring" : {
+
     },
     "Imtiyozlar mavjud emas" : {
       "localizations" : {
@@ -2297,6 +2302,9 @@
     "Obuna faollashtirildi va karta saqlandi" : {
 
     },
+    "Obuna faollashtirildi!" : {
+
+    },
     "Obuna ma'lumotlari" : {
       "localizations" : {
         "en" : {
@@ -2806,6 +2814,9 @@
     "Pro rejaga o'tish" : {
 
     },
+    "Pro rejimi faol" : {
+
+    },
     "Qayta urinish" : {
 
     },
@@ -3136,6 +3147,9 @@
     "Sinov rejimi — xatolar bo'lishi mumkin" : {
 
     },
+    "Sizga qulay usulni tanlang." : {
+
+    },
     "Sizga Salom AI yoqyaptimi?" : {
       "extractionState" : "manual",
       "localizations" : {
@@ -3246,6 +3260,9 @@
       }
     },
     "SSL" : {
+
+    },
+    "SSL bilan himoyalangan xavfsiz to'lov" : {
 
     },
     "Suhbat" : {
@@ -3506,6 +3523,15 @@
         }
       }
     },
+    "To'lov amalga oshmadi" : {
+
+    },
+    "To'lov bekor qilindi" : {
+
+    },
+    "To'lov havolasi bekor qilindi" : {
+
+    },
     "To'lov havolasini olib bo'lmadi." : {
       "extractionState" : "stale",
       "localizations" : {
@@ -3553,6 +3579,7 @@
       }
     },
     "To'lov turi" : {
+      "extractionState" : "stale",
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -3575,7 +3602,6 @@
       }
     },
     "To'lov turini tanlang" : {
-      "extractionState" : "stale",
       "localizations" : {
         "en" : {
           "stringUnit" : {

@@ -25,9 +25,11 @@ struct Salom_Ai_iOSApp: App {
                 .onChange(of: scenePhase) { _, newPhase in
                     if newPhase == .active {
                         Task {
-                            // Check subscription whenever app comes to foreground
-                            // This handles the case where user paid in Safari/Click app and returned
-                            await SubscriptionManager.shared.checkSubscriptionStatus()
+                            // Refresh on every foreground. Doubles as the fallback for
+                            // when the user returns from Safari via the back button and
+                            // the salomai:// deep link never fired — a confirmed upgrade
+                            // still surfaces the success toast exactly once.
+                            await SubscriptionManager.shared.refreshAfterForeground()
                         }
                         // Register OneSignal push id with backend so notifications deliver.
                         PushManager.syncDevice()
@@ -36,11 +38,14 @@ struct Salom_Ai_iOSApp: App {
                 .onOpenURL { url in
                     // Deep link from the web payment-result page after Payme/Click:
                     //   salomai://payment/result?payment_id=...&status=paid
-                    // Brings the user straight back into the app and refreshes their plan.
+                    // Brings the user straight back into the app, refreshes their plan,
+                    // and shows the result toast based on the trusted `status` param.
                     guard url.scheme == "salomai" else { return }
-                    if url.host == "payment" || url.path.contains("payment") {
-                        Task { await SubscriptionManager.shared.checkSubscriptionStatus() }
-                    }
+                    guard url.host == "payment" || url.path.contains("payment") else { return }
+                    let items = URLComponents(url: url, resolvingAgainstBaseURL: false)?.queryItems
+                    let status = items?.first(where: { $0.name == "status" })?.value
+                    let paymentId = items?.first(where: { $0.name == "payment_id" })?.value.flatMap(Int.init)
+                    Task { await SubscriptionManager.shared.handlePaymentReturn(status: status, paymentId: paymentId) }
                 }
         }
     }

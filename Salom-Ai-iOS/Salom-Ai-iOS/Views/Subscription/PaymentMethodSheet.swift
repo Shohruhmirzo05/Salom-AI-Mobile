@@ -78,10 +78,11 @@ struct PaymentMethodSheet: View {
             Image(systemName: "arrow.right")
                 .font(.system(size: 11, weight: .semibold))
                 .foregroundColor(.white.opacity(0.25))
-            Image("click-logo")
-                .resizable()
-                .scaledToFit()
-                .frame(height: 18)
+            // Both payment partners we work with.
+            HStack(spacing: 7) {
+                ProviderChip(logo: "click-icon", size: 30)
+                ProviderChip(logo: "payme-logo", size: 30)
+            }
             Spacer()
             HStack(spacing: 4) {
                 Image(systemName: "lock.shield.fill")
@@ -113,7 +114,8 @@ struct PaymentMethodSheet: View {
         VStack(spacing: 10) {
             MethodRow(
                 active: selected == .autoRenew,
-                icon: "arrow.triangle.2.circlepath",
+                logo: "click-icon",
+                badge: "arrow.triangle.2.circlepath",
                 title: "Karta (avto-yangilanish)",
                 subtitle: "Karta saqlanadi, har oy o'zi yangilanadi"
             ) {
@@ -122,7 +124,8 @@ struct PaymentMethodSheet: View {
             }
             MethodRow(
                 active: selected == .oneTime,
-                icon: "arrow.up.right.square.fill",
+                logo: "click-icon",
+                badge: nil,
                 title: "Click (bir martalik)",
                 subtitle: "Click sahifasiga o'tasiz"
             ) {
@@ -132,7 +135,8 @@ struct PaymentMethodSheet: View {
             if paymeEnabled {
                 MethodRow(
                     active: selected == .payme,
-                    icon: "creditcard.fill",
+                    logo: "payme-logo",
+                    badge: nil,
                     title: "Payme (bir martalik)",
                     subtitle: "Payme sahifasiga o'tasiz"
                 ) {
@@ -183,7 +187,7 @@ struct PaymentMethodSheet: View {
             HStack(spacing: 5) {
                 Image(systemName: "lock.fill")
                     .font(.system(size: 9))
-                Text("Click orqali xavfsiz to'lov")
+                Text("SSL bilan himoyalangan xavfsiz to'lov")
                     .font(.system(size: 11))
             }
             .foregroundColor(.white.opacity(0.32))
@@ -257,7 +261,8 @@ struct PaymentMethodSheet: View {
 
 private struct MethodRow: View {
     let active: Bool
-    let icon: String
+    let logo: String
+    let badge: String?
     let title: String
     let subtitle: String
     let onTap: () -> Void
@@ -274,15 +279,8 @@ private struct MethodRow: View {
                     .frame(width: 18, height: 18)
                     .animation(.easeOut(duration: 0.15), value: active)
 
-                // Icon tile
-                ZStack {
-                    RoundedRectangle(cornerRadius: 10, style: .continuous)
-                        .fill(active ? Color.white.opacity(0.12) : Color.white.opacity(0.05))
-                        .frame(width: 36, height: 36)
-                    Image(systemName: icon)
-                        .font(.system(size: 15, weight: .semibold))
-                        .foregroundColor(active ? .white : .white.opacity(0.55))
-                }
+                // Real provider logo on a white chip.
+                ProviderChip(logo: logo, size: 40, badge: badge)
 
                 VStack(alignment: .leading, spacing: 3) {
                     Text(title)
@@ -324,5 +322,37 @@ private struct TrustItem: View {
                 .font(.system(size: 11, weight: .medium))
         }
         .foregroundColor(.white.opacity(0.45))
+    }
+}
+
+/// A provider's official logo on a white rounded chip. Optional `badge` overlays a
+/// small accent glyph (e.g. auto-renew) in the bottom-trailing corner.
+private struct ProviderChip: View {
+    let logo: String
+    var size: CGFloat = 40
+    var badge: String? = nil
+
+    var body: some View {
+        RoundedRectangle(cornerRadius: size * 0.26, style: .continuous)
+            .fill(Color.white)
+            .frame(width: size, height: size)
+            .overlay(
+                Image(logo)
+                    .resizable()
+                    .scaledToFit()
+                    .padding(size * 0.16)
+            )
+            .clipShape(RoundedRectangle(cornerRadius: size * 0.26, style: .continuous))
+            .overlay(alignment: .bottomTrailing) {
+                if let badge {
+                    Image(systemName: badge)
+                        .font(.system(size: size * 0.26, weight: .bold))
+                        .foregroundColor(.white)
+                        .padding(size * 0.1)
+                        .background(Circle().fill(Color(hex: "#1ED6FF")))
+                        .overlay(Circle().strokeBorder(Color.black, lineWidth: 1.5))
+                        .offset(x: size * 0.14, y: size * 0.14)
+                }
+            }
     }
 }
