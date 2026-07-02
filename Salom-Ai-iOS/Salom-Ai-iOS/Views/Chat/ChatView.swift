@@ -896,6 +896,7 @@ struct ChatView: View {
     }
     
     @ViewBuilder func MessageBubble(message: ChatMessage) -> some View {
+        VStack(alignment: .leading, spacing: 4) {
         HStack {
             if message.isUser {
                 Spacer(minLength: 40)
@@ -982,8 +983,15 @@ struct ChatView: View {
                 }
             }
         }
+
+            // Like / dislike under AI answers (records an ai_feedback analytics event)
+            if !message.isUser && !message.text.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty {
+                MessageActions(message: message, model: viewModel.selectedModel?.id)
+                    .padding(.leading, 8)
+            }
+        }
     }
-    
+
     @ViewBuilder func TypingBubble() -> some View {
         HStack {
             HStack(spacing: 4) {
@@ -1439,6 +1447,41 @@ struct ChatView: View {
             .padding(10)
             .background(Color.white.opacity(0.08))
             .clipShape(RoundedRectangle(cornerRadius: 10, style: .continuous))
+        }
+    }
+
+    struct MessageActions: View {
+        let message: ChatMessage
+        let model: String?
+        @State private var rating: String? = nil
+
+        var body: some View {
+            HStack(spacing: 2) {
+                Button { setRating("up") } label: {
+                    Image(systemName: rating == "up" ? "hand.thumbsup.fill" : "hand.thumbsup")
+                        .font(.system(size: 13))
+                        .foregroundColor(rating == "up" ? SalomTheme.Colors.accentPrimary : .white.opacity(0.4))
+                        .frame(width: 32, height: 28)
+                }
+                Button { setRating("down") } label: {
+                    Image(systemName: rating == "down" ? "hand.thumbsdown.fill" : "hand.thumbsdown")
+                        .font(.system(size: 13))
+                        .foregroundColor(rating == "down" ? .red.opacity(0.85) : .white.opacity(0.4))
+                        .frame(width: 32, height: 28)
+                }
+            }
+        }
+
+        private func setRating(_ r: String) {
+            let newVal: String? = (rating == r) ? nil : r
+            rating = newVal
+            HapticManager.shared.fire(.lightImpact)
+            guard let nv = newVal else { return }
+            Analytics.shared.track("ai_feedback", [
+                "rating": nv,
+                "model": model ?? "",
+                "preview": String(message.text.prefix(200))
+            ])
         }
     }
 }
