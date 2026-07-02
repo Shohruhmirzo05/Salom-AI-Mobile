@@ -15,6 +15,7 @@ enum AppStorageKeys {
     static let phoneNumber            = "phoneNumber"
     static let displayName            = "displayName"
     static let userEmail              = "userEmail"
+    static let avatarUrl              = "avatarUrl"
     static let preferredLanguageCode  = "preferredLanguageCode"
     static let accessToken            = "accessToken"
     static let refreshToken           = "refreshToken"

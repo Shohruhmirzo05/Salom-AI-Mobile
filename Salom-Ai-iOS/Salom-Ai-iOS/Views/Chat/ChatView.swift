@@ -18,14 +18,16 @@ struct ChatMessage: Identifiable {
     let role: MessageRole
     let createdAt: Date?
     var fileUrls: [String]? = nil
-    
-    init(id: UUID = UUID(), remoteId: Int? = nil, text: String, role: MessageRole, createdAt: Date? = nil, fileUrls: [String]? = nil) {
+    var docFormat: DocFormat? = nil   // set when the user asked for a downloadable file
+
+    init(id: UUID = UUID(), remoteId: Int? = nil, text: String, role: MessageRole, createdAt: Date? = nil, fileUrls: [String]? = nil, docFormat: DocFormat? = nil) {
         self.id = id
         self.remoteId = remoteId
         self.text = text
         self.role = role
         self.createdAt = createdAt
         self.fileUrls = fileUrls
+        self.docFormat = docFormat
     }
     
     var isUser: Bool {
@@ -360,27 +362,51 @@ final class ChatViewModel: ObservableObject {
         )
         
         objectWillChange.send()
-        messages.append(userMessage)
-        
+        withAnimation(.spring(response: 0.35, dampingFraction: 0.82)) {
+            messages.append(userMessage)
+        }
+
         isSending = true
         isTyping = true
         Analytics.shared.track("chat_message", ["has_image": !attachments.isEmpty, "length": trimmed.count])
 
         let currentAttachments = attachments
         attachments = []
-        
+
+        streamAssistant(text: trimmed,
+                        attachments: currentAttachments.isEmpty ? nil : currentAttachments,
+                        regenerate: false,
+                        docFormat: DocumentExporter.detectFormat(trimmed))
+    }
+
+    /// Re-run the last AI answer in place using the preceding user message.
+    func regenerate(_ assistant: ChatMessage) {
+        guard !isSending else { return }
+        guard let idx = messages.firstIndex(where: { $0.id == assistant.id }),
+              let userMsg = messages[..<idx].last(where: { $0.isUser }) else { return }
+        withAnimation { _ = messages.remove(at: idx) }
+        isSending = true
+        isTyping = true
+        streamAssistant(text: userMsg.text,
+                        attachments: userMsg.fileUrls,
+                        regenerate: true,
+                        docFormat: DocumentExporter.detectFormat(userMsg.text))
+    }
+
+    /// Shared streaming pipeline for both fresh sends and regenerations.
+    private func streamAssistant(text: String, attachments: [String]?, regenerate: Bool, docFormat: DocFormat?) {
         let currentConvId = selectedConversation?.id
         let selectedModelId = selectedModel?.id
-        
+
         Task {
             do {
                 let stream = client.chatStream(
-                    .chatStream(conversationId: currentConvId, text: trimmed, projectId: nil, model: selectedModelId, attachments: currentAttachments.isEmpty ? nil : currentAttachments)
+                    .chatStream(conversationId: currentConvId, text: text, projectId: nil, model: selectedModelId, attachments: attachments, regenerate: regenerate)
                 )
-                
+
                 var fullText = ""
                 var assistantMessageId: UUID?
-                
+
                 for try await event in stream {
                     switch event.type {
                     case "chunk":
@@ -389,20 +415,21 @@ final class ChatViewModel: ObservableObject {
                             await MainActor.run {
                                 if let existingId = assistantMessageId,
                                    let index = self.messages.firstIndex(where: { $0.id == existingId }) {
-                                    // Update existing message
                                     self.messages[index] = ChatMessage(
                                         id: existingId,
                                         remoteId: self.messages[index].remoteId,
                                         text: fullText,
                                         role: .assistant,
-                                        createdAt: self.messages[index].createdAt
+                                        createdAt: self.messages[index].createdAt,
+                                        fileUrls: self.messages[index].fileUrls,
+                                        docFormat: docFormat
                                     )
                                 } else {
-                                    // First chunk: Create message and hide typing indicator
                                     let newMessage = ChatMessage(
                                         text: fullText,
                                         role: .assistant,
-                                        createdAt: Date()
+                                        createdAt: Date(),
+                                        docFormat: docFormat
                                     )
                                     assistantMessageId = newMessage.id
                                     self.messages.append(newMessage)
@@ -425,22 +452,20 @@ final class ChatViewModel: ObservableObject {
                         }
                     case "error":
                         if let errorMsg = event.message {
-                            await MainActor.run {
-                                self.errorMessage = errorMsg
-                            }
+                            await MainActor.run { self.errorMessage = errorMsg }
                         }
                     default:
                         break
                     }
                 }
-                
+
                 await MainActor.run {
                     self.isTyping = false
                     self.isSending = false
                 }
-                
+
                 await loadConversations(selectFirst: false)
-                
+
             } catch {
                 await MainActor.run {
                     self.isTyping = false
@@ -449,7 +474,7 @@ final class ChatViewModel: ObservableObject {
                     print("❌ Chat error: \(error)")
                 }
             }
-            
+
             await MainActor.run {
                 ReviewManager.shared.incrementActionCount()
             }
@@ -991,10 +1016,42 @@ struct ChatView: View {
             }
         }
 
-            // Like / dislike under AI answers (records an ai_feedback analytics event)
-            if !message.isUser && !message.text.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty {
-                MessageActions(message: message, model: viewModel.selectedModel?.id)
+            // AI answer extras: a document card (only if the user asked for a file)
+            // + the action row (copy / share / regenerate / 👍 / 👎). Hidden while
+            // this message is still streaming.
+            if !message.isUser,
+               !message.text.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty,
+               !(viewModel.isSending && message.id == viewModel.messages.last?.id) {
+
+                if let fmt = message.docFormat {
+                    Button {
+                        HapticManager.shared.fire(.mediumImpact)
+                        DocumentExporter.export(message.text, format: fmt)
+                    } label: {
+                        HStack(spacing: 10) {
+                            Image(systemName: fmt.icon).foregroundColor(SalomTheme.Colors.accentPrimary)
+                            VStack(alignment: .leading, spacing: 1) {
+                                Text(fmt.label).font(.system(size: 14, weight: .semibold)).foregroundColor(.white)
+                                Text("Yuklab olish").font(.system(size: 11)).foregroundColor(.white.opacity(0.5))
+                            }
+                            Spacer(minLength: 0)
+                            Image(systemName: "square.and.arrow.down").foregroundColor(SalomTheme.Colors.accentPrimary)
+                        }
+                        .padding(12)
+                        .background(SalomTheme.Colors.accentPrimary.opacity(0.1))
+                        .clipShape(RoundedRectangle(cornerRadius: 14, style: .continuous))
+                        .overlay(RoundedRectangle(cornerRadius: 14).stroke(SalomTheme.Colors.accentPrimary.opacity(0.3)))
+                    }
+                    .buttonStyle(.plain)
                     .padding(.leading, 8)
+                    .transition(.opacity.combined(with: .scale(scale: 0.96)))
+                }
+
+                MessageActions(message: message, model: viewModel.selectedModel?.id) {
+                    viewModel.regenerate(message)
+                }
+                .padding(.leading, 8)
+                .transition(.opacity)
             }
         }
     }
@@ -1460,28 +1517,50 @@ struct ChatView: View {
     struct MessageActions: View {
         let message: ChatMessage
         let model: String?
+        var onRegenerate: () -> Void = {}
         @State private var rating: String? = nil
+        @State private var copied = false
 
         var body: some View {
             HStack(spacing: 2) {
-                Button { setRating("up") } label: {
-                    Image(systemName: rating == "up" ? "hand.thumbsup.fill" : "hand.thumbsup")
-                        .font(.system(size: 13))
-                        .foregroundColor(rating == "up" ? SalomTheme.Colors.accentPrimary : .white.opacity(0.4))
+                iconButton(copied ? "checkmark" : "doc.on.doc", tint: copied ? .green : .white.opacity(0.45)) {
+                    UIPasteboard.general.string = message.text
+                    HapticManager.shared.fire(.lightImpact)
+                    withAnimation { copied = true }
+                    DispatchQueue.main.asyncAfter(deadline: .now() + 1.4) { withAnimation { copied = false } }
+                }
+
+                ShareLink(item: message.text) {
+                    Image(systemName: "square.and.arrow.up")
+                        .font(.system(size: 13)).foregroundColor(.white.opacity(0.45))
                         .frame(width: 32, height: 28)
                 }
-                Button { setRating("down") } label: {
-                    Image(systemName: rating == "down" ? "hand.thumbsdown.fill" : "hand.thumbsdown")
-                        .font(.system(size: 13))
-                        .foregroundColor(rating == "down" ? .red.opacity(0.85) : .white.opacity(0.4))
-                        .frame(width: 32, height: 28)
+
+                iconButton("arrow.clockwise", tint: .white.opacity(0.45)) {
+                    HapticManager.shared.fire(.lightImpact)
+                    onRegenerate()
                 }
+
+                Rectangle().fill(Color.white.opacity(0.12)).frame(width: 1, height: 15).padding(.horizontal, 3)
+
+                iconButton(rating == "up" ? "hand.thumbsup.fill" : "hand.thumbsup",
+                           tint: rating == "up" ? SalomTheme.Colors.accentPrimary : .white.opacity(0.45)) { setRating("up") }
+                iconButton(rating == "down" ? "hand.thumbsdown.fill" : "hand.thumbsdown",
+                           tint: rating == "down" ? .red.opacity(0.85) : .white.opacity(0.45)) { setRating("down") }
             }
+        }
+
+        @ViewBuilder
+        private func iconButton(_ icon: String, tint: Color, action: @escaping () -> Void) -> some View {
+            Button(action: action) {
+                Image(systemName: icon).font(.system(size: 13)).foregroundColor(tint).frame(width: 32, height: 28)
+            }
+            .buttonStyle(.plain)
         }
 
         private func setRating(_ r: String) {
             let newVal: String? = (rating == r) ? nil : r
-            rating = newVal
+            withAnimation(.spring(response: 0.3, dampingFraction: 0.7)) { rating = newVal }
             HapticManager.shared.fire(.lightImpact)
             guard let nv = newVal else { return }
             Analytics.shared.track("ai_feedback", [

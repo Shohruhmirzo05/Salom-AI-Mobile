@@ -64,5 +64,6 @@ final class SessionManager: ObservableObject {
         UserDefaults.standard.removeObject(forKey: AppStorageKeys.displayName)
         UserDefaults.standard.removeObject(forKey: AppStorageKeys.userEmail)
         UserDefaults.standard.removeObject(forKey: AppStorageKeys.phoneNumber)
+        UserDefaults.standard.removeObject(forKey: AppStorageKeys.avatarUrl)
     }
 }

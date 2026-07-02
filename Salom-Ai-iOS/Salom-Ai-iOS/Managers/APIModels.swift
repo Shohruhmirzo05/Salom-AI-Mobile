@@ -23,13 +23,15 @@ struct OAuthUser: Codable {
     let id: Int
     let email: String?
     let displayName: String?
+    let avatarUrl: String?
     let authProvider: String?
     let createdAt: Date?
-    
+
     enum CodingKeys: String, CodingKey {
         case id
         case email
         case displayName = "display_name"
+        case avatarUrl = "avatar_url"
         case authProvider = "auth_provider"
         case createdAt = "created_at"
     }

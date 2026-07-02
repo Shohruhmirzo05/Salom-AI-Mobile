@@ -242,7 +242,7 @@ struct ChatContainerView: View {
         Task {
             do {
                 let _: OAuthUser = try await APIClient.shared.request(
-                    .updateProfile(language: code, displayName: nil),
+                    .updateProfile(language: code, displayName: nil, avatarUrl: nil),
                     decodeTo: OAuthUser.self
                 )
             } catch {

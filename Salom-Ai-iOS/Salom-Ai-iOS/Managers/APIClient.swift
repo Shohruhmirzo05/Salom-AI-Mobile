@@ -281,12 +281,12 @@ extension APIClient {
         case logout(refreshToken: String)
         case oauthVerify(provider: OAuthProvider, idToken: String, platform: String = "ios")
         case oauthUser
-        case updateProfile(language: String?, displayName: String?)
+        case updateProfile(language: String?, displayName: String?, avatarUrl: String?)
         case updatePlatform(platform: String)
         
         // Chat
         case chat(conversationId: Int?, text: String, projectId: Int?, model: String?, attachments: [String]?)
-        case chatStream(conversationId: Int?, text: String, projectId: Int?, model: String?, attachments: [String]?)
+        case chatStream(conversationId: Int?, text: String, projectId: Int?, model: String?, attachments: [String]?, regenerate: Bool)
         case generateImage(conversationId: Int?, prompt: String, projectId: Int?)
         case saveChat(conversationId: Int, userText: String, assistantText: String)
         case uploadFile(data: Data, filename: String)
@@ -579,13 +579,20 @@ extension APIClient {
                 return ["reason": reason]
             case .registerPushDevice(let token, let platform):
                 return ["token": token, "platform": platform]
-            case .chat(let conversationId, let text, let projectId, let model, let attachments),
-                 .chatStream(let conversationId, let text, let projectId, let model, let attachments):
+            case .chat(let conversationId, let text, let projectId, let model, let attachments):
                 var body: [String: Any] = ["text": text]
                 if let conversationId { body["conversation_id"] = conversationId }
                 if let projectId { body["project_id"] = projectId }
                 if let model { body["model"] = model }
                 if let attachments { body["attachments"] = attachments }
+                return body
+            case .chatStream(let conversationId, let text, let projectId, let model, let attachments, let regenerate):
+                var body: [String: Any] = ["text": text]
+                if let conversationId { body["conversation_id"] = conversationId }
+                if let projectId { body["project_id"] = projectId }
+                if let model { body["model"] = model }
+                if let attachments { body["attachments"] = attachments }
+                if regenerate { body["regenerate"] = true }
                 return body
             case .generateImage(let conversationId, let prompt, let projectId):
                 var params: [String: Any] = ["prompt": prompt]
@@ -630,10 +637,11 @@ extension APIClient {
                 if let prompt = payload.systemPrompt { body["system_prompt"] = prompt }
                 if let preferences = payload.preferences { body["preferences"] = preferences }
                 return body
-            case .updateProfile(let language, let displayName):
+            case .updateProfile(let language, let displayName, let avatarUrl):
                 var body: [String: Any] = [:]
                 if let language { body["language"] = language }
                 if let displayName { body["display_name"] = displayName }
+                if let avatarUrl { body["avatar_url"] = avatarUrl }
                 return body
             case .updatePlatform(let platform):
                 return ["platform": platform]

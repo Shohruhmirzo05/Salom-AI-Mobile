@@ -6,6 +6,7 @@
 //
 
 import SwiftUI
+import PhotosUI
 
 struct SettingsScreen: View {
     @AppStorage(AppStorageKeys.phoneNumber)
@@ -20,6 +21,9 @@ struct SettingsScreen: View {
     @AppStorage(AppStorageKeys.userEmail)
     private var storedEmail: String = ""
 
+    @AppStorage(AppStorageKeys.avatarUrl)
+    private var storedAvatarUrl: String = ""
+
     private let session = SessionManager.shared
 
     @State private var showDeleteConfirmation = false
@@ -27,6 +31,22 @@ struct SettingsScreen: View {
     @State private var deleteError: String?
     @State private var currentPlanName: String = ""
     @State private var isPremium: Bool = false
+    @State private var selectedAvatarItem: PhotosPickerItem?
+    @State private var avatarUploading = false
+
+    private func uploadAvatar(_ item: PhotosPickerItem) async {
+        guard let data = try? await item.loadTransferable(type: Data.self) else { return }
+        await MainActor.run { avatarUploading = true }
+        do {
+            let uploaded = try await APIClient.shared.request(
+                .uploadFile(data: data, filename: "avatar.jpg"), decodeTo: FileUploadResponse.self)
+            _ = try? await APIClient.shared.request(
+                .updateProfile(language: nil, displayName: nil, avatarUrl: uploaded.url), decodeTo: OAuthUser.self)
+            await MainActor.run { storedAvatarUrl = uploaded.url; avatarUploading = false }
+        } catch {
+            await MainActor.run { avatarUploading = false }
+        }
+    }
 
     // MARK: - Computed helpers
 
@@ -103,14 +123,38 @@ struct SettingsScreen: View {
     @ViewBuilder
     private func ProfileCard() -> some View {
         HStack(spacing: 16) {
-            ZStack {
-                Circle()
-                    .fill(SalomTheme.Gradients.accent)
-                    .frame(width: 64, height: 64)
-                Text(profileInitials)
-                    .font(.system(size: 24, weight: .bold))
-                    .foregroundColor(.white)
+            PhotosPicker(selection: $selectedAvatarItem, matching: .images) {
+                ZStack {
+                    if !storedAvatarUrl.isEmpty, let url = URL(string: storedAvatarUrl) {
+                        AsyncImage(url: url) { image in
+                            image.resizable().scaledToFill()
+                        } placeholder: {
+                            Circle().fill(SalomTheme.Gradients.accent)
+                        }
+                        .frame(width: 64, height: 64)
+                        .clipShape(Circle())
+                    } else {
+                        Circle().fill(SalomTheme.Gradients.accent).frame(width: 64, height: 64)
+                        Text(profileInitials).font(.system(size: 24, weight: .bold)).foregroundColor(.white)
+                    }
+
+                    if avatarUploading {
+                        Circle().fill(Color.black.opacity(0.45)).frame(width: 64, height: 64)
+                        ProgressView().tint(.white)
+                    }
+
+                    Image(systemName: "camera.fill")
+                        .font(.system(size: 10))
+                        .foregroundColor(.black)
+                        .frame(width: 22, height: 22)
+                        .background(SalomTheme.Colors.accentPrimary)
+                        .clipShape(Circle())
+                        .overlay(Circle().stroke(SalomTheme.Colors.bgMain, lineWidth: 2))
+                        .offset(x: 23, y: 23)
+                }
+                .frame(width: 64, height: 64)
             }
+            .buttonStyle(.plain)
 
             VStack(alignment: .leading, spacing: 6) {
                 Text(profileName)
@@ -127,6 +171,9 @@ struct SettingsScreen: View {
         }
         .padding(.vertical, 8)
         .glassCard(cornerRadius: 24)
+        .onChange(of: selectedAvatarItem) { item in
+            if let item { Task { await uploadAvatar(item) } }
+        }
     }
 
     // MARK: - Subscription Section
@@ -382,7 +429,7 @@ struct SettingsScreen: View {
     private func updateLanguage(code: String) async {
         do {
             let _: OAuthUser = try await APIClient.shared.request(
-                .updateProfile(language: code, displayName: nil),
+                .updateProfile(language: code, displayName: nil, avatarUrl: nil),
                 decodeTo: OAuthUser.self
             )
         } catch {
