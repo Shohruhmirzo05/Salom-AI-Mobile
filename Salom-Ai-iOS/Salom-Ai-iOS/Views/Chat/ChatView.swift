@@ -920,10 +920,17 @@ struct ChatView: View {
                 }
                 
                 if !message.text.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty {
-                    Text(message.text)
-                        .font(.system(size: 15, weight: .medium))
-                        .foregroundColor(.white)
-                        .transition(.opacity.combined(with: .move(edge: .bottom)))
+                    Group {
+                        if message.isUser {
+                            Text(message.text)
+                                .font(.system(size: 15, weight: .medium))
+                                .foregroundColor(.white)
+                        } else {
+                            MarkdownText(text: message.text)   // rich formatting, like web
+                        }
+                    }
+                    .textSelection(.enabled)
+                    .transition(.opacity.combined(with: .move(edge: .bottom)))
                 }
             }
             .padding(.horizontal, 14)
