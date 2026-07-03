@@ -220,7 +220,11 @@ final class OpenAIRealtimeManager: NSObject, ObservableObject {
     /// in ~200ms. The gate is reduced from 1200 → 300 ms so genuine barge-in
     /// works again while still suppressing the loudest startup transient.
     private var assistantSpeakingStartedAt: Date?
-    private let micGateAfterAssistantStartMs: Double = 300
+    // Safety cap only: the mic uplink is gated for the WHOLE assistant turn
+    // (see sendAudioChunk). onStreamingDrained normally clears the gate the
+    // moment playback ends; this cap just guarantees the mic can never get stuck
+    // muted if that callback is somehow missed.
+    private let maxAssistantGateMs: Double = 30_000
 
     // MARK: - Init
     /// ViewModel calls this once after constructing both objects so the
@@ -323,19 +327,22 @@ final class OpenAIRealtimeManager: NSObject, ObservableObject {
     /// Forward a raw 24 kHz PCM16 chunk from the mic, wrapped in OpenAI's
     /// `input_audio_buffer.append` JSON envelope (base64-encoded audio).
     ///
-    /// Gating: during the first `micGateAfterAssistantStartMs` of any assistant
-    /// turn, we DROP mic chunks instead of forwarding them. iOS's session-level
-    /// AEC needs ~half a second of speaker output to converge on a reference;
-    /// before that, residual speaker→mic leak is loud enough to trigger
-    /// OpenAI's server VAD and self-cancel the assistant. After the gate, the
-    /// stream resumes so genuine user barge-in still works.
+    /// HALF-DUPLEX GATING: while the assistant is speaking, we DROP mic chunks
+    /// entirely rather than forwarding them. Even with VPIO (hardware AEC), a bit
+    /// of speaker→mic echo leaks through, and that leak was reaching OpenAI's
+    /// server VAD and self-cancelling the reply — the assistant would cut itself
+    /// off mid-sentence even when the user is silent. Not sending ANY mic audio
+    /// during playback makes that impossible. `assistantIsSpeaking` is cleared by
+    /// `onStreamingDrained` the instant the last audio chunk finishes, so the mic
+    /// resumes immediately after the assistant stops; the time cap is only a
+    /// stuck-mic safety. Trade-off: no talk-over barge-in — the user speaks after
+    /// the assistant finishes (reliable > twitchy, which is what users asked for).
     func sendAudioChunk(_ data: Data) {
         guard connectionState == .connected else { return }
 
         if assistantIsSpeaking, let started = assistantSpeakingStartedAt {
             let elapsedMs = Date().timeIntervalSince(started) * 1000
-            if elapsedMs < micGateAfterAssistantStartMs {
-                // Drop — speaker leak is still louder than AEC can suppress.
+            if elapsedMs < maxAssistantGateMs {
                 return
             }
         }
