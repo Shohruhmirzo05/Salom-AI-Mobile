@@ -46,11 +46,22 @@ struct ChatReplyResponse: Codable {
     let conversationId: Int
     // Note: No custom CodingKeys needed - decoder uses .convertFromSnakeCase
 }
+/// A web source returned with a search-grounded answer.
+struct Citation: Codable, Hashable {
+    let title: String
+    let url: String
+}
+
 struct ChatStreamEvent: Codable {
     let type: String
     let content: String?
     let conversationId: Int?
     let message: String?
+    // Web-search extras: stage=="searching_web" on a "status" event, citations on
+    // a "citations" event, upgrade==true on a "search_limit" event.
+    let stage: String?
+    let citations: [Citation]?
+    let upgrade: Bool?
 }
 
 struct ChatSavePayload: Codable {

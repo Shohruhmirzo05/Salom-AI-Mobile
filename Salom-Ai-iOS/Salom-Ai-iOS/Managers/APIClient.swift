@@ -286,7 +286,7 @@ extension APIClient {
         
         // Chat
         case chat(conversationId: Int?, text: String, projectId: Int?, model: String?, attachments: [String]?)
-        case chatStream(conversationId: Int?, text: String, projectId: Int?, model: String?, attachments: [String]?, regenerate: Bool)
+        case chatStream(conversationId: Int?, text: String, projectId: Int?, model: String?, attachments: [String]?, regenerate: Bool, webSearch: Bool, platform: String?)
         case generateImage(conversationId: Int?, prompt: String, projectId: Int?)
         case saveChat(conversationId: Int, userText: String, assistantText: String)
         case uploadFile(data: Data, filename: String)
@@ -298,7 +298,7 @@ extension APIClient {
         case getModels
         
         // Voice
-        case stt(audio: Data, filename: String)
+        case stt(audio: Data, filename: String, language: String?)
         case tts(text: String)
         case chatVoice(audio: Data, filename: String, conversationId: Int?)
         case ttsStream(text: String)
@@ -591,13 +591,16 @@ extension APIClient {
                 if let model { body["model"] = model }
                 if let attachments { body["attachments"] = attachments }
                 return body
-            case .chatStream(let conversationId, let text, let projectId, let model, let attachments, let regenerate):
+            case .chatStream(let conversationId, let text, let projectId, let model, let attachments, let regenerate, let webSearch, let platform):
                 var body: [String: Any] = ["text": text]
                 if let conversationId { body["conversation_id"] = conversationId }
                 if let projectId { body["project_id"] = projectId }
                 if let model { body["model"] = model }
                 if let attachments { body["attachments"] = attachments }
                 if regenerate { body["regenerate"] = true }
+                // true = force web search; omitted = smart auto-detect on the backend.
+                if webSearch { body["web_search"] = true }
+                if let platform { body["platform"] = platform }
                 return body
             case .generateImage(let conversationId, let prompt, let projectId):
                 var params: [String: Any] = ["prompt": prompt]
@@ -682,13 +685,24 @@ extension APIClient {
             }
             
             switch self {
-            case .uploadFile(let data, let filename),
-                 .stt(let data, let filename):
+            case .uploadFile(let data, let filename):
                 append("--\(boundary)\r\n")
                 append("Content-Disposition: form-data; name=\"file\"; filename=\"\(filename)\"\r\n")
                 append("Content-Type: application/octet-stream\r\n\r\n")
                 body.append(data)
                 append("\r\n")
+            case .stt(let data, let filename, let language):
+                append("--\(boundary)\r\n")
+                append("Content-Disposition: form-data; name=\"file\"; filename=\"\(filename)\"\r\n")
+                append("Content-Type: application/octet-stream\r\n\r\n")
+                body.append(data)
+                append("\r\n")
+                // Prioritise the user's spoken/UI language (backend defaults to Uzbek).
+                if let language {
+                    append("--\(boundary)\r\n")
+                    append("Content-Disposition: form-data; name=\"language\"\r\n\r\n")
+                    append("\(language)\r\n")
+                }
             case .chatVoice(let data, let filename, let conversationId):
                 append("--\(boundary)\r\n")
                 append("Content-Disposition: form-data; name=\"file\"; filename=\"\(filename)\"\r\n")

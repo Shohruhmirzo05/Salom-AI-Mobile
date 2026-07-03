@@ -19,8 +19,10 @@ struct ChatMessage: Identifiable {
     let createdAt: Date?
     var fileUrls: [String]? = nil
     var docFormat: DocFormat? = nil   // set when the user asked for a downloadable file
+    var searchingWeb: Bool = false    // true while a live web search runs for this reply
+    var citations: [Citation]? = nil  // web sources for this reply
 
-    init(id: UUID = UUID(), remoteId: Int? = nil, text: String, role: MessageRole, createdAt: Date? = nil, fileUrls: [String]? = nil, docFormat: DocFormat? = nil) {
+    init(id: UUID = UUID(), remoteId: Int? = nil, text: String, role: MessageRole, createdAt: Date? = nil, fileUrls: [String]? = nil, docFormat: DocFormat? = nil, searchingWeb: Bool = false, citations: [Citation]? = nil) {
         self.id = id
         self.remoteId = remoteId
         self.text = text
@@ -28,6 +30,8 @@ struct ChatMessage: Identifiable {
         self.createdAt = createdAt
         self.fileUrls = fileUrls
         self.docFormat = docFormat
+        self.searchingWeb = searchingWeb
+        self.citations = citations
     }
     
     var isUser: Bool {
@@ -96,6 +100,10 @@ final class ChatViewModel: ObservableObject {
     // Image Generation
     @Published var isImageMode: Bool = false
     @Published var isGeneratingImage: Bool = false
+    // Web search: false = smart auto-detect (backend decides), true = force a web search.
+    @Published var webSearchEnabled: Bool = false
+    // Flipped when a web-search answer is blocked by the plan quota → view shows paywall.
+    @Published var pendingSearchUpgrade: Bool = false
 
     // Document generation / preview
     @Published var generatingDocId: UUID?
@@ -174,9 +182,11 @@ final class ChatViewModel: ObservableObject {
             
             do {
                 let data = try Data(contentsOf: url)
-                
+
+                // Prioritise the user's chosen language for STT (defaults to Uzbek).
+                let sttLang = UserDefaults.standard.string(forKey: AppStorageKeys.preferredLanguageCode) ?? "uz"
                 let response = try await client.request(
-                    .stt(audio: data, filename: "voice.m4a"),
+                    .stt(audio: data, filename: "voice.m4a", language: sttLang),
                     decodeTo: STTResponse.self
                 )
                 
@@ -467,42 +477,70 @@ final class ChatViewModel: ObservableObject {
         Task {
             do {
                 let stream = client.chatStream(
-                    .chatStream(conversationId: currentConvId, text: text, projectId: nil, model: selectedModelId, attachments: attachments, regenerate: regenerate)
+                    .chatStream(conversationId: currentConvId, text: text, projectId: nil, model: selectedModelId, attachments: attachments, regenerate: regenerate, webSearch: self.webSearchEnabled, platform: "ios")
                 )
 
                 var fullText = ""
                 var assistantMessageId: UUID?
+                var searchingWeb = false
+                var citations: [Citation]? = nil
+
+                // Rebuild (or create) the assistant bubble with the latest state. The
+                // ChatMessage is immutable, so streaming updates replace it in place,
+                // carrying searchingWeb / citations across every rebuild.
+                @MainActor func upsertAssistant() {
+                    if let existingId = assistantMessageId,
+                       let index = self.messages.firstIndex(where: { $0.id == existingId }) {
+                        self.messages[index] = ChatMessage(
+                            id: existingId,
+                            remoteId: self.messages[index].remoteId,
+                            text: fullText,
+                            role: .assistant,
+                            createdAt: self.messages[index].createdAt,
+                            fileUrls: self.messages[index].fileUrls,
+                            docFormat: docFormat,
+                            searchingWeb: searchingWeb,
+                            citations: citations
+                        )
+                    } else {
+                        let newMessage = ChatMessage(
+                            text: fullText,
+                            role: .assistant,
+                            createdAt: Date(),
+                            docFormat: docFormat,
+                            searchingWeb: searchingWeb,
+                            citations: citations
+                        )
+                        assistantMessageId = newMessage.id
+                        self.messages.append(newMessage)
+                        self.isTyping = false
+                    }
+                }
 
                 for try await event in stream {
                     switch event.type {
+                    case "status":
+                        // Live web search started — show a dedicated loader on the reply.
+                        if event.stage == "searching_web" {
+                            searchingWeb = true
+                            await MainActor.run { upsertAssistant() }
+                        }
                     case "chunk":
                         if let content = event.content {
                             fullText += content
-                            await MainActor.run {
-                                if let existingId = assistantMessageId,
-                                   let index = self.messages.firstIndex(where: { $0.id == existingId }) {
-                                    self.messages[index] = ChatMessage(
-                                        id: existingId,
-                                        remoteId: self.messages[index].remoteId,
-                                        text: fullText,
-                                        role: .assistant,
-                                        createdAt: self.messages[index].createdAt,
-                                        fileUrls: self.messages[index].fileUrls,
-                                        docFormat: docFormat
-                                    )
-                                } else {
-                                    let newMessage = ChatMessage(
-                                        text: fullText,
-                                        role: .assistant,
-                                        createdAt: Date(),
-                                        docFormat: docFormat
-                                    )
-                                    assistantMessageId = newMessage.id
-                                    self.messages.append(newMessage)
-                                    self.isTyping = false
-                                }
-                            }
+                            searchingWeb = false  // first chunk clears the loader
+                            await MainActor.run { upsertAssistant() }
                         }
+                    case "citations":
+                        if let cites = event.citations, !cites.isEmpty {
+                            citations = cites
+                            searchingWeb = false
+                            await MainActor.run { upsertAssistant() }
+                        }
+                    case "search_limit":
+                        // Web-search quota hit: the answer continues from the model's
+                        // own knowledge; surface the upgrade paywall.
+                        await MainActor.run { self.pendingSearchUpgrade = true }
                     case "done":
                         if let newId = event.conversationId {
                             await MainActor.run {
@@ -735,6 +773,14 @@ struct ChatView: View {
                 // silently fails after a few cycles). Don't stack either.
                 guard !showRewardSheet && !showPaywall else { return }
                 showRewardSheet = true
+            }
+        }
+        .onChange(of: viewModel.pendingSearchUpgrade) { _, hit in
+            // Web-search quota hit → go straight to the upgrade paywall.
+            if hit {
+                viewModel.pendingSearchUpgrade = false
+                guard !showRewardSheet && !showPaywall else { return }
+                showPaywall = true
             }
         }
         .sheet(isPresented: $showPaywall) {
@@ -1032,6 +1078,20 @@ struct ChatView: View {
             }
             
             VStack(alignment: .leading, spacing: 6) {
+                if !message.isUser && message.searchingWeb {
+                    HStack(spacing: 6) {
+                        Image(systemName: "globe")
+                            .font(.system(size: 13, weight: .semibold))
+                            .foregroundColor(SalomTheme.Colors.accentPrimary)
+                        Text("Internetdan qidirilmoqda…")
+                            .font(.system(size: 13, weight: .medium))
+                            .foregroundColor(SalomTheme.Colors.accentPrimary)
+                        ProgressView()
+                            .scaleEffect(0.7)
+                            .tint(SalomTheme.Colors.accentPrimary)
+                    }
+                }
+
                 if let fileUrls = message.fileUrls, !fileUrls.isEmpty {
                     VStack(alignment: .leading, spacing: 8) {
                         ForEach(fileUrls, id: \.self) { url in
@@ -1060,6 +1120,34 @@ struct ChatView: View {
                     }
                     .textSelection(.enabled)
                     .transition(.opacity.combined(with: .move(edge: .bottom)))
+                }
+
+                // Web sources / citations
+                if !message.isUser, let citations = message.citations, !citations.isEmpty {
+                    ScrollView(.horizontal, showsIndicators: false) {
+                        HStack(spacing: 6) {
+                            Image(systemName: "globe")
+                                .font(.system(size: 11))
+                                .foregroundColor(.white.opacity(0.4))
+                            ForEach(Array(citations.enumerated()), id: \.offset) { idx, cite in
+                                if let url = URL(string: cite.url) {
+                                    Link(destination: url) {
+                                        Text("\(idx + 1). \(sourceHost(cite.url))")
+                                            .font(.system(size: 11, weight: .medium))
+                                            .foregroundColor(SalomTheme.Colors.accentPrimary)
+                                            .lineLimit(1)
+                                            .padding(.horizontal, 8)
+                                            .padding(.vertical, 4)
+                                            .background(
+                                                RoundedRectangle(cornerRadius: 8, style: .continuous)
+                                                    .fill(Color.white.opacity(0.06))
+                                            )
+                                    }
+                                }
+                            }
+                        }
+                    }
+                    .padding(.top, 2)
                 }
             }
             .padding(.horizontal, 14)
@@ -1322,7 +1410,20 @@ struct ChatView: View {
                         }
                     )
                     .disabled(viewModel.isRecording || viewModel.isProcessingVoice || viewModel.isGeneratingImage)
-                    
+
+                    // Web search: off = smart auto-detect, on = force a web search.
+                    IconBubble(
+                        systemName: "globe",
+                        isActive: viewModel.webSearchEnabled,
+                        action: {
+                            HapticManager.shared.fire(.mediumImpact)
+                            withAnimation(.spring(response: 0.35, dampingFraction: 0.8)) {
+                                viewModel.webSearchEnabled.toggle()
+                            }
+                        }
+                    )
+                    .disabled(viewModel.isImageMode || viewModel.isRecording || viewModel.isProcessingVoice || viewModel.isGeneratingImage)
+
                     Menu {
                         Button {
                             viewModel.showPhotoPicker = true
@@ -1536,6 +1637,12 @@ struct ChatView: View {
         let cleanUrl = url.components(separatedBy: "?").first ?? url
         let lower = cleanUrl.lowercased()
         return lower.hasSuffix(".jpg") || lower.hasSuffix(".jpeg") || lower.hasSuffix(".png") || lower.hasSuffix(".webp") || lower.hasSuffix(".gif") || lower.hasSuffix(".heic")
+    }
+
+    /// Short, readable label for a citation link (host without the "www.").
+    private func sourceHost(_ url: String) -> String {
+        guard let host = URL(string: url)?.host else { return url }
+        return host.hasPrefix("www.") ? String(host.dropFirst(4)) : host
     }
     
     struct AttachmentImage: View {
