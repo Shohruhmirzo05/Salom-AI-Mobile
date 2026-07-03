@@ -40,6 +40,19 @@ struct ImageViewerItem: Identifiable {
     var id: URL { url }
 }
 
+extension View {
+    /// Native, smooth bottom-pinning for chat (iOS 17+): the scroll view keeps the
+    /// bottom in view as content grows (streaming) — no manual scrollTo, no phantom
+    /// space. No-op on older systems (falls back to manual scroll).
+    @ViewBuilder func pinnedToBottom() -> some View {
+        if #available(iOS 17.0, *) {
+            self.defaultScrollAnchor(.bottom)
+        } else {
+            self
+        }
+    }
+}
+
 struct AIModel: Codable, Identifiable, Hashable {
     let id: String
     let name: String
@@ -950,10 +963,13 @@ struct ChatView: View {
                     .padding(.top, 8)
                     .padding(.bottom, 4)
                 }
+                // Native, smooth bottom-pinning on iOS 17+ (no manual scrollTo, so no
+                // phantom empty-space and it follows the stream smoothly).
+                .pinnedToBottom()
                 .id(viewModel.selectedConversation?.id)
                 .scrollDismissesKeyboard(.interactively)
-                // The instant the user drags up, stop auto-scroll so a streaming
-                // token can't yank them back to the bottom.
+                // The instant the user drags up, mark not-at-bottom so the button
+                // appears promptly.
                 .simultaneousGesture(
                     DragGesture(minimumDistance: 6)
                         .onChanged { value in
@@ -986,22 +1002,26 @@ struct ChatView: View {
                     .transition(.scale(scale: 0.8).combined(with: .opacity))
                 }
             }
-            // Plain scrollTo (no withAnimation) — animating a scroll while content
-            // grows caused the over-scroll / empty space.
+            // iOS 16 fallback only — on 17+ the native anchor handles following.
             .onChange(of: viewModel.messages.count) { _, _ in
-                DispatchQueue.main.async { proxy.scrollTo("BOTTOM", anchor: .bottom) }
+                if #unavailable(iOS 17.0) {
+                    DispatchQueue.main.async { proxy.scrollTo("BOTTOM", anchor: .bottom) }
+                }
             }
             .onChange(of: viewModel.messages.last?.text) { _, _ in
-                if isAtBottom { proxy.scrollTo("BOTTOM", anchor: .bottom) }
-            }
-            .onChange(of: viewModel.isTyping) { _, isTyping in
-                if isTyping { DispatchQueue.main.async { proxy.scrollTo("BOTTOM", anchor: .bottom) } }
+                if #unavailable(iOS 17.0) {
+                    if isAtBottom { proxy.scrollTo("BOTTOM", anchor: .bottom) }
+                }
             }
         }
     }
 
+    /// Smooth animated scroll to the bottom (used by the button; the content is
+    /// always taller than the viewport when the button is visible, so no phantom space).
     private func scrollToBottom(proxy: ScrollViewProxy) {
-        proxy.scrollTo("BOTTOM", anchor: .bottom)
+        withAnimation(.easeInOut(duration: 0.35)) {
+            proxy.scrollTo("BOTTOM", anchor: .bottom)
+        }
     }
     
     @ViewBuilder func MessageBubble(message: ChatMessage) -> some View {
