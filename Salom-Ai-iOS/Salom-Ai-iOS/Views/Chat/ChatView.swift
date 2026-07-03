@@ -35,12 +35,6 @@ struct ChatMessage: Identifiable {
     }
 }
 
-/// Distance (pt) the chat content extends below the visible bottom. ~0 = at bottom.
-struct BottomDistanceKey: PreferenceKey {
-    static var defaultValue: CGFloat = 0
-    static func reduce(value: inout CGFloat, nextValue: () -> CGFloat) { value = nextValue() }
-}
-
 struct ImageViewerItem: Identifiable {
     let url: URL
     var id: URL { url }
@@ -919,85 +913,81 @@ struct ChatView: View {
     // MARK: - Messages
     @ViewBuilder func MessagesList() -> some View {
         ScrollViewReader { proxy in
-            GeometryReader { outer in
-                ZStack(alignment: .bottom) {
-                    if viewModel.messages.isEmpty && !viewModel.isLoadingMessages {
-                        VStack {
-                            Spacer()
-                            AssistantHero()
-                            Spacer()
-                        }
-                        .padding(.horizontal, 12)
+            ZStack(alignment: .bottom) {
+                if viewModel.messages.isEmpty && !viewModel.isLoadingMessages {
+                    VStack {
+                        Spacer()
+                        AssistantHero()
+                        Spacer()
                     }
+                    .padding(.horizontal, 12)
+                }
 
-                    ScrollView {
-                        LazyVStack(alignment: .leading, spacing: 12) {
-                            ForEach(viewModel.messages) { message in
-                                MessageBubble(message: message)
-                                    .id(message.id)
+                ScrollView {
+                    LazyVStack(alignment: .leading, spacing: 12) {
+                        ForEach(viewModel.messages) { message in
+                            MessageBubble(message: message)
+                                .id(message.id)
+                        }
+
+                        if viewModel.isGeneratingImage {
+                            ImageGenerationLoadingBubble()
+                                .id("image_loading_indicator")
+                        } else if viewModel.isTyping {
+                            TypingBubble()
+                                .id("typing_indicator")
+                        }
+
+                        // 1px anchor at the very bottom. Visible = we're at the bottom,
+                        // scrolled off = we're up (drives the button + the auto-scroll guard).
+                        Color.clear
+                            .frame(height: 1)
+                            .id("BOTTOM")
+                            .onAppear { withAnimation(.easeInOut(duration: 0.2)) { isAtBottom = true } }
+                            .onDisappear { withAnimation(.easeInOut(duration: 0.2)) { isAtBottom = false } }
+                    }
+                    .padding(.horizontal, 12)
+                    .padding(.top, 8)
+                    .padding(.bottom, 4)
+                }
+                .id(viewModel.selectedConversation?.id)
+                .scrollDismissesKeyboard(.interactively)
+                // The instant the user drags up, stop auto-scroll so a streaming
+                // token can't yank them back to the bottom.
+                .simultaneousGesture(
+                    DragGesture(minimumDistance: 6)
+                        .onChanged { value in
+                            if value.translation.height > 6 && isAtBottom {
+                                withAnimation(.easeInOut(duration: 0.2)) { isAtBottom = false }
                             }
-
-                            if viewModel.isGeneratingImage {
-                                ImageGenerationLoadingBubble()
-                                    .id("image_loading_indicator")
-                            } else if viewModel.isTyping {
-                                TypingBubble()
-                                    .id("typing_indicator")
-                            }
-
-                            Color.clear.frame(height: 1).id("BOTTOM")
                         }
-                        .padding(.horizontal, 12)
-                        .padding(.top, 8)
-                        .padding(.bottom, 4)
-                        // Measure how far the content extends below the viewport.
-                        .background(
-                            GeometryReader { content in
-                                Color.clear.preference(
-                                    key: BottomDistanceKey.self,
-                                    value: content.frame(in: .named("chatScroll")).maxY - outer.size.height
-                                )
-                            }
-                        )
-                    }
-                    .coordinateSpace(name: "chatScroll")
-                    .id(viewModel.selectedConversation?.id)
-                    .scrollDismissesKeyboard(.interactively)
-                    .onPreferenceChange(BottomDistanceKey.self) { dist in
-                        // ~0 (or negative) = pinned to bottom. Immediate + accurate,
-                        // so the auto-scroll never fights the user's manual scroll.
-                        let atBottom = dist < 90
-                        if atBottom != isAtBottom {
-                            withAnimation(.easeOut(duration: 0.18)) { isAtBottom = atBottom }
-                        }
-                    }
+                )
 
-                    if viewModel.isLoadingMessages {
-                        ProgressView().tint(.white)
-                    }
+                if viewModel.isLoadingMessages {
+                    ProgressView().tint(.white)
+                }
 
-                    // ChatGPT-style scroll-to-bottom button (glass), shown when scrolled up.
-                    if !isAtBottom && !viewModel.messages.isEmpty {
-                        Button {
-                            HapticManager.shared.fire(.lightImpact)
-                            scrollToBottom(proxy: proxy)
-                        } label: {
-                            Image(systemName: "chevron.down")
-                                .font(.system(size: 15, weight: .bold))
-                                .foregroundColor(.white)
-                                .frame(width: 38, height: 38)
-                                .background(.ultraThinMaterial, in: Circle())
-                                .overlay(Circle().stroke(Color.white.opacity(0.18), lineWidth: 0.5))
-                                .shadow(color: .black.opacity(0.3), radius: 8, x: 0, y: 4)
-                        }
-                        .buttonStyle(.plain)
-                        .padding(.bottom, 12)
-                        .transition(.scale(scale: 0.8).combined(with: .opacity))
+                // ChatGPT-style scroll-to-bottom button (glass), shown when scrolled up.
+                if !isAtBottom && !viewModel.messages.isEmpty {
+                    Button {
+                        HapticManager.shared.fire(.lightImpact)
+                        scrollToBottom(proxy: proxy)
+                    } label: {
+                        Image(systemName: "chevron.down")
+                            .font(.system(size: 15, weight: .bold))
+                            .foregroundColor(.white)
+                            .frame(width: 38, height: 38)
+                            .background(.ultraThinMaterial, in: Circle())
+                            .overlay(Circle().stroke(Color.white.opacity(0.18), lineWidth: 0.5))
+                            .shadow(color: .black.opacity(0.3), radius: 8, x: 0, y: 4)
                     }
+                    .buttonStyle(.plain)
+                    .padding(.bottom, 12)
+                    .transition(.scale(scale: 0.8).combined(with: .opacity))
                 }
             }
-            // NOTE: plain scrollTo (no withAnimation) — animating a scroll while the
-            // content is still growing is what caused the over-scroll / empty space.
+            // Plain scrollTo (no withAnimation) — animating a scroll while content
+            // grows caused the over-scroll / empty space.
             .onChange(of: viewModel.messages.count) { _, _ in
                 DispatchQueue.main.async { proxy.scrollTo("BOTTOM", anchor: .bottom) }
             }
