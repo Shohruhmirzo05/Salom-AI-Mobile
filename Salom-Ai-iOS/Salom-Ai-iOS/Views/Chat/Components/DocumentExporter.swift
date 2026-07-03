@@ -7,7 +7,7 @@
 //
 
 import SwiftUI
-import UIKit
+internal import UIKit
 
 enum DocFormat: String {
     case pdf, docx, xlsx
@@ -42,6 +42,23 @@ enum DocumentExporter {
         if has(#"pdf"#) { return .pdf }
         if has(#"(yuklab ol|yuklab ber|faylga|fayl qilib|hujjat qilib|dokument|скачать)"#) { return .pdf }
         return nil
+    }
+
+    /// A short message that just asks to convert the PREVIOUS answer to a file
+    /// ("pdf qil", "word formatda ber") — NOT a new document ("cv pdf qil").
+    /// Returns the format if so, so the app makes the file from the last answer
+    /// instead of asking the AI to rewrite it.
+    static func pureFormatConversion(_ text: String) -> DocFormat? {
+        let s = text.lowercased().trimmingCharacters(in: .whitespacesAndNewlines)
+        guard let fmt = detectFormat(s) else { return nil }
+        let words = s.split(whereSeparator: { $0 == " " || $0 == "\n" })
+        guard words.count <= 5 else { return nil }
+        // If it names a document type, it's a NEW document request, not a conversion.
+        let docNouns = ["cv", "rezyume", "resume", "xat", "ariza", "hisobot",
+                        "referat", "taklif", "reja", "maqola", "insho",
+                        "letter", "report", "essay"]
+        if docNouns.contains(where: { s.contains($0) }) { return nil }
+        return fmt
     }
 
     /// Build the file and present the iOS share sheet.

@@ -35,6 +35,12 @@ struct ChatMessage: Identifiable {
     }
 }
 
+/// Distance (pt) the chat content extends below the visible bottom. ~0 = at bottom.
+struct BottomDistanceKey: PreferenceKey {
+    static var defaultValue: CGFloat = 0
+    static func reduce(value: inout CGFloat, nextValue: () -> CGFloat) { value = nextValue() }
+}
+
 struct ImageViewerItem: Identifiable {
     let url: URL
     var id: URL { url }
@@ -302,7 +308,7 @@ final class ChatViewModel: ObservableObject {
                     )
                 }
                 
-                messages = messagesResponse.messages.map { dto in
+                var loaded = messagesResponse.messages.map { dto -> ChatMessage in
                     let attachments = (dto.imageUrls ?? []) + (dto.fileUrls ?? [])
                     return ChatMessage(
                         remoteId: dto.id,
@@ -312,7 +318,17 @@ final class ChatViewModel: ObservableObject {
                         fileUrls: attachments.isEmpty ? nil : attachments
                     )
                 }
-                
+                // Re-attach document cards: an assistant answer whose preceding user
+                // message asked for a file gets its docFormat back, so the PDF/Word
+                // card reappears after reopening the app.
+                for i in loaded.indices where !loaded[i].isUser && !loaded[i].text.isEmpty {
+                    if let prevUser = loaded[..<i].last(where: { $0.isUser }),
+                       let fmt = DocumentExporter.detectFormat(prevUser.text) {
+                        loaded[i].docFormat = fmt
+                    }
+                }
+                messages = loaded
+
                 print("✅ UI updated with \(messages.count) messages")
             }
         } catch {
@@ -355,7 +371,20 @@ final class ChatViewModel: ObservableObject {
         let trimmed = inputText.trimmingCharacters(in: .whitespacesAndNewlines)
         // Allow sending an attachment with no text (image-only send).
         guard !isSending, (!trimmed.isEmpty || !attachments.isEmpty) else { return }
-        
+
+        // "pdf qil" / "word formatda ber" about the previous answer → just build the
+        // file from that answer (attach the card + open it); don't rewrite it.
+        if attachments.isEmpty,
+           let fmt = DocumentExporter.pureFormatConversion(trimmed),
+           let idx = messages.lastIndex(where: { !$0.isUser && !$0.text.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty }) {
+            inputText = ""
+            var target = messages[idx]
+            target.docFormat = fmt
+            messages[idx] = target
+            openDocument(target)
+            return
+        }
+
         inputText = ""
         let userMessage = ChatMessage(
             remoteId: nil,
@@ -890,92 +919,99 @@ struct ChatView: View {
     // MARK: - Messages
     @ViewBuilder func MessagesList() -> some View {
         ScrollViewReader { proxy in
-            ZStack(alignment: .bottom) {
-                if viewModel.messages.isEmpty && !viewModel.isLoadingMessages {
-                    VStack {
-                        Spacer()
-                        AssistantHero()
-                        Spacer()
-                    }
-                    .padding(.horizontal, 12)
-                }
-
-                ScrollView {
-                    LazyVStack(alignment: .leading, spacing: 12) {
-                        ForEach(viewModel.messages) { message in
-                            MessageBubble(message: message)
-                                .id(message.id)
+            GeometryReader { outer in
+                ZStack(alignment: .bottom) {
+                    if viewModel.messages.isEmpty && !viewModel.isLoadingMessages {
+                        VStack {
+                            Spacer()
+                            AssistantHero()
+                            Spacer()
                         }
+                        .padding(.horizontal, 12)
+                    }
 
-                        if viewModel.isGeneratingImage {
-                            ImageGenerationLoadingBubble()
-                                .id("image_loading_indicator")
-                        } else if viewModel.isTyping {
-                            TypingBubble()
-                                .id("typing_indicator")
+                    ScrollView {
+                        LazyVStack(alignment: .leading, spacing: 12) {
+                            ForEach(viewModel.messages) { message in
+                                MessageBubble(message: message)
+                                    .id(message.id)
+                            }
+
+                            if viewModel.isGeneratingImage {
+                                ImageGenerationLoadingBubble()
+                                    .id("image_loading_indicator")
+                            } else if viewModel.isTyping {
+                                TypingBubble()
+                                    .id("typing_indicator")
+                            }
+
+                            Color.clear.frame(height: 1).id("BOTTOM")
                         }
-
-                        // Stable 1px bottom anchor. Its appear/disappear tells us
-                        // whether we're pinned to the bottom (drives the button).
-                        Color.clear
-                            .frame(height: 1)
-                            .id("BOTTOM")
-                            .onAppear { withAnimation(.easeOut(duration: 0.2)) { isAtBottom = true } }
-                            .onDisappear { withAnimation(.easeOut(duration: 0.2)) { isAtBottom = false } }
+                        .padding(.horizontal, 12)
+                        .padding(.top, 8)
+                        .padding(.bottom, 4)
+                        // Measure how far the content extends below the viewport.
+                        .background(
+                            GeometryReader { content in
+                                Color.clear.preference(
+                                    key: BottomDistanceKey.self,
+                                    value: content.frame(in: .named("chatScroll")).maxY - outer.size.height
+                                )
+                            }
+                        )
                     }
-                    .padding(.horizontal, 12)
-                    .padding(.top, 8)
-                    .padding(.bottom, 4)
-                }
-                .id(viewModel.selectedConversation?.id)
-                .scrollDismissesKeyboard(.interactively)
-
-                if viewModel.isLoadingMessages {
-                    ProgressView().tint(.white)
-                }
-
-                // ChatGPT-style scroll-to-bottom button (glass), shown when scrolled up.
-                if !isAtBottom && !viewModel.messages.isEmpty {
-                    Button {
-                        HapticManager.shared.fire(.lightImpact)
-                        scrollToBottom(proxy: proxy, animated: true)
-                    } label: {
-                        Image(systemName: "chevron.down")
-                            .font(.system(size: 15, weight: .bold))
-                            .foregroundColor(.white)
-                            .frame(width: 38, height: 38)
-                            .background(.ultraThinMaterial, in: Circle())
-                            .overlay(Circle().stroke(Color.white.opacity(0.18), lineWidth: 0.5))
-                            .shadow(color: .black.opacity(0.3), radius: 8, x: 0, y: 4)
+                    .coordinateSpace(name: "chatScroll")
+                    .id(viewModel.selectedConversation?.id)
+                    .scrollDismissesKeyboard(.interactively)
+                    .onPreferenceChange(BottomDistanceKey.self) { dist in
+                        // ~0 (or negative) = pinned to bottom. Immediate + accurate,
+                        // so the auto-scroll never fights the user's manual scroll.
+                        let atBottom = dist < 90
+                        if atBottom != isAtBottom {
+                            withAnimation(.easeOut(duration: 0.18)) { isAtBottom = atBottom }
+                        }
                     }
-                    .buttonStyle(.plain)
-                    .padding(.bottom, 12)
-                    .transition(.scale(scale: 0.8).combined(with: .opacity))
+
+                    if viewModel.isLoadingMessages {
+                        ProgressView().tint(.white)
+                    }
+
+                    // ChatGPT-style scroll-to-bottom button (glass), shown when scrolled up.
+                    if !isAtBottom && !viewModel.messages.isEmpty {
+                        Button {
+                            HapticManager.shared.fire(.lightImpact)
+                            scrollToBottom(proxy: proxy)
+                        } label: {
+                            Image(systemName: "chevron.down")
+                                .font(.system(size: 15, weight: .bold))
+                                .foregroundColor(.white)
+                                .frame(width: 38, height: 38)
+                                .background(.ultraThinMaterial, in: Circle())
+                                .overlay(Circle().stroke(Color.white.opacity(0.18), lineWidth: 0.5))
+                                .shadow(color: .black.opacity(0.3), radius: 8, x: 0, y: 4)
+                        }
+                        .buttonStyle(.plain)
+                        .padding(.bottom, 12)
+                        .transition(.scale(scale: 0.8).combined(with: .opacity))
+                    }
                 }
             }
+            // NOTE: plain scrollTo (no withAnimation) — animating a scroll while the
+            // content is still growing is what caused the over-scroll / empty space.
             .onChange(of: viewModel.messages.count) { _, _ in
-                // New message (user sent / assistant started) → pin to bottom.
-                scrollToBottom(proxy: proxy, animated: true)
+                DispatchQueue.main.async { proxy.scrollTo("BOTTOM", anchor: .bottom) }
             }
             .onChange(of: viewModel.messages.last?.text) { _, _ in
-                // Streaming tokens → keep pinned ONLY if already at the bottom (don't
-                // yank the user down while they're reading). No animation = smooth.
-                if isAtBottom { scrollToBottom(proxy: proxy, animated: false) }
+                if isAtBottom { proxy.scrollTo("BOTTOM", anchor: .bottom) }
             }
             .onChange(of: viewModel.isTyping) { _, isTyping in
-                if isTyping { scrollToBottom(proxy: proxy, animated: true) }
+                if isTyping { DispatchQueue.main.async { proxy.scrollTo("BOTTOM", anchor: .bottom) } }
             }
         }
     }
 
-    private func scrollToBottom(proxy: ScrollViewProxy, animated: Bool) {
-        if animated {
-            withAnimation(.easeOut(duration: 0.28)) {
-                proxy.scrollTo("BOTTOM", anchor: .bottom)
-            }
-        } else {
-            proxy.scrollTo("BOTTOM", anchor: .bottom)
-        }
+    private func scrollToBottom(proxy: ScrollViewProxy) {
+        proxy.scrollTo("BOTTOM", anchor: .bottom)
     }
     
     @ViewBuilder func MessageBubble(message: ChatMessage) -> some View {
