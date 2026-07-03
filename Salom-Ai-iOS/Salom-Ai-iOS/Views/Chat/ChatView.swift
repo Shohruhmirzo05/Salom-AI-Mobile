@@ -628,6 +628,7 @@ struct ChatView: View {
     @State private var showUsageInfo = false
     @State private var selectedImage: ImageViewerItem?
     @State private var showPaywall = false
+    @State private var isAtBottom = true
     @StateObject private var rewardAds = RewardedAdManager.shared
     @StateObject private var subs = SubscriptionManager.shared
     @State private var showRewardSheet = false
@@ -889,7 +890,7 @@ struct ChatView: View {
     // MARK: - Messages
     @ViewBuilder func MessagesList() -> some View {
         ScrollViewReader { proxy in
-            ZStack {
+            ZStack(alignment: .bottom) {
                 if viewModel.messages.isEmpty && !viewModel.isLoadingMessages {
                     VStack {
                         Spacer()
@@ -898,14 +899,14 @@ struct ChatView: View {
                     }
                     .padding(.horizontal, 12)
                 }
-                
+
                 ScrollView {
                     LazyVStack(alignment: .leading, spacing: 12) {
                         ForEach(viewModel.messages) { message in
                             MessageBubble(message: message)
                                 .id(message.id)
                         }
-                        
+
                         if viewModel.isGeneratingImage {
                             ImageGenerationLoadingBubble()
                                 .id("image_loading_indicator")
@@ -913,43 +914,67 @@ struct ChatView: View {
                             TypingBubble()
                                 .id("typing_indicator")
                         }
+
+                        // Stable 1px bottom anchor. Its appear/disappear tells us
+                        // whether we're pinned to the bottom (drives the button).
+                        Color.clear
+                            .frame(height: 1)
+                            .id("BOTTOM")
+                            .onAppear { withAnimation(.easeOut(duration: 0.2)) { isAtBottom = true } }
+                            .onDisappear { withAnimation(.easeOut(duration: 0.2)) { isAtBottom = false } }
                     }
                     .padding(.horizontal, 12)
                     .padding(.top, 8)
                     .padding(.bottom, 4)
-                    .animation(.spring(response: 0.35, dampingFraction: 0.85), value: viewModel.messages.count)
-                    .animation(.easeInOut(duration: 0.25), value: viewModel.isTyping)
                 }
                 .id(viewModel.selectedConversation?.id)
-                
+                .scrollDismissesKeyboard(.interactively)
+
                 if viewModel.isLoadingMessages {
-                    ProgressView()
-                        .tint(.white)
+                    ProgressView().tint(.white)
+                }
+
+                // ChatGPT-style scroll-to-bottom button (glass), shown when scrolled up.
+                if !isAtBottom && !viewModel.messages.isEmpty {
+                    Button {
+                        HapticManager.shared.fire(.lightImpact)
+                        scrollToBottom(proxy: proxy, animated: true)
+                    } label: {
+                        Image(systemName: "chevron.down")
+                            .font(.system(size: 15, weight: .bold))
+                            .foregroundColor(.white)
+                            .frame(width: 38, height: 38)
+                            .background(.ultraThinMaterial, in: Circle())
+                            .overlay(Circle().stroke(Color.white.opacity(0.18), lineWidth: 0.5))
+                            .shadow(color: .black.opacity(0.3), radius: 8, x: 0, y: 4)
+                    }
+                    .buttonStyle(.plain)
+                    .padding(.bottom, 12)
+                    .transition(.scale(scale: 0.8).combined(with: .opacity))
                 }
             }
             .onChange(of: viewModel.messages.count) { _, _ in
-                scrollToBottom(proxy: proxy)
+                // New message (user sent / assistant started) → pin to bottom.
+                scrollToBottom(proxy: proxy, animated: true)
             }
             .onChange(of: viewModel.messages.last?.text) { _, _ in
-                scrollToBottom(proxy: proxy)
+                // Streaming tokens → keep pinned ONLY if already at the bottom (don't
+                // yank the user down while they're reading). No animation = smooth.
+                if isAtBottom { scrollToBottom(proxy: proxy, animated: false) }
             }
             .onChange(of: viewModel.isTyping) { _, isTyping in
-                if isTyping {
-                    scrollToBottom(proxy: proxy, id: "typing_indicator")
-                }
+                if isTyping { scrollToBottom(proxy: proxy, animated: true) }
             }
         }
     }
-    
-    private func scrollToBottom(proxy: ScrollViewProxy, id: AnyHashable? = nil) {
-        if let id = id {
-            withAnimation(.easeOut) {
-                proxy.scrollTo(id, anchor: .bottom)
+
+    private func scrollToBottom(proxy: ScrollViewProxy, animated: Bool) {
+        if animated {
+            withAnimation(.easeOut(duration: 0.28)) {
+                proxy.scrollTo("BOTTOM", anchor: .bottom)
             }
-        } else if let lastId = viewModel.messages.last?.id {
-            withAnimation(.easeOut) {
-                proxy.scrollTo(lastId, anchor: .bottom)
-            }
+        } else {
+            proxy.scrollTo("BOTTOM", anchor: .bottom)
         }
     }
     
