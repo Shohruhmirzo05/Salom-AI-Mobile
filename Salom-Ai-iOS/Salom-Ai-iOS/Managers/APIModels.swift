@@ -467,6 +467,11 @@ struct FileUploadResponse: Codable {
     let filename: String
 }
 
+struct DocGenResponse: Codable {
+    let url: String
+    let filename: String
+}
+
 // MARK: - Card Tokenization
 
 struct TokenizeRequestResponse: Codable {

@@ -83,6 +83,10 @@ final class ChatViewModel: ObservableObject {
     // Image Generation
     @Published var isImageMode: Bool = false
     @Published var isGeneratingImage: Bool = false
+
+    // Document generation / preview
+    @Published var generatingDocId: UUID?
+    @Published var previewDoc: PreviewDocument?
     
     private let client = APIClient.shared
     private var searchCancellable: AnyCancellable?
@@ -391,6 +395,32 @@ final class ChatViewModel: ObservableObject {
                         attachments: userMsg.fileUrls,
                         regenerate: true,
                         docFormat: DocumentExporter.detectFormat(userMsg.text))
+    }
+
+    /// Server-render the answer into a clean PDF/Word/Excel and open it in-app.
+    func openDocument(_ message: ChatMessage) {
+        guard let fmt = message.docFormat, generatingDocId == nil else { return }
+        generatingDocId = message.id
+        Task {
+            do {
+                let resp = try await client.request(
+                    .generateDocument(text: message.text, format: fmt.rawValue),
+                    decodeTo: DocGenResponse.self)
+                guard let remote = URL(string: resp.url) else { throw URLError(.badURL) }
+                let (data, _) = try await URLSession.shared.data(from: remote)
+                let local = FileManager.default.temporaryDirectory.appendingPathComponent(resp.filename)
+                try data.write(to: local)
+                await MainActor.run {
+                    self.generatingDocId = nil
+                    self.previewDoc = PreviewDocument(url: local, isPDF: fmt == .pdf)
+                }
+            } catch {
+                await MainActor.run {
+                    self.generatingDocId = nil
+                    self.errorMessage = "Hujjatni yaratib boʻlmadi"
+                }
+            }
+        }
     }
 
     /// Shared streaming pipeline for both fresh sends and regenerations.
@@ -743,6 +773,9 @@ struct ChatView: View {
                 selectedImage = nil
             }
         }
+        .sheet(item: $viewModel.previewDoc) { doc in
+            DocumentPreviewView(doc: doc)
+        }
     }
     
     private func isLimitExceeded(_ error: String?) -> Bool {
@@ -1026,16 +1059,23 @@ struct ChatView: View {
                 if let fmt = message.docFormat {
                     Button {
                         HapticManager.shared.fire(.mediumImpact)
-                        DocumentExporter.export(message.text, format: fmt)
+                        viewModel.openDocument(message)
                     } label: {
                         HStack(spacing: 10) {
-                            Image(systemName: fmt.icon).foregroundColor(SalomTheme.Colors.accentPrimary)
+                            if viewModel.generatingDocId == message.id {
+                                ProgressView().tint(SalomTheme.Colors.accentPrimary).frame(width: 22, height: 22)
+                            } else {
+                                Image(systemName: fmt.icon).foregroundColor(SalomTheme.Colors.accentPrimary)
+                            }
                             VStack(alignment: .leading, spacing: 1) {
                                 Text(fmt.label).font(.system(size: 14, weight: .semibold)).foregroundColor(.white)
-                                Text("Yuklab olish").font(.system(size: 11)).foregroundColor(.white.opacity(0.5))
+                                Text(viewModel.generatingDocId == message.id ? "Tayyorlanmoqda…" : "Ochish")
+                                    .font(.system(size: 11)).foregroundColor(.white.opacity(0.5))
                             }
                             Spacer(minLength: 0)
-                            Image(systemName: "square.and.arrow.down").foregroundColor(SalomTheme.Colors.accentPrimary)
+                            if viewModel.generatingDocId != message.id {
+                                Image(systemName: "eye").foregroundColor(SalomTheme.Colors.accentPrimary)
+                            }
                         }
                         .padding(12)
                         .background(SalomTheme.Colors.accentPrimary.opacity(0.1))
@@ -1043,6 +1083,7 @@ struct ChatView: View {
                         .overlay(RoundedRectangle(cornerRadius: 14).stroke(SalomTheme.Colors.accentPrimary.opacity(0.3)))
                     }
                     .buttonStyle(.plain)
+                    .disabled(viewModel.generatingDocId != nil)
                     .padding(.leading, 8)
                     .transition(.opacity.combined(with: .scale(scale: 0.96)))
                 }

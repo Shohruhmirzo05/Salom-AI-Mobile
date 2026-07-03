@@ -365,6 +365,9 @@ extension APIClient {
         // Push registration (fixes iOS notifications: register OneSignal id)
         case registerPushDevice(token: String, platform: String)
 
+        // On-demand document generation (server-renders a clean PDF/Word/Excel)
+        case generateDocument(text: String, format: String)
+
         fileprivate var method: HTTPMethod {
             switch self {
             case .listConversations, .getConversation, .getConversationMessages, .perplexityUsage, .currentSubscription, .getSettings, .getModels, .getUsageStats, .listPlans, .oauthUser, .savedCards, .paymentStatus, .notifications, .unreadNotificationCount,
@@ -431,6 +434,8 @@ extension APIClient {
                 return "/chat/generate-image"
             case .uploadFile:
                 return "/files/upload"
+            case .generateDocument:
+                return "/documents/generate"
             case .stt:
                 return "/voice/stt"
             case .tts:
@@ -643,6 +648,8 @@ extension APIClient {
                 if let displayName { body["display_name"] = displayName }
                 if let avatarUrl { body["avatar_url"] = avatarUrl }
                 return body
+            case .generateDocument(let text, let format):
+                return ["text": text, "format": format]
             case .updatePlatform(let platform):
                 return ["platform": platform]
             case .sendFeedback(let content):
