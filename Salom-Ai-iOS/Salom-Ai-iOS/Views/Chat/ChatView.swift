@@ -1428,18 +1428,8 @@ struct ChatView: View {
                     )
                     .disabled(viewModel.isRecording || viewModel.isProcessingVoice || viewModel.isGeneratingImage)
 
-                    // Web search: off = smart auto-detect, on = force a web search.
-                    IconBubble(
-                        systemName: "globe",
-                        isActive: viewModel.webSearchEnabled,
-                        action: {
-                            HapticManager.shared.fire(.mediumImpact)
-                            withAnimation(.spring(response: 0.35, dampingFraction: 0.8)) {
-                                viewModel.webSearchEnabled.toggle()
-                            }
-                        }
-                    )
-                    .disabled(viewModel.isImageMode || viewModel.isRecording || viewModel.isProcessingVoice || viewModel.isGeneratingImage)
+                    // Web search is fully automatic (the backend detects when a
+                    // question needs fresh info), so there's no manual toggle here.
 
                     Menu {
                         Button {
