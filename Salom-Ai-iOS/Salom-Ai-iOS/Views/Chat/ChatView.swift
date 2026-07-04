@@ -1036,17 +1036,17 @@ struct ChatView: View {
                 if !isAtBottom && !viewModel.messages.isEmpty {
                     Button {
                         HapticManager.shared.fire(.lightImpact)
-                        // Hide immediately — we're commanding a jump to the very bottom
-                        // (don't wait on the geometry callback, which lags after a
-                        // programmatic scroll → the "won't disappear" bug).
-                        withAnimation(.spring(response: 0.34, dampingFraction: 0.66)) { isAtBottom = true }
-                        // PLAIN (non-animated) scroll: a hard content-offset set stops
-                        // in-flight momentum and lands at the bottom. An animated scroll
-                        // fights the deceleration instead and never arrives (the
-                        // "must fully stop before it works" bug). Re-issue next runloop
-                        // as insurance if the first was swallowed by momentum.
-                        scrollToLatest(proxy: proxy, animated: false)
-                        DispatchQueue.main.async { scrollToLatest(proxy: proxy, animated: false) }
+                        // Smooth glide to the bottom. Do NOT set isAtBottom manually —
+                        // let the geometry detector drive it. Setting it by hand desyncs
+                        // the detector's internal last-value, so scrolling back up later
+                        // returns a value it thinks is unchanged and never re-fires (the
+                        // "button won't come back until I manually go to the bottom" bug).
+                        scrollToLatest(proxy: proxy, animated: true)
+                        // Safety: if in-flight momentum swallowed the animated scroll,
+                        // a plain hard-set after it lands us at the true bottom.
+                        DispatchQueue.main.asyncAfter(deadline: .now() + 0.4) {
+                            scrollToLatest(proxy: proxy, animated: false)
+                        }
                     } label: {
                         Image(systemName: "chevron.down")
                             .font(.system(size: 16, weight: .bold))
