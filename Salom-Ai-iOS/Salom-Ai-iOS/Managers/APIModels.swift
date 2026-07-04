@@ -57,11 +57,13 @@ struct ChatStreamEvent: Codable {
     let content: String?
     let conversationId: Int?
     let message: String?
-    // Web-search extras: stage=="searching_web" on a "status" event, citations on
-    // a "citations" event, upgrade==true on a "search_limit" event.
+    // Web-search extras: stage=="searching_web"/"generating_image" on a "status"
+    // event, citations on a "citations" event, upgrade==true on limit events.
     let stage: String?
     let citations: [Citation]?
     let upgrade: Bool?
+    // Auto-generated image URL on an "image" event.
+    let url: String?
 }
 
 struct ChatSavePayload: Codable {
