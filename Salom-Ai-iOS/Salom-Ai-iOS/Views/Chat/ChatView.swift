@@ -51,11 +51,15 @@ struct ScrollBottomDetector: ViewModifier {
     func body(content: Content) -> some View {
         if #available(iOS 18.0, *) {
             content.onScrollGeometryChange(for: Bool.self) { geo in
-                // Within 120pt of the very bottom counts as "at bottom".
-                geo.contentOffset.y + geo.containerSize.height >= geo.contentSize.height - 120
+                // Within ~100pt of the very bottom counts as "at bottom". Forgiving
+                // enough that the last deceleration callback catches it before the
+                // scroll settles — otherwise the button sticks visible at the true
+                // bottom until a further nudge re-fires this callback.
+                (geo.contentSize.height - (geo.contentOffset.y + geo.containerSize.height)) < 100
             } action: { _, atBottom in
                 if atBottom != isAtBottom {
-                    withAnimation(.easeInOut(duration: 0.2)) { isAtBottom = atBottom }
+                    // Springy so the button pops small→big / big→small.
+                    withAnimation(.spring(response: 0.34, dampingFraction: 0.66)) { isAtBottom = atBottom }
                 }
             }
         } else {
@@ -1010,8 +1014,8 @@ struct ChatView: View {
                         Color.clear
                             .frame(height: 1)
                             .id("BOTTOM")
-                            .onAppear { if #unavailable(iOS 18.0) { withAnimation(.easeInOut(duration: 0.2)) { isAtBottom = true } } }
-                            .onDisappear { if #unavailable(iOS 18.0) { withAnimation(.easeInOut(duration: 0.2)) { isAtBottom = false } } }
+                            .onAppear { if #unavailable(iOS 18.0) { withAnimation(.spring(response: 0.34, dampingFraction: 0.66)) { isAtBottom = true } } }
+                            .onDisappear { if #unavailable(iOS 18.0) { withAnimation(.spring(response: 0.34, dampingFraction: 0.66)) { isAtBottom = false } } }
                     }
                     .padding(.horizontal, 12)
                     .padding(.top, 8)
@@ -1032,19 +1036,30 @@ struct ChatView: View {
                 if !isAtBottom && !viewModel.messages.isEmpty {
                     Button {
                         HapticManager.shared.fire(.lightImpact)
-                        scrollToLatest(proxy: proxy, animated: true)
+                        // Hide immediately — we're commanding a jump to the very bottom
+                        // (don't wait on the geometry callback, which lags after a
+                        // programmatic scroll → the "won't disappear" bug).
+                        withAnimation(.spring(response: 0.34, dampingFraction: 0.66)) { isAtBottom = true }
+                        // PLAIN (non-animated) scroll: a hard content-offset set stops
+                        // in-flight momentum and lands at the bottom. An animated scroll
+                        // fights the deceleration instead and never arrives (the
+                        // "must fully stop before it works" bug). Re-issue next runloop
+                        // as insurance if the first was swallowed by momentum.
+                        scrollToLatest(proxy: proxy, animated: false)
+                        DispatchQueue.main.async { scrollToLatest(proxy: proxy, animated: false) }
                     } label: {
                         Image(systemName: "chevron.down")
-                            .font(.system(size: 15, weight: .bold))
+                            .font(.system(size: 16, weight: .bold))
                             .foregroundColor(.white)
-                            .frame(width: 38, height: 38)
+                            .frame(width: 40, height: 40)
                             .background(.ultraThinMaterial, in: Circle())
-                            .overlay(Circle().stroke(Color.white.opacity(0.18), lineWidth: 0.5))
-                            .shadow(color: .black.opacity(0.3), radius: 8, x: 0, y: 4)
+                            .overlay(Circle().stroke(Color.white.opacity(0.2), lineWidth: 0.5))
+                            .shadow(color: .black.opacity(0.38), radius: 12, x: 0, y: 6)
                     }
                     .buttonStyle(.plain)
-                    .padding(.bottom, 12)
-                    .transition(.scale(scale: 0.8).combined(with: .opacity))
+                    .padding(.bottom, 14)
+                    // small→big on appear, big→small on hide (with the spring above).
+                    .transition(.scale(scale: 0.4).combined(with: .opacity))
                 }
             }
             // New message → animate down. Streaming tokens → follow only if already at
