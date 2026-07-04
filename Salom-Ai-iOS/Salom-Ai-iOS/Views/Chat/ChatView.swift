@@ -20,9 +20,10 @@ struct ChatMessage: Identifiable {
     var fileUrls: [String]? = nil
     var docFormat: DocFormat? = nil   // set when the user asked for a downloadable file
     var searchingWeb: Bool = false    // true while a live web search runs for this reply
+    var generatingImage: Bool = false // true while an image is being auto-generated
     var citations: [Citation]? = nil  // web sources for this reply
 
-    init(id: UUID = UUID(), remoteId: Int? = nil, text: String, role: MessageRole, createdAt: Date? = nil, fileUrls: [String]? = nil, docFormat: DocFormat? = nil, searchingWeb: Bool = false, citations: [Citation]? = nil) {
+    init(id: UUID = UUID(), remoteId: Int? = nil, text: String, role: MessageRole, createdAt: Date? = nil, fileUrls: [String]? = nil, docFormat: DocFormat? = nil, searchingWeb: Bool = false, generatingImage: Bool = false, citations: [Citation]? = nil) {
         self.id = id
         self.remoteId = remoteId
         self.text = text
@@ -31,6 +32,7 @@ struct ChatMessage: Identifiable {
         self.fileUrls = fileUrls
         self.docFormat = docFormat
         self.searchingWeb = searchingWeb
+        self.generatingImage = generatingImage
         self.citations = citations
     }
     
@@ -48,6 +50,7 @@ struct ImageViewerItem: Identifiable {
 /// (iOS 18). On iOS 17 it's a no-op and we fall back to a bottom-anchor marker.
 struct ScrollBottomDetector: ViewModifier {
     @Binding var isAtBottom: Bool
+    @Binding var suppressed: Bool
     func body(content: Content) -> some View {
         if #available(iOS 18.0, *) {
             // Track a CONTINUOUS distance-from-bottom, not a Bool. A Bool transform
@@ -59,6 +62,10 @@ struct ScrollBottomDetector: ViewModifier {
             content.onScrollGeometryChange(for: CGFloat.self) { geo in
                 geo.contentSize.height - (geo.contentOffset.y + geo.containerSize.height)
             } action: { _, distanceFromBottom in
+                // Ignore while the button's own scroll is running — it starts far from
+                // the bottom and would flip the button back on mid-flight, then leave a
+                // stale value (the "won't disappear until I scroll more" bug).
+                guard !suppressed else { return }
                 let atBottom = distanceFromBottom < 100   // within ~100pt = at bottom
                 if atBottom != isAtBottom {
                     // Springy so the button pops small→big / big→small.
@@ -68,6 +75,58 @@ struct ScrollBottomDetector: ViewModifier {
         } else {
             content
         }
+    }
+}
+
+/// Smoothly animated "AI is typing" dots. A real @State drives the animation —
+/// the old inline version pinned scaleEffect to a constant, so `.repeatForever`
+/// animated nothing and the dots sat frozen ("stuck" look).
+struct TypingIndicator: View {
+    @State private var animate = false
+    var body: some View {
+        HStack(spacing: 5) {
+            ForEach(0..<3, id: \.self) { i in
+                Circle()
+                    .fill(Color.white.opacity(0.55))
+                    .frame(width: 7, height: 7)
+                    .offset(y: animate ? -4 : 2)
+                    .opacity(animate ? 1.0 : 0.35)
+                    .animation(
+                        .easeInOut(duration: 0.5)
+                            .repeatForever(autoreverses: true)
+                            .delay(Double(i) * 0.16),
+                        value: animate
+                    )
+            }
+        }
+        .onAppear { animate = true }
+    }
+}
+
+/// Shimmering placeholder bubbles shown while a conversation loads — far smoother
+/// than a lone spinner sitting in an empty screen.
+struct ChatLoadingSkeleton: View {
+    private let rows: [(isUser: Bool, width: CGFloat, height: CGFloat)] = [
+        (false, 240, 54), (true, 150, 40), (false, 280, 78), (true, 120, 40), (false, 210, 54)
+    ]
+    var body: some View {
+        VStack(alignment: .leading, spacing: 16) {
+            ForEach(0..<rows.count, id: \.self) { i in
+                let row = rows[i]
+                HStack {
+                    if row.isUser { Spacer(minLength: 60) }
+                    RoundedRectangle(cornerRadius: 18, style: .continuous)
+                        .fill(Color.white.opacity(0.07))
+                        .frame(width: row.width, height: row.height)
+                    if !row.isUser { Spacer(minLength: 60) }
+                }
+            }
+            Spacer(minLength: 0)
+        }
+        .padding(.horizontal, 16)
+        .padding(.top, 14)
+        .shimmering()
+        .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .top)
     }
 }
 
@@ -497,11 +556,13 @@ final class ChatViewModel: ObservableObject {
                 var fullText = ""
                 var assistantMessageId: UUID?
                 var searchingWeb = false
+                var generatingImage = false
+                var imageUrls: [String]? = nil
                 var citations: [Citation]? = nil
 
                 // Rebuild (or create) the assistant bubble with the latest state. The
                 // ChatMessage is immutable, so streaming updates replace it in place,
-                // carrying searchingWeb / citations across every rebuild.
+                // carrying searchingWeb / image / citations across every rebuild.
                 @MainActor func upsertAssistant() {
                     if let existingId = assistantMessageId,
                        let index = self.messages.firstIndex(where: { $0.id == existingId }) {
@@ -511,9 +572,10 @@ final class ChatViewModel: ObservableObject {
                             text: fullText,
                             role: .assistant,
                             createdAt: self.messages[index].createdAt,
-                            fileUrls: self.messages[index].fileUrls,
+                            fileUrls: imageUrls ?? self.messages[index].fileUrls,
                             docFormat: docFormat,
                             searchingWeb: searchingWeb,
+                            generatingImage: generatingImage,
                             citations: citations
                         )
                     } else {
@@ -521,8 +583,10 @@ final class ChatViewModel: ObservableObject {
                             text: fullText,
                             role: .assistant,
                             createdAt: Date(),
+                            fileUrls: imageUrls,
                             docFormat: docFormat,
                             searchingWeb: searchingWeb,
+                            generatingImage: generatingImage,
                             citations: citations
                         )
                         assistantMessageId = newMessage.id
@@ -534,15 +598,30 @@ final class ChatViewModel: ObservableObject {
                 for try await event in stream {
                     switch event.type {
                     case "status":
-                        // Live web search started — show a dedicated loader on the reply.
+                        // A dedicated loader on the reply (web search or image gen).
                         if event.stage == "searching_web" {
                             searchingWeb = true
                             await MainActor.run { upsertAssistant() }
+                        } else if event.stage == "generating_image" {
+                            generatingImage = true
+                            await MainActor.run { upsertAssistant() }
                         }
+                    case "image":
+                        // Auto-generated image arrived — render it in the reply bubble.
+                        if let u = event.url {
+                            imageUrls = [u]
+                            generatingImage = false
+                            await MainActor.run { upsertAssistant() }
+                        }
+                    case "image_limit":
+                        // Image-generation quota hit → upgrade paywall.
+                        generatingImage = false
+                        await MainActor.run { self.pendingSearchUpgrade = true }
                     case "chunk":
                         if let content = event.content {
                             fullText += content
                             searchingWeb = false  // first chunk clears the loader
+                            generatingImage = false
                             await MainActor.run { upsertAssistant() }
                         }
                     case "citations":
@@ -717,6 +796,10 @@ struct ChatView: View {
     @State private var selectedImage: ImageViewerItem?
     @State private var showPaywall = false
     @State private var isAtBottom = true
+    // True while the button's own scroll is in flight, so the geometry detector
+    // doesn't fight it (it fires mid-scroll from far up and would flip the button
+    // back on, then leave a stale value → the "won't disappear" bug).
+    @State private var isProgrammaticScroll = false
     @StateObject private var rewardAds = RewardedAdManager.shared
     @StateObject private var subs = SubscriptionManager.shared
     @State private var showRewardSheet = false
@@ -1029,26 +1112,29 @@ struct ChatView: View {
                 .id(viewModel.selectedConversation?.id)
                 .scrollDismissesKeyboard(.interactively)
                 // Real-time bottom detection (iOS 18) — drives the button + follow guard.
-                .modifier(ScrollBottomDetector(isAtBottom: $isAtBottom))
+                .modifier(ScrollBottomDetector(isAtBottom: $isAtBottom, suppressed: $isProgrammaticScroll))
 
                 if viewModel.isLoadingMessages {
-                    ProgressView().tint(.white)
+                    ChatLoadingSkeleton()
+                        .transition(.opacity)
                 }
 
                 // ChatGPT-style scroll-to-bottom button (glass), shown when scrolled up.
                 if !isAtBottom && !viewModel.messages.isEmpty {
                     Button {
                         HapticManager.shared.fire(.lightImpact)
-                        // Hide immediately so it disappears on tap. Safe now: the CGFloat
-                        // detector re-fires on the next scroll movement and re-syncs, so
-                        // this manual set can't get stuck (the old Bool version could).
+                        // Suppress the detector for the duration of our own scroll so it
+                        // can't flip the button back on mid-flight, then hide immediately.
+                        isProgrammaticScroll = true
                         withAnimation(.spring(response: 0.34, dampingFraction: 0.66)) { isAtBottom = true }
                         // Smooth glide to the bottom…
                         scrollToLatest(proxy: proxy, animated: true)
-                        // …with a plain hard-set after it, so in-flight momentum can't
-                        // stop us from landing at the true bottom.
-                        DispatchQueue.main.asyncAfter(deadline: .now() + 0.4) {
+                        // …then a plain hard-set lands us at the true bottom even through
+                        // momentum, and we re-enable the detector (already at the bottom,
+                        // so it stays hidden; a later scroll-up re-syncs and shows it).
+                        DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
                             scrollToLatest(proxy: proxy, animated: false)
+                            isProgrammaticScroll = false
                         }
                     } label: {
                         Image(systemName: "chevron.down")
@@ -1124,6 +1210,20 @@ struct ChatView: View {
                         ProgressView()
                             .scaleEffect(0.7)
                             .tint(SalomTheme.Colors.accentPrimary)
+                    }
+                }
+
+                if !message.isUser && message.generatingImage {
+                    HStack(spacing: 6) {
+                        Image(systemName: "photo")
+                            .font(.system(size: 13, weight: .semibold))
+                            .foregroundColor(.purple)
+                        Text("Rasm yaratilmoqda…")
+                            .font(.system(size: 13, weight: .medium))
+                            .foregroundColor(.purple)
+                        ProgressView()
+                            .scaleEffect(0.7)
+                            .tint(.purple)
                     }
                 }
 
@@ -1293,34 +1393,20 @@ struct ChatView: View {
 
     @ViewBuilder func TypingBubble() -> some View {
         HStack {
-            HStack(spacing: 4) {
-                Circle()
-                    .fill(Color.white.opacity(0.6))
-                    .frame(width: 6, height: 6)
-                    .scaleEffect(1.0)
-                    .animation(.easeInOut(duration: 0.6).repeatForever().delay(0), value: viewModel.isTyping)
-                Circle()
-                    .fill(Color.white.opacity(0.6))
-                    .frame(width: 6, height: 6)
-                    .scaleEffect(1.0)
-                    .animation(.easeInOut(duration: 0.6).repeatForever().delay(0.2), value: viewModel.isTyping)
-                Circle()
-                    .fill(Color.white.opacity(0.6))
-                    .frame(width: 6, height: 6)
-                    .scaleEffect(1.0)
-                    .animation(.easeInOut(duration: 0.6).repeatForever().delay(0.4), value: viewModel.isTyping)
-            }
-            .padding(.horizontal, 14)
-            .padding(.vertical, 12)
-            .background(
-                RoundedRectangle(cornerRadius: 20, style: .continuous)
-                    .fill(Color.white.opacity(0.05))
-            )
-            
+            TypingIndicator()
+                .padding(.horizontal, 16)
+                .padding(.vertical, 15)
+                .background(
+                    RoundedRectangle(cornerRadius: 20, style: .continuous)
+                        .fill(Color.white.opacity(0.06))
+                )
             Spacer()
         }
         .padding(.horizontal, 4)
-        .transition(.opacity)
+        .transition(.asymmetric(
+            insertion: .scale(scale: 0.85, anchor: .bottomLeading).combined(with: .opacity),
+            removal: .opacity
+        ))
     }
     
     @ViewBuilder func ImageGenerationLoadingBubble() -> some View {
