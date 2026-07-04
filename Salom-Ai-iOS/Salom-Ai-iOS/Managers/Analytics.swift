@@ -39,6 +39,18 @@ final class Analytics {
         return s
     }
 
+    /// Device/app version reported with each batch → admin version breakdown.
+    private var deviceInfo: (os: String, app: String, model: String) {
+        let os = UIDevice.current.systemVersion  // e.g. "17.5.1"
+        let app = (Bundle.main.infoDictionary?["CFBundleShortVersionString"] as? String) ?? "?"
+        var sys = utsname()
+        uname(&sys)
+        let model = withUnsafePointer(to: &sys.machine) {
+            $0.withMemoryRebound(to: CChar.self, capacity: 1) { String(validatingUTF8: $0) }
+        } ?? "?"  // e.g. "iPhone15,3"
+        return (os, app, model)
+    }
+
     /// Record an interaction. Safe to call from anywhere, on any thread.
     func track(_ name: String, _ props: [String: Any]? = nil) {
         lock.lock()
@@ -62,7 +74,11 @@ final class Analytics {
             if let p = e.props { d["props"] = p }
             return d
         }
-        let body: [String: Any] = ["events": eventsJSON, "platform": "ios", "session_id": sessionId]
+        let dev = deviceInfo
+        let body: [String: Any] = [
+            "events": eventsJSON, "platform": "ios", "session_id": sessionId,
+            "os_version": dev.os, "app_version": dev.app, "device_model": dev.model
+        ]
         guard let data = try? JSONSerialization.data(withJSONObject: body) else { return }
 
         let url = APIClient.shared.baseURL.appendingPathComponent("events")
