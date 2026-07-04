@@ -50,13 +50,16 @@ struct ScrollBottomDetector: ViewModifier {
     @Binding var isAtBottom: Bool
     func body(content: Content) -> some View {
         if #available(iOS 18.0, *) {
-            content.onScrollGeometryChange(for: Bool.self) { geo in
-                // Within ~100pt of the very bottom counts as "at bottom". Forgiving
-                // enough that the last deceleration callback catches it before the
-                // scroll settles — otherwise the button sticks visible at the true
-                // bottom until a further nudge re-fires this callback.
-                (geo.contentSize.height - (geo.contentOffset.y + geo.containerSize.height)) < 100
-            } action: { _, atBottom in
+            // Track a CONTINUOUS distance-from-bottom, not a Bool. A Bool transform
+            // only fires when it flips, so after a programmatic scroll (which may not
+            // emit a geometry change) the detector's internal value goes stale, and a
+            // later scroll-up computes the same Bool → never fires → the button gets
+            // stuck. A CGFloat changes on every pixel of movement, so ANY manual
+            // scroll re-fires this and self-corrects isAtBottom.
+            content.onScrollGeometryChange(for: CGFloat.self) { geo in
+                geo.contentSize.height - (geo.contentOffset.y + geo.containerSize.height)
+            } action: { _, distanceFromBottom in
+                let atBottom = distanceFromBottom < 100   // within ~100pt = at bottom
                 if atBottom != isAtBottom {
                     // Springy so the button pops small→big / big→small.
                     withAnimation(.spring(response: 0.34, dampingFraction: 0.66)) { isAtBottom = atBottom }
@@ -1036,14 +1039,14 @@ struct ChatView: View {
                 if !isAtBottom && !viewModel.messages.isEmpty {
                     Button {
                         HapticManager.shared.fire(.lightImpact)
-                        // Smooth glide to the bottom. Do NOT set isAtBottom manually —
-                        // let the geometry detector drive it. Setting it by hand desyncs
-                        // the detector's internal last-value, so scrolling back up later
-                        // returns a value it thinks is unchanged and never re-fires (the
-                        // "button won't come back until I manually go to the bottom" bug).
+                        // Hide immediately so it disappears on tap. Safe now: the CGFloat
+                        // detector re-fires on the next scroll movement and re-syncs, so
+                        // this manual set can't get stuck (the old Bool version could).
+                        withAnimation(.spring(response: 0.34, dampingFraction: 0.66)) { isAtBottom = true }
+                        // Smooth glide to the bottom…
                         scrollToLatest(proxy: proxy, animated: true)
-                        // Safety: if in-flight momentum swallowed the animated scroll,
-                        // a plain hard-set after it lands us at the true bottom.
+                        // …with a plain hard-set after it, so in-flight momentum can't
+                        // stop us from landing at the true bottom.
                         DispatchQueue.main.asyncAfter(deadline: .now() + 0.4) {
                             scrollToLatest(proxy: proxy, animated: false)
                         }
