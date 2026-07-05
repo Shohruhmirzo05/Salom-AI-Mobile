@@ -9,6 +9,7 @@ struct SubscriptionView: View {
     @State private var selectedPlanForPayment: IdentifiablePlanCode?
     @State private var showCancelAlert = false
     @State private var isTogglingAutoRenew = false
+    @State private var billingPeriod: BillingPeriod = .yearly   // prioritise yearly
     
     @AppStorage(AppStorageKeys.preferredLanguageCode)
     private var languageCode: String = "uz"
@@ -238,15 +239,44 @@ struct SubscriptionView: View {
     
     @ViewBuilder
     private func PlansGrid() -> some View {
+        let paid = subscriptionManager.plans.filter { $0.priceUzs > 0 && !$0.code.hasSuffix("_promo") }
+        let hasYearly = paid.contains { PlanPeriodHelper.isYearly($0) }
+        let displayed = paid.filter { PlanPeriodHelper.isYearly($0) == (billingPeriod == .yearly) }
+        let maxSave = paid.compactMap { PlanPeriodHelper.savingsPct($0, in: paid) }.max() ?? 0
         VStack(spacing: 16) {
-            ForEach(subscriptionManager.plans) { plan in
-                PlanCard(plan: plan)
+            if hasYearly {
+                HStack(spacing: 4) {
+                    ForEach([BillingPeriod.yearly, BillingPeriod.monthly], id: \.self) { p in
+                        Button {
+                            HapticManager.shared.fire(.lightImpact)
+                            withAnimation(.easeOut(duration: 0.18)) { billingPeriod = p }
+                        } label: {
+                            HStack(spacing: 5) {
+                                Text(p == .yearly ? "Yillik" : "Oylik").font(.system(size: 13.5, weight: .semibold))
+                                if p == .yearly, maxSave > 0 {
+                                    Text("−\(maxSave)%").font(.system(size: 10, weight: .bold)).foregroundColor(.white)
+                                        .padding(.horizontal, 5).padding(.vertical, 1)
+                                        .background(Capsule().fill(Color.green))
+                                }
+                            }
+                            .foregroundColor(billingPeriod == p ? .black : .white.opacity(0.6))
+                            .frame(maxWidth: .infinity).padding(.vertical, 8)
+                            .background(RoundedRectangle(cornerRadius: 10, style: .continuous).fill(billingPeriod == p ? Color.white : Color.clear))
+                        }
+                        .buttonStyle(.plain)
+                    }
+                }
+                .padding(4)
+                .background(RoundedRectangle(cornerRadius: 13, style: .continuous).fill(Color.white.opacity(0.06)))
+            }
+            ForEach(displayed) { plan in
+                PlanCard(plan: plan, savingsPct: PlanPeriodHelper.savingsPct(plan, in: paid))
             }
         }
     }
-    
+
     @ViewBuilder
-    private func PlanCard(plan: SubscriptionPlan) -> some View {
+    private func PlanCard(plan: SubscriptionPlan, savingsPct: Int? = nil) -> some View {
         let isCurrent = subscriptionManager.currentPlan?.plan == plan.code && subscriptionManager.currentPlan?.active == true
         
         VStack(alignment: .leading, spacing: 16) {
@@ -264,12 +294,26 @@ struct SubscriptionView: View {
             }
             
             VStack(alignment: .leading, spacing: 4) {
-                Text("\(plan.priceUzs.formatted()) UZS")
-                    .font(.title2.weight(.bold))
-                    .foregroundColor(.white)
-                Text("/ oyiga")
-                    .font(.caption)
-                    .foregroundColor(SalomTheme.Colors.textSecondary)
+                let days = plan.durationDays ?? 30
+                let perDay = Int((Double(plan.priceUzs) / Double(max(1, days))).rounded())
+                HStack(alignment: .firstTextBaseline, spacing: 6) {
+                    Text("\(perDay.formatted()) so'm")
+                        .font(.title.weight(.bold))
+                        .foregroundColor(.white)
+                    Text("/ kun")
+                        .font(.caption)
+                        .foregroundColor(SalomTheme.Colors.textSecondary)
+                }
+                HStack(spacing: 6) {
+                    Text("\(plan.priceUzs.formatted()) UZS / \(days >= 300 ? "yil" : "oy")")
+                        .font(.caption)
+                        .foregroundColor(SalomTheme.Colors.textSecondary)
+                    if let s = savingsPct, s > 0 {
+                        Text("−\(s)% tejang")
+                            .font(.caption.weight(.bold))
+                            .foregroundColor(.green)
+                    }
+                }
             }
             
             // Features list

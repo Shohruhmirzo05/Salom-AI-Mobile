@@ -9,6 +9,25 @@
 
 import SwiftUI
 
+/// Billing period for the paywalls' Oylik/Yillik toggle (shared across views).
+enum BillingPeriod: Hashable { case yearly, monthly }
+
+/// Shared helpers for pairing monthly↔yearly plans and computing savings.
+enum PlanPeriodHelper {
+    static func isYearly(_ p: SubscriptionPlan) -> Bool { (p.durationDays ?? 30) >= 300 }
+    /// % cheaper vs paying the monthly counterpart for a whole year.
+    static func savingsPct(_ plan: SubscriptionPlan, in all: [SubscriptionPlan]) -> Int? {
+        guard isYearly(plan) else { return nil }
+        let base = plan.code.replacingOccurrences(of: "_yearly", with: "")
+        guard let m = all.first(where: { $0.code == base }) else { return nil }
+        let full: Int = m.priceUzs * 12
+        guard full > 0 else { return nil }
+        let ratio: Double = Double(plan.priceUzs) / Double(full)
+        let pct: Int = Int((1.0 - ratio) * 100.0)
+        return pct > 0 ? pct : nil
+    }
+}
+
 // MARK: - Navigation model
 
 enum PaymentStep: Hashable {
@@ -36,6 +55,7 @@ struct PaywallSheet: View {
 
     @State private var path = NavigationPath()
     @State private var selectedPlanCode: String? = nil
+    @State private var billingPeriod: BillingPeriod = .yearly   // prioritise yearly
 
     var body: some View {
         NavigationStack(path: $path) {
@@ -68,6 +88,7 @@ struct PaywallSheet: View {
                     headerArt
                     headerCopy
                     highlightsStrip
+                    if hasYearly { billingToggle }
                     planList
                     if let selected = selectedPlan {
                         benefitsBlock(for: selected)
@@ -172,6 +193,44 @@ struct PaywallSheet: View {
 
     // MARK: - Plans
 
+    // Oylik / Yillik segmented toggle — defaults to Yillik so users see the deal.
+    @ViewBuilder private var billingToggle: some View {
+        HStack(spacing: 4) {
+            ForEach([BillingPeriod.yearly, BillingPeriod.monthly], id: \.self) { p in
+                Button {
+                    HapticManager.shared.fire(.lightImpact)
+                    withAnimation(.easeOut(duration: 0.18)) {
+                        billingPeriod = p
+                        // recommendedPlan is already scoped to the new period.
+                        selectedPlanCode = recommendedPlan?.code
+                    }
+                } label: {
+                    HStack(spacing: 5) {
+                        Text(p == .yearly ? "Yillik" : "Oylik")
+                            .font(.system(size: 13.5, weight: .semibold))
+                        if p == .yearly, maxSavingsPct > 0 {
+                            Text("−\(maxSavingsPct)%")
+                                .font(.system(size: 10, weight: .bold))
+                                .foregroundColor(.white)
+                                .padding(.horizontal, 5).padding(.vertical, 1)
+                                .background(Capsule().fill(Color.green))
+                        }
+                    }
+                    .foregroundColor(billingPeriod == p ? .black : .white.opacity(0.6))
+                    .frame(maxWidth: .infinity)
+                    .padding(.vertical, 8)
+                    .background(
+                        RoundedRectangle(cornerRadius: 10, style: .continuous)
+                            .fill(billingPeriod == p ? Color.white : Color.clear)
+                    )
+                }
+                .buttonStyle(.plain)
+            }
+        }
+        .padding(4)
+        .background(RoundedRectangle(cornerRadius: 13, style: .continuous).fill(Color.white.opacity(0.06)))
+    }
+
     @ViewBuilder private var planList: some View {
         if paidPlans.isEmpty {
             ProgressView()
@@ -179,11 +238,12 @@ struct PaywallSheet: View {
                 .frame(maxWidth: .infinity, minHeight: 200)
         } else {
             VStack(spacing: 10) {
-                ForEach(paidPlans, id: \.code) { plan in
+                ForEach(displayedPlans, id: \.code) { plan in
                     DailyPriceRow(
                         plan: plan,
                         selected: selectedPlanCode == plan.code,
-                        isRecommended: plan.code == recommendedPlan?.code
+                        isRecommended: plan.code == recommendedPlan?.code,
+                        savingsPct: savingsPct(for: plan)
                     ) {
                         HapticManager.shared.fire(.lightImpact)
                         withAnimation(.easeOut(duration: 0.18)) {
@@ -358,14 +418,37 @@ struct PaywallSheet: View {
             .sorted { $0.priceUzs < $1.priceUzs }
     }
 
+    // Plans for the currently-selected billing period.
+    private var displayedPlans: [SubscriptionPlan] {
+        paidPlans.filter { p in
+            let d = p.durationDays ?? 30
+            return billingPeriod == .yearly ? d >= 300 : d < 300
+        }
+    }
+    private var hasYearly: Bool { paidPlans.contains { ($0.durationDays ?? 30) >= 300 } }
+
     private var recommendedPlan: SubscriptionPlan? {
-        let paid = paidPlans
-        if paid.count >= 2 { return paid[1] }
-        return paid.first
+        let list = displayedPlans
+        if list.count >= 2 { return list[1] }   // the higher tier
+        return list.first
+    }
+
+    /// % cheaper vs paying the monthly counterpart for a whole year.
+    private func savingsPct(for plan: SubscriptionPlan) -> Int? {
+        guard (plan.durationDays ?? 30) >= 300 else { return nil }
+        let base = plan.code.replacingOccurrences(of: "_yearly", with: "")
+        guard let m = paidPlans.first(where: { $0.code == base }) else { return nil }
+        let full = m.priceUzs * 12
+        guard full > 0 else { return nil }
+        let pct = Int((1.0 - Double(plan.priceUzs) / Double(full)) * 100.0)
+        return pct > 0 ? pct : nil
+    }
+    private var maxSavingsPct: Int {
+        paidPlans.compactMap { savingsPct(for: $0) }.max() ?? 0
     }
 
     private var selectedPlan: SubscriptionPlan? {
-        guard let code = selectedPlanCode else { return paidPlans.first }
+        guard let code = selectedPlanCode else { return displayedPlans.first }
         return paidPlans.first { $0.code == code }
     }
 }
@@ -376,6 +459,7 @@ private struct DailyPriceRow: View {
     let plan: SubscriptionPlan
     let selected: Bool
     let isRecommended: Bool
+    var savingsPct: Int? = nil
     let onTap: () -> Void
 
     var body: some View {
@@ -409,9 +493,16 @@ private struct DailyPriceRow: View {
                                     )
                             }
                         }
-                        Text(periodLabel)
-                            .font(.system(size: 11.5))
-                            .foregroundColor(.white.opacity(0.4))
+                        HStack(spacing: 6) {
+                            Text(periodLabel)
+                                .font(.system(size: 11.5))
+                                .foregroundColor(.white.opacity(0.4))
+                            if let s = savingsPct, s > 0 {
+                                Text("−\(s)% tejang")
+                                    .font(.system(size: 10, weight: .bold))
+                                    .foregroundColor(.green)
+                            }
+                        }
                     }
 
                     Spacer(minLength: 8)
