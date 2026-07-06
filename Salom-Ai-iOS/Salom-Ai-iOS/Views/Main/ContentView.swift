@@ -16,6 +16,8 @@ struct ContentView: View {
     
     @StateObject private var session = SessionManager.shared
     @State private var showSplash: Bool = true
+    // Observe the payment-abandon survey flag (set after a non-paid checkout return).
+    @ObservedObject private var subs = SubscriptionManager.shared
 
     var body: some View {
         ZStack {
@@ -47,6 +49,17 @@ struct ContentView: View {
         }
         .fullScreenCover(item: $winBackOffer) { offer in
             WinBackOfferSheet(offer: offer)
+        }
+        .sheet(isPresented: $subs.showPaymentSurvey) {
+            // "Why didn't you pay?" after a returned-but-not-paid checkout.
+            WhyNotPaySurvey(
+                onPick: { reason in
+                    Task { await SubscriptionManager.shared.submitCancelSurvey(reason: reason) }
+                    subs.showPaymentSurvey = false
+                },
+                onSkip: { subs.showPaymentSurvey = false }
+            )
+            .presentationDetents([.height(320)])
         }
         .onChange(of: showSplash) { _, isSplashActive in
             if !isSplashActive {

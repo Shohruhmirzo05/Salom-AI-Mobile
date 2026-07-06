@@ -15,9 +15,11 @@ import SwiftUI
 /// The outcome of a redirect checkout, mapped from the deep-link `status` param
 /// (`paid` / `failed` / `cancelled`) or inferred from a subscription refresh.
 enum PaymentToastKind: Equatable {
+    case checking   // transient: we're polling the payment status
     case success
     case failed
     case cancelled
+    case pending    // returned but not confirmed yet (likely abandoned / slow webhook)
 
     /// Map the web result page's `status` query value onto a toast kind.
     init?(status: String?) {
@@ -29,43 +31,56 @@ enum PaymentToastKind: Equatable {
         }
     }
 
+    /// Terminal outcomes clear the pending checkout; checking/pending do not.
+    var isTerminal: Bool { self == .success || self == .failed || self == .cancelled }
+
     var icon: String {
         switch self {
+        case .checking:  return "arrow.triangle.2.circlepath"
         case .success:   return "checkmark.circle.fill"
         case .failed:    return "xmark.circle.fill"
         case .cancelled: return "exclamationmark.circle.fill"
+        case .pending:   return "clock.fill"
         }
     }
 
     var tint: Color {
         switch self {
+        case .checking:  return Color(hex: "#60A5FA") // blue
         case .success:   return Color(hex: "#34D399") // emerald
         case .failed:    return Color(hex: "#F97373") // red
         case .cancelled: return Color(hex: "#FBBF24") // amber
+        case .pending:   return Color(hex: "#FBBF24") // amber
         }
     }
 
     var title: LocalizedStringKey {
         switch self {
+        case .checking:  return "To'lov tekshirilmoqda…"
         case .success:   return "Obuna faollashtirildi!"
         case .failed:    return "To'lov amalga oshmadi"
         case .cancelled: return "To'lov bekor qilindi"
+        case .pending:   return "To'lov hali tasdiqlanmadi"
         }
     }
 
     var subtitle: LocalizedStringKey {
         switch self {
+        case .checking:  return "Iltimos, biroz kuting"
         case .success:   return "Pro rejimi faol"
         case .failed:    return "Iltimos, qaytadan urinib ko'ring"
         case .cancelled: return "To'lov havolasi bekor qilindi"
+        case .pending:   return "Agar to'lagan bo'lsangiz, biroz vaqt olishi mumkin"
         }
     }
 
     var haptic: HapticFeedback {
         switch self {
+        case .checking:  return .warning
         case .success:   return .success
         case .failed:    return .error
         case .cancelled: return .warning
+        case .pending:   return .warning
         }
     }
 }
@@ -161,6 +176,8 @@ private struct PaymentToastHost: View {
                     .transition(.move(edge: .top).combined(with: .opacity))
                     .task(id: toast.id) {
                         HapticManager.shared.fire(toast.kind.haptic)
+                        // The "checking…" toast stays until the result replaces it.
+                        if toast.kind == .checking { return }
                         try? await Task.sleep(nanoseconds: UInt64(visibleDuration * 1_000_000_000))
                         // Only auto-dismiss if this exact toast is still showing.
                         if manager.paymentToast?.id == toast.id { dismiss() }

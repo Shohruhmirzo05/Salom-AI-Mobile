@@ -25,6 +25,11 @@ final class SubscriptionManager: ObservableObject {
     /// view — go through `handlePaymentReturn` / `refreshAfterForeground`.
     @Published var paymentToast: PaymentToast?
 
+    /// Root-level "why didn't you pay?" survey. Set true when a checkout is
+    /// returned-from but NOT paid (failed / cancelled / abandoned). Observed by
+    /// ContentView, which presents the WhyNotPaySurvey sheet.
+    @Published var showPaymentSurvey = false
+
     // MARK: - Redirect-checkout tracking
     //
     // When we hand a user off to a Payme/Click redirect checkout we remember the
@@ -106,23 +111,40 @@ final class SubscriptionManager: ObservableObject {
             clearPendingCheckout(); return                                 // window expired
         }
 
-        // Fast path — trusted terminal status, no round-trip.
+        // Fast path — trusted terminal status from the deep link, no round-trip.
         if let kind = PaymentToastKind(status: trustedStatus) {
             await finishPayment(kind)
             return
         }
 
-        // Slow path — ask the backend for the real status. One poll at a time.
+        // Slow path — poll the backend for the REAL status. One resolver at a time.
         guard !isPollingPaymentStatus, let id else { return }
         isPollingPaymentStatus = true
         defer { isPollingPaymentStatus = false }
 
-        guard let resp = try? await APIClient.shared.request(
-                .paymentStatus(id: id), decodeTo: PaymentStatusResponse.self),
-              let kind = PaymentToastKind(status: resp.status) else {
-            return  // still pending / unknown → keep waiting for the next return
+        // Immediate "checking…" feedback so the user never returns to silence.
+        presentToast(.checking, plan: pendingCheckoutPlan)
+
+        // Retry a few times: a just-paid order may take a few seconds for the
+        // Payme/Click webhook to land. Abandoned orders stay 'pending'.
+        for attempt in 0..<5 {
+            if attempt > 0 { try? await Task.sleep(nanoseconds: 2_500_000_000) }
+            // Bail if a peer (deep link) already resolved this checkout.
+            guard pendingCheckoutAt != nil else { return }
+            if let resp = try? await APIClient.shared.request(
+                    .paymentStatus(id: id), decodeTo: PaymentStatusResponse.self),
+               let kind = PaymentToastKind(status: resp.status) {
+                await finishPayment(kind)
+                return
+            }
         }
-        await finishPayment(kind)
+
+        // Still not terminal after retries → treat as abandoned: show a pending
+        // info toast and ask WHY they didn't pay. Keep the checkout armed so a
+        // late webhook can still flip it to success on the next foreground.
+        guard pendingCheckoutAt != nil else { return }
+        presentToast(.pending, plan: pendingCheckoutPlan)
+        showPaymentSurvey = true
     }
 
     /// Terminal resolution. Claims the pending checkout synchronously (clearing it
@@ -134,6 +156,10 @@ final class SubscriptionManager: ObservableObject {
         clearPendingCheckout()
         await checkSubscriptionStatus()
         presentToast(kind, plan: plan)
+        // Not paid → ask why (failed / cancelled). Success never surveys.
+        if kind != .success {
+            showPaymentSurvey = true
+        }
     }
 
     /// Marks that a redirect checkout was just opened.
@@ -150,11 +176,14 @@ final class SubscriptionManager: ObservableObject {
     }
 
     private func presentToast(_ kind: PaymentToastKind, plan: String?) {
-        Analytics.shared.track("payment_completed", [
-            "status": kind == .success ? "paid" : (kind == .failed ? "failed" : "cancelled"),
-            "plan": plan ?? currentPlan?.plan ?? "unknown",
-            "platform": "ios",
-        ])
+        // Only terminal outcomes are a "completed" funnel event; skip checking/pending.
+        if kind.isTerminal {
+            Analytics.shared.track("payment_completed", [
+                "status": kind == .success ? "paid" : (kind == .failed ? "failed" : "cancelled"),
+                "plan": plan ?? currentPlan?.plan ?? "unknown",
+                "platform": "ios",
+            ])
+        }
         // Ensure the top-most overlay window exists so the toast floats above any
         // open sheet / fullScreenCover, then publish it.
         ToastWindowController.shared.install()
