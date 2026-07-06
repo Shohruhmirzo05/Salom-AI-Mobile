@@ -260,8 +260,9 @@ struct SubscriptionView: View {
                                 }
                             }
                             .foregroundColor(billingPeriod == p ? .black : .white.opacity(0.6))
-                            .frame(maxWidth: .infinity).padding(.vertical, 8)
+                            .frame(maxWidth: .infinity).padding(.vertical, 10)
                             .background(RoundedRectangle(cornerRadius: 10, style: .continuous).fill(billingPeriod == p ? Color.white : Color.clear))
+                            .contentShape(Rectangle())   // whole segment tappable, not just the text
                         }
                         .buttonStyle(.plain)
                     }
@@ -316,28 +317,23 @@ struct SubscriptionView: View {
                 }
             }
             
-            // Features list
+            // Feature comparison (✓/✗) — Pro gets all rows; lower tier shows premium rows as ✗.
+            let isPro = plan.code.contains("pro")
             VStack(alignment: .leading, spacing: 8) {
-                if let benefits = plan.benefits, !benefits.isEmpty {
-                    ForEach(benefits.indices, id: \.self) { index in
-                        let benefit = benefits[index]
-                        HStack(alignment: .top, spacing: 8) {
-                            Image(systemName: "checkmark")
-                                .font(.caption.weight(.bold))
-                                .foregroundColor(SalomTheme.Colors.accentPrimary)
-                                .padding(.top, 2)
-                            
-                            Text(benefit[languageCode] ?? benefit["uz"] ?? "")
-                                .font(.subheadline)
-                                .foregroundColor(SalomTheme.Colors.textSecondary)
-                                .fixedSize(horizontal: false, vertical: true)
-                        }
+                ForEach(planCompareFeatures) { f in
+                    let included = isPro || !f.proOnly
+                    HStack(alignment: .top, spacing: 8) {
+                        Image(systemName: included ? "checkmark" : "xmark")
+                            .font(.caption.weight(.bold))
+                            .foregroundColor(included ? (isPro ? .yellow : SalomTheme.Colors.accentPrimary) : .white.opacity(0.3))
+                            .padding(.top, 2)
+
+                        Text(f.label)
+                            .font(.subheadline)
+                            .foregroundColor(included ? SalomTheme.Colors.textSecondary : .white.opacity(0.3))
+                            .strikethrough(!included, color: .white.opacity(0.3))
+                            .fixedSize(horizontal: false, vertical: true)
                     }
-                } else {
-                    Text("Imtiyozlar mavjud emas")
-                        .font(.subheadline)
-                        .foregroundColor(SalomTheme.Colors.textSecondary)
-                        .italic()
                 }
             }
             .padding(.vertical, 8)

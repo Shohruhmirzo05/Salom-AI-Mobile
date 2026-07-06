@@ -28,6 +28,22 @@ enum PlanPeriodHelper {
     }
 }
 
+/// General ✓/✗ comparison shown on every plan card (matches web). The higher tier
+/// gets every row; the lower tier shows the premium (proOnly) rows as ✗, so the
+/// gap is obvious and users are nudged up. NOT exact per-plan limits.
+struct PlanCompareFeature: Identifiable {
+    let id = UUID()
+    let label: String
+    let proOnly: Bool
+}
+let planCompareFeatures: [PlanCompareFeature] = [
+    .init(label: "📊 Taqdimot, referat va DTM", proOnly: false),
+    .init(label: "🎨 Rasm yaratish va ovozli rejim", proOnly: false),
+    .init(label: "🧠 Eng kuchli AI — Super Aqlli", proOnly: true),
+    .init(label: "🚀 Yuqori limitlar — ko‘proq rasm va ovoz", proOnly: true),
+    .init(label: "👑 Hamma imkoniyat — cheklovsiz", proOnly: true),
+]
+
 // MARK: - Navigation model
 
 enum PaymentStep: Hashable {
@@ -218,11 +234,12 @@ struct PaywallSheet: View {
                     }
                     .foregroundColor(billingPeriod == p ? .black : .white.opacity(0.6))
                     .frame(maxWidth: .infinity)
-                    .padding(.vertical, 8)
+                    .padding(.vertical, 10)
                     .background(
                         RoundedRectangle(cornerRadius: 10, style: .continuous)
                             .fill(billingPeriod == p ? Color.white : Color.clear)
                     )
+                    .contentShape(Rectangle())   // whole segment tappable, not just the text
                 }
                 .buttonStyle(.plain)
             }
@@ -258,47 +275,47 @@ struct PaywallSheet: View {
     // MARK: - Benefits
 
     @ViewBuilder private func benefitsBlock(for plan: SubscriptionPlan) -> some View {
-        if let benefits = plan.benefits, !benefits.isEmpty {
-            VStack(alignment: .leading, spacing: 10) {
-                Text("\(plan.name) imkoniyatlari")
-                    .font(.system(size: 12, weight: .semibold))
-                    .foregroundColor(.white.opacity(0.4))
-                    .tracking(0.6)
-                    .textCase(.uppercase)
+        let isPro = plan.code.contains("pro")
+        VStack(alignment: .leading, spacing: 10) {
+            Text("\(plan.name) imkoniyatlari")
+                .font(.system(size: 12, weight: .semibold))
+                .foregroundColor(.white.opacity(0.4))
+                .tracking(0.6)
+                .textCase(.uppercase)
 
-                VStack(alignment: .leading, spacing: 9) {
-                    ForEach(0..<min(6, benefits.count), id: \.self) { i in
-                        if let line = plan.benefit(at: i, lang: "uz") {
-                            HStack(alignment: .top, spacing: 10) {
-                                ZStack {
-                                    Circle()
-                                        .fill(Color.white.opacity(0.08))
-                                        .frame(width: 18, height: 18)
-                                    Image(systemName: "checkmark")
-                                        .font(.system(size: 9, weight: .bold))
-                                        .foregroundColor(.white.opacity(0.85))
-                                }
-                                .padding(.top, 1)
-                                Text(line)
-                                    .font(.system(size: 13.5))
-                                    .foregroundColor(.white.opacity(0.78))
-                                    .lineSpacing(2)
-                            }
+            // ✓/✗ comparison — Pro gets all rows; lower tier shows premium rows as ✗.
+            VStack(alignment: .leading, spacing: 9) {
+                ForEach(planCompareFeatures) { f in
+                    let included = isPro || !f.proOnly
+                    HStack(alignment: .top, spacing: 10) {
+                        ZStack {
+                            Circle()
+                                .fill(Color.white.opacity(included ? 0.08 : 0.04))
+                                .frame(width: 18, height: 18)
+                            Image(systemName: included ? "checkmark" : "xmark")
+                                .font(.system(size: 9, weight: .bold))
+                                .foregroundColor(.white.opacity(included ? 0.85 : 0.3))
                         }
+                        .padding(.top, 1)
+                        Text(f.label)
+                            .font(.system(size: 13.5))
+                            .foregroundColor(.white.opacity(included ? 0.78 : 0.3))
+                            .strikethrough(!included, color: .white.opacity(0.3))
+                            .lineSpacing(2)
                     }
                 }
             }
-            .padding(16)
-            .frame(maxWidth: .infinity, alignment: .leading)
-            .background(
-                RoundedRectangle(cornerRadius: 16, style: .continuous)
-                    .fill(Color.white.opacity(0.025))
-            )
-            .overlay(
-                RoundedRectangle(cornerRadius: 16, style: .continuous)
-                    .strokeBorder(Color.white.opacity(0.05), lineWidth: 0.5)
-            )
         }
+        .padding(16)
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .background(
+            RoundedRectangle(cornerRadius: 16, style: .continuous)
+                .fill(Color.white.opacity(0.025))
+        )
+        .overlay(
+            RoundedRectangle(cornerRadius: 16, style: .continuous)
+                .strokeBorder(Color.white.opacity(0.05), lineWidth: 0.5)
+        )
     }
 
     // MARK: - Trust row
