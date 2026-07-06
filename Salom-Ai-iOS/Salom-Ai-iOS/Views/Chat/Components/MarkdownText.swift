@@ -8,7 +8,7 @@
 //
 
 import SwiftUI
-import UIKit
+internal import UIKit
 
 enum MDBlock: Identifiable {
     case heading(Int, String)

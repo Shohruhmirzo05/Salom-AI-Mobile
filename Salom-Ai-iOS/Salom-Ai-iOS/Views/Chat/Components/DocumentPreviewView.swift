@@ -9,7 +9,7 @@
 
 import SwiftUI
 import PDFKit
-import UIKit
+internal import UIKit
 
 struct PreviewDocument: Identifiable {
     let id = UUID()

