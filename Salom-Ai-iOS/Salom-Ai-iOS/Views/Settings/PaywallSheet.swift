@@ -73,6 +73,12 @@ struct PaywallSheet: View {
     @State private var selectedPlanCode: String? = nil
     @State private var billingPeriod: BillingPeriod = .yearly   // prioritise yearly
 
+    // "Why didn't you pay?" survey — shown once (per 30d) when the user closes the
+    // paywall without subscribing. Feeds the admin Insights breakdown.
+    @State private var askSurvey = false
+    @State private var showSurvey = false
+    @State private var surveyed = false
+
     var body: some View {
         NavigationStack(path: $path) {
             content
@@ -89,9 +95,33 @@ struct PaywallSheet: View {
             if selectedPlanCode == nil {
                 selectedPlanCode = recommendedPlan?.code
             }
+            // Whether to ask "why didn't you pay?" on exit (throttled by backend).
+            if let rec = await subscriptionManager.fetchRecoveryOffer() {
+                askSurvey = rec.askSurvey ?? false
+            }
         }
         .onChange(of: subscriptionManager.isPro) { _, isPro in
             if isPro { dismiss() }
+        }
+        .sheet(isPresented: $showSurvey, onDismiss: { dismiss() }) {
+            WhyNotPaySurvey(
+                onPick: { reason in
+                    surveyed = true
+                    Task { await subscriptionManager.submitCancelSurvey(reason: reason) }
+                    showSurvey = false
+                },
+                onSkip: { showSurvey = false }
+            )
+            .presentationDetents([.height(320)])
+        }
+    }
+
+    /// Intercept close: ask why (once) if they're leaving without subscribing.
+    private func handleDismiss() {
+        if !subscriptionManager.isPro && askSurvey && !surveyed {
+            showSurvey = true
+        } else {
+            dismiss()
         }
     }
 
@@ -121,7 +151,7 @@ struct PaywallSheet: View {
         }
         .toolbar {
             ToolbarItem(placement: .topBarLeading) {
-                Button { dismiss() } label: {
+                Button { handleDismiss() } label: {
                     Image(systemName: "xmark")
                         .font(.system(size: 13, weight: .semibold))
                         .foregroundColor(.white.opacity(0.55))
@@ -622,4 +652,57 @@ private func formatPrice(_ uzs: Int) -> String {
     f.numberStyle = .decimal
     f.groupingSeparator = " "
     return (f.string(from: NSNumber(value: uzs)) ?? "\(uzs)") + " UZS"
+}
+
+
+// MARK: - "Why didn't you pay?" exit survey
+
+/// One-tap reason picker shown when a user closes the paywall without subscribing.
+/// Records to /subscriptions/cancel-survey → admin Insights "Nega to'lamadi?".
+struct WhyNotPaySurvey: View {
+    let onPick: (String) -> Void
+    let onSkip: () -> Void
+
+    private let reasons: [(key: String, label: String)] = [
+        ("no_card", "Kartam/balansim yo‘q"),
+        ("expensive", "Qimmat tuyuldi"),
+        ("later", "Keyinroq qilaman"),
+        ("technical", "Texnik muammo"),
+        ("other", "Boshqa sabab"),
+    ]
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 14) {
+            Text("Ketishdan oldin — nega to‘lamadingiz?")
+                .font(.system(size: 17, weight: .semibold))
+                .foregroundColor(.white)
+                .padding(.top, 20)
+
+            VStack(spacing: 8) {
+                ForEach(reasons, id: \.key) { r in
+                    Button { onPick(r.key) } label: {
+                        HStack {
+                            Text(r.label)
+                                .font(.system(size: 15, weight: .medium))
+                                .foregroundColor(.white.opacity(0.9))
+                            Spacer()
+                        }
+                        .padding(.horizontal, 14)
+                        .padding(.vertical, 12)
+                        .background(RoundedRectangle(cornerRadius: 12, style: .continuous).fill(Color.white.opacity(0.06)))
+                    }
+                }
+            }
+
+            Button("O‘tkazib yuborish", action: onSkip)
+                .font(.system(size: 13))
+                .foregroundColor(.white.opacity(0.4))
+                .frame(maxWidth: .infinity)
+                .padding(.top, 2)
+        }
+        .padding(.horizontal, 20)
+        .padding(.bottom, 16)
+        .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .top)
+        .background(Color.black.ignoresSafeArea())
+    }
 }
