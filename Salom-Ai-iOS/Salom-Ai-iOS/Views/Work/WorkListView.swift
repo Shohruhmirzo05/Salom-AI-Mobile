@@ -19,10 +19,11 @@ private let ICON3D_BY_LUCIDE: [String: String] = [
 
 /// Glossy 3D icon loaded from the web asset host (same set the web app uses).
 struct Icon3DView: View {
-    let lucide: String
+    let slug: String
     var size: CGFloat = 44
+    init(slug: String, size: CGFloat = 44) { self.slug = slug; self.size = size }
+    init(lucide: String, size: CGFloat = 44) { self.slug = ICON3D_BY_LUCIDE[lucide] ?? "doc"; self.size = size }
     var body: some View {
-        let slug = ICON3D_BY_LUCIDE[lucide] ?? "doc"
         AsyncImage(url: URL(string: "https://salom-ai.uz/icons3d/\(slug).webp")) { img in
             img.resizable().scaledToFit()
         } placeholder: {

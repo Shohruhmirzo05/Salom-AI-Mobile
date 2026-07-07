@@ -19,8 +19,7 @@ extension Notification.Name {
 
 struct ShowcaseItem: Identifiable {
     let id = UUID()
-    let icon: String
-    let tint: Color
+    let n3d: String        // 3D icon slug (salom-ai.uz/icons3d)
     let title: String
     let desc: String
     let pro: Bool
@@ -32,18 +31,13 @@ struct ValueShowcaseSheet: View {
     var onSeePro: () -> Void = {}
 
     private let items: [ShowcaseItem] = [
-        .init(icon: "bubble.left.and.text.bubble.right.fill", tint: .cyan,
-              title: "Aqlli chat", desc: "Savol bering, yozing, tarjima qiling", pro: false, section: "chat"),
-        .init(icon: "rectangle.on.rectangle.angled.fill", tint: .green,
-              title: "Taqdimotlar", desc: "PPTX / PDF — bir necha soniyada", pro: true, section: "presentations"),
-        .init(icon: "graduationcap.fill", tint: .indigo,
-              title: "DTM tayyorgarlik", desc: "Fanlar bo‘yicha testlar va tahlil", pro: false, section: "dtm"),
-        .init(icon: "waveform", tint: .pink,
-              title: "Ovozli rejim", desc: "Gapiring — javobni eshiting", pro: false, section: "realtime"),
-        .init(icon: "photo.fill", tint: .purple,
-              title: "Rasm yaratish", desc: "Matndan chiroyli rasm", pro: true, section: nil),
-        .init(icon: "doc.text.fill", tint: .orange,
-              title: "Referat va insho", desc: "Chatda so‘rang — tayyor hujjat", pro: true, section: nil),
+        .init(n3d: "briefcase", title: "Ish — hujjatlar", desc: "Tijorat taklifi, shartnoma, hisobot…", pro: true, section: "ish"),
+        .init(n3d: "chat", title: "Aqlli chat", desc: "Savol bering, yozing, tarjima qiling", pro: false, section: "chat"),
+        .init(n3d: "present", title: "Taqdimotlar", desc: "PPTX / PDF — bir necha soniyada", pro: true, section: "presentations"),
+        .init(n3d: "grad", title: "DTM tayyorgarlik", desc: "Fanlar bo‘yicha testlar va tahlil", pro: false, section: "dtm"),
+        .init(n3d: "voice", title: "Ovozli rejim", desc: "Gapiring — javobni eshiting", pro: false, section: "realtime"),
+        .init(n3d: "image", title: "Rasm yaratish", desc: "Matndan chiroyli rasm", pro: true, section: nil),
+        .init(n3d: "books", title: "Referat va insho", desc: "Chatda so‘rang — tayyor hujjat", pro: true, section: nil),
     ]
 
     var body: some View {
@@ -54,12 +48,10 @@ struct ValueShowcaseSheet: View {
                 VStack(alignment: .leading, spacing: 16) {
                     // Header
                     HStack(alignment: .top) {
-                        ZStack {
-                            RoundedRectangle(cornerRadius: 14, style: .continuous)
-                                .fill(LinearGradient(colors: [.cyan, .purple], startPoint: .topLeading, endPoint: .bottomTrailing))
-                                .frame(width: 46, height: 46)
-                            Image(systemName: "sparkles").font(.system(size: 22, weight: .semibold)).foregroundColor(.white)
-                        }
+                        Image(.appIconTransparent)
+                            .resizable()
+                            .scaledToFit()
+                            .frame(width: 52, height: 52)
                         Spacer()
                         Button { dismiss() } label: {
                             Image(systemName: "xmark")
@@ -113,11 +105,7 @@ struct ValueShowcaseSheet: View {
 
     @ViewBuilder private func row(_ item: ShowcaseItem) -> some View {
         HStack(spacing: 12) {
-            ZStack {
-                RoundedRectangle(cornerRadius: 12, style: .continuous)
-                    .fill(item.tint.opacity(0.18)).frame(width: 42, height: 42)
-                Image(systemName: item.icon).font(.system(size: 18, weight: .semibold)).foregroundColor(item.tint)
-            }
+            Icon3DView(slug: item.n3d, size: 42)
             VStack(alignment: .leading, spacing: 2) {
                 HStack(spacing: 6) {
                     Text(item.title).font(.system(size: 15, weight: .semibold)).foregroundColor(.white)

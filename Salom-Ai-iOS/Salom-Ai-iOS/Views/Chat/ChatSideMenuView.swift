@@ -173,11 +173,35 @@ struct ChatSideMenuView: View {
                 Image(.appIconTransparent)
                     .resizable()
                     .scaledToFit()
-                    .frame(width: 38, height: 38)
+                    .frame(width: 36, height: 36)
                 Text("Salom AI")
-                    .font(.system(size: 15, weight: .semibold))
+                    .font(.system(size: 18, weight: .bold))
                     .foregroundColor(.white)
-                
+
+                Spacer()
+
+                // Notifications → a bell in the header (no list row).
+                Button {
+                    HapticManager.shared.fire(.lightImpact)
+                    select(.notifications)
+                } label: {
+                    Image(systemName: "bell")
+                        .font(.system(size: 17, weight: .medium))
+                        .foregroundColor(.white.opacity(0.85))
+                        .frame(width: 38, height: 38)
+                        .salomGlassCircle(38)
+                        .overlay(alignment: .topTrailing) {
+                            if unreadNotificationCount > 0 {
+                                Text(unreadNotificationCount > 99 ? "99+" : "\(unreadNotificationCount)")
+                                    .font(.system(size: 9, weight: .bold))
+                                    .foregroundColor(.white)
+                                    .padding(.horizontal, 4).padding(.vertical, 1)
+                                    .background(Capsule().fill(Color.red))
+                                    .offset(x: 4, y: -2)
+                            }
+                        }
+                }
+                .buttonStyle(.plain)
             }
             
             HStack(spacing: 8) {
@@ -251,37 +275,11 @@ struct ChatSideMenuView: View {
                 }
             }
             
+            // "Salom AI" (new-chat) row removed — the enlarged + button below covers it.
+            // Notifications moved to a bell in the header. Order: work → voice →
+            // presentations → DTM → showcase.
             MenuItemRow(
-                systemName: MainSection.chat.icon,
-                title: MainSection.chat.title,
-                subtitle: MainSection.chat.subtitle,
-                isHighlighted: selectedSection == .chat
-            ) {
-                // Always start new chat when clicking "Salom AI"
-                viewModel.startNewConversation()
-                select(.chat)
-            }
-            
-//            MenuItemRow(
-//                systemName: MainSection.voice.icon,
-//                title: MainSection.voice.title,
-//                subtitle: MainSection.voice.subtitle,
-//                isHighlighted: selectedSection == .voice
-//            ) {
-//                select(.voice)
-//            }
-            
-            MenuItemRow(
-                systemName: MainSection.realtime.icon,
-                title: MainSection.realtime.title,
-                subtitle: MainSection.realtime.subtitle,
-                isHighlighted: selectedSection == .realtime
-            ) {
-                select(.realtime)
-            }
-
-            MenuItemRow(
-                systemName: MainSection.ish.icon,
+                icon3d: "briefcase",
                 title: MainSection.ish.title,
                 subtitle: MainSection.ish.subtitle,
                 isHighlighted: selectedSection == .ish
@@ -290,7 +288,16 @@ struct ChatSideMenuView: View {
             }
 
             MenuItemRow(
-                systemName: MainSection.presentations.icon,
+                icon3d: "voice",
+                title: MainSection.realtime.title,
+                subtitle: MainSection.realtime.subtitle,
+                isHighlighted: selectedSection == .realtime
+            ) {
+                select(.realtime)
+            }
+
+            MenuItemRow(
+                icon3d: "present",
                 title: MainSection.presentations.title,
                 subtitle: MainSection.presentations.subtitle,
                 isHighlighted: selectedSection == .presentations
@@ -299,7 +306,7 @@ struct ChatSideMenuView: View {
             }
 
             MenuItemRow(
-                systemName: MainSection.dtm.icon,
+                icon3d: "grad",
                 title: MainSection.dtm.title,
                 subtitle: MainSection.dtm.subtitle,
                 isHighlighted: selectedSection == .dtm
@@ -309,23 +316,13 @@ struct ChatSideMenuView: View {
 
             // Re-open the "what can you do" value showcase.
             MenuItemRow(
-                systemName: "sparkles",
+                icon3d: "sparkles",
                 title: "Nimalar qila olaman?",
                 subtitle: "Salom AI imkoniyatlari",
                 isHighlighted: false
             ) {
                 withAnimation(.easeInOut(duration: 0.25)) { isOpen = false }
                 NotificationCenter.default.post(name: .showValueShowcase, object: nil)
-            }
-
-            MenuItemRow(
-                systemName: MainSection.notifications.icon,
-                title: MainSection.notifications.title,
-                subtitle: MainSection.notifications.subtitle,
-                isHighlighted: selectedSection == .notifications,
-                badge: unreadNotificationCount
-            ) {
-                select(.notifications)
             }
         }
     }
@@ -347,11 +344,22 @@ struct ChatSideMenuView: View {
                     viewModel.startNewConversation()
                     select(.chat)
                 } label: {
-                    Image(systemName: "plus")
-                        .font(.system(size: 13, weight: .bold))
-                        .foregroundColor(SalomTheme.Colors.accentPrimary)
-                        .padding(8)
-                        .salomGlassCard(10, interactive: true)
+                    HStack(spacing: 6) {
+                        Image(systemName: "plus")
+                            .font(.system(size: 16, weight: .bold))
+                        Text("Yangi chat")
+                            .font(.system(size: 14, weight: .semibold))
+                    }
+                    .foregroundColor(.white)
+                    .padding(.horizontal, 14)
+                    .padding(.vertical, 9)
+                    .background(
+                        LinearGradient(
+                            colors: [Color(SalomTheme.Colors.accentPrimary), Color(SalomTheme.Colors.accentSecondary)],
+                            startPoint: .leading, endPoint: .trailing
+                        )
+                    )
+                    .clipShape(Capsule())
                 }
             }
             
@@ -418,7 +426,7 @@ struct ChatSideMenuView: View {
     }
     
     @ViewBuilder func MenuItemRow(
-        systemName: String,
+        icon3d: String,
         title: LocalizedStringKey,
         subtitle: LocalizedStringKey,
         isHighlighted: Bool = false,
@@ -427,13 +435,7 @@ struct ChatSideMenuView: View {
     ) -> some View {
         let row = HStack(spacing: 12) {
             ZStack(alignment: .topTrailing) {
-                Image(systemName: systemName)
-                    .font(.system(size: 16, weight: .semibold))
-                    .foregroundColor(
-                        isHighlighted
-                        ? SalomTheme.Colors.accentPrimary
-                        : SalomTheme.Colors.textSecondary
-                    )
+                Icon3DView(slug: icon3d, size: 34)
                 if badge > 0 {
                     Text(badge > 99 ? "99+" : "\(badge)")
                         .font(.system(size: 9, weight: .bold))
