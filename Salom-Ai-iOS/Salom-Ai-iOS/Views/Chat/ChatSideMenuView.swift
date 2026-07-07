@@ -10,6 +10,7 @@ import SwiftUI
 enum MainSection: String, CaseIterable, Identifiable {
     case chat
 //    case voice
+    case ish
     case realtime
     case presentations
     case dtm
@@ -22,6 +23,7 @@ enum MainSection: String, CaseIterable, Identifiable {
         switch self {
         case .chat: return "Salom AI"
 //        case .voice: return "Ovozli suhbat"
+        case .ish: return "Ish — hujjatlar"
         case .realtime: return "Ovozli suhbat"
         case .presentations: return "Presentatsiyalar"
         case .dtm: return "DTM testlar"
@@ -34,6 +36,7 @@ enum MainSection: String, CaseIterable, Identifiable {
         switch self {
         case .chat: return "O'zbekcha AI yordamchi"
 //        case .voice: return "Tez orada"
+        case .ish: return "Tijorat taklifi, shartnoma, hisobot…"
         case .realtime: return "Real vaqt ovozli AI"
         case .presentations: return "AI presentatsiya yaratish"
         case .dtm: return "Moslashuvchan test tayyorgarlik"
@@ -46,6 +49,7 @@ enum MainSection: String, CaseIterable, Identifiable {
         switch self {
         case .chat: return "sparkles"
 //        case .voice: return "waveform.and.mic"
+        case .ish: return "briefcase.fill"
         case .realtime: return "waveform.circle.fill"
         case .presentations: return "rectangle.on.rectangle.angled"
         case .dtm: return "graduationcap.fill"
@@ -274,6 +278,15 @@ struct ChatSideMenuView: View {
                 isHighlighted: selectedSection == .realtime
             ) {
                 select(.realtime)
+            }
+
+            MenuItemRow(
+                systemName: MainSection.ish.icon,
+                title: MainSection.ish.title,
+                subtitle: MainSection.ish.subtitle,
+                isHighlighted: selectedSection == .ish
+            ) {
+                select(.ish)
             }
 
             MenuItemRow(

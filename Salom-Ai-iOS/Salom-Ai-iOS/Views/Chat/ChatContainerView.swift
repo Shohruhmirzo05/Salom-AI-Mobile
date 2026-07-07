@@ -91,6 +91,16 @@ struct ChatContainerView: View {
             })
             .navigationBarHidden(true)
             
+        case .ish:
+            SectionScaffold(
+                icon: MainSection.ish.icon,
+                title: "Ish — hujjatlar",
+                subtitle: "Kasbiy hujjatlarni tayyorlang"
+            ) {
+                WorkListView()
+                    .frame(maxWidth: .infinity, maxHeight: .infinity)
+            }
+
         case .presentations:
             SectionScaffold(
                 icon: MainSection.presentations.icon,
