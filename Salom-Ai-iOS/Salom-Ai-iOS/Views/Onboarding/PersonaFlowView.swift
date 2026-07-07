@@ -95,16 +95,23 @@ struct PersonaFlowView: View {
     @State private var role: PersonaRole?
     @State private var goals: Set<String> = []
 
-    private enum Step: Hashable { case value, goals }
+    // The destination carries the role id in the path VALUE — not external
+    // @State — so the pushed screen never reads a stale/nil role on first push
+    // (that caused a blank screen the first time).
+    private enum Step: Hashable { case value(String), goals(String) }
     private var defaultAccent: Color { Color(red: 0.30, green: 0.55, blue: 0.98) }
+
+    private func roleFor(_ id: String) -> PersonaRole {
+        PERSONA_ROLES.first { $0.id == id } ?? PERSONA_ROLES[0]
+    }
 
     var body: some View {
         NavigationStack(path: $path) {
             roleStep
                 .navigationDestination(for: Step.self) { step in
                     switch step {
-                    case .value: valueStep
-                    case .goals: goalsStep
+                    case .value(let id): valueStep(roleFor(id))
+                    case .goals(let id): goalsStep(roleFor(id))
                     }
                 }
         }
@@ -157,7 +164,7 @@ struct PersonaFlowView: View {
                         Button {
                             HapticManager.shared.fire(.selection)
                             role = r
-                            path.append(.value)   // native push → native slide + back
+                            path.append(.value(r.id))   // native push → native slide + back
                         } label: { roleCard(r) }
                         .buttonStyle(.plain)
                     }
@@ -198,9 +205,8 @@ struct PersonaFlowView: View {
     }
 
     // MARK: Step 1 — tailored value (real photo)
-    @ViewBuilder private var valueStep: some View {
-        if let r = role {
-            VStack(spacing: 0) {
+    private func valueStep(_ r: PersonaRole) -> some View {
+        VStack(spacing: 0) {
             ScrollView(showsIndicators: false) {
                 VStack(alignment: .leading, spacing: 16) {
                     // Real Pexels photo with a shimmer placeholder + gradient scrim.
@@ -245,21 +251,20 @@ struct PersonaFlowView: View {
                 .padding(.horizontal, 22).padding(.top, 6).padding(.bottom, 24)
             }
             primaryButton(L4(uz: "Davom etish", kr: "Давом этиш", ru: "Продолжить", en: "Continue").t(lang)) {
-                path.append(.goals)
+                path.append(.goals(r.id))
             }
-            }
-            .background(backdrop(r.accent))
-            .navigationBarTitleDisplayMode(.inline)
-            .toolbarBackground(.hidden, for: .navigationBar)
-            .toolbar {
-                ToolbarItem(placement: .principal) { dots(1) }
-                ToolbarItem(placement: .topBarTrailing) { skipButton }
-            }
+        }
+        .background(backdrop(r.accent))
+        .navigationBarTitleDisplayMode(.inline)
+        .toolbarBackground(.hidden, for: .navigationBar)
+        .toolbar {
+            ToolbarItem(placement: .principal) { dots(1) }
+            ToolbarItem(placement: .topBarTrailing) { skipButton }
         }
     }
 
     // MARK: Step 2 — goals
-    private var goalsStep: some View {
+    private func goalsStep(_ r: PersonaRole) -> some View {
         VStack(alignment: .leading, spacing: 6) {
             Text(L4(uz: "Nima bilan boshlaymiz?", kr: "Нима билан бошлаймиз?", ru: "С чего начнём?", en: "Where shall we start?").t(lang))
                 .font(.system(size: 24, weight: .bold)).foregroundColor(.white)
@@ -273,12 +278,12 @@ struct PersonaFlowView: View {
             }
             primaryButton(L4(uz: "Tayyor", kr: "Тайёр", ru: "Готово", en: "Done").t(lang)) {
                 HapticManager.shared.fire(.success)
-                onComplete(role?.id, Array(goals))
+                onComplete(r.id, Array(goals))
             }
         }
         .padding(.horizontal, 22)
         .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .top)
-        .background(backdrop(role?.accent ?? defaultAccent))
+        .background(backdrop(r.accent))
         .navigationBarTitleDisplayMode(.inline)
         .toolbarBackground(.hidden, for: .navigationBar)
         .toolbar {
