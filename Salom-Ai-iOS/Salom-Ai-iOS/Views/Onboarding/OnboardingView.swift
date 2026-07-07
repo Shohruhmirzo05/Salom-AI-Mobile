@@ -19,6 +19,8 @@ struct OnboardingView: View {
     @State private var showContent: Bool = false
     @State private var backgroundRotation: Double = 0
     @State private var heroPulse: Bool = false
+    // Persona questionnaire shown after the capability scenes (before finishing).
+    @State private var showPersona: Bool = false
 
     var body: some View {
         ZStack {
@@ -67,13 +69,21 @@ struct OnboardingView: View {
                 heroPulse = true
             }
         }
+        .fullScreenCover(isPresented: $showPersona) {
+            PersonaFlowView { role, goals in
+                PersonaStore.saveLocal(role: role, goals: goals)
+                HapticManager.shared.fire(.success)
+                showPersona = false
+                viewModel.markAsCompleted()
+            }
+        }
     }
 
     private func goNext() {
         HapticManager.shared.fire(.lightImpact)
         if viewModel.isLastPage {
-            HapticManager.shared.fire(.success)
-            viewModel.markAsCompleted()
+            // Last capability scene → ask the persona questions before finishing.
+            showPersona = true
         } else {
             viewModel.goNext()
         }

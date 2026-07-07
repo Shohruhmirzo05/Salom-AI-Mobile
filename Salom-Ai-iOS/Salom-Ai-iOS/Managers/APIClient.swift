@@ -350,6 +350,17 @@ extension APIClient {
         case exportPresentation(id: Int, format: String)
         case getExportStatus(exportId: Int)
 
+        // Ish / Work (task studio)
+        case workTasks
+        case generateWorkTask(taskId: String, inputs: [String: String], language: String)
+        case listWork
+        case getWork(id: Int)
+        case workChat(id: Int, instruction: String)
+        case workExport(id: Int, format: String)
+        case workExportStatus(exportId: Int)
+        case getWorkProfile
+        case updateWorkProfile(fields: [String: String])
+
         // DTM (adaptive test-prep)
         case dtmSubjects
         case dtmTopics(subject: String)
@@ -360,6 +371,7 @@ extension APIClient {
         // Win-back + retention
         case recoveryOffer
         case cancelSurvey(reason: String)
+        case savePersona(role: String?, goals: [String])
         case accountStreak
 
         // Push registration (fixes iOS notifications: register OneSignal id)
@@ -372,11 +384,12 @@ extension APIClient {
             switch self {
             case .listConversations, .getConversation, .getConversationMessages, .perplexityUsage, .currentSubscription, .getSettings, .getModels, .getUsageStats, .listPlans, .oauthUser, .savedCards, .paymentStatus, .notifications, .unreadNotificationCount,
                  .presentationsConfig, .listPresentations, .getPresentation, .getExportStatus,
+                 .workTasks, .listWork, .getWork, .workExportStatus, .getWorkProfile,
                  .dtmSubjects, .dtmTopics, .dtmQuiz, .dtmProgress, .recoveryOffer, .accountStreak:
                 return .get
             case .deleteConversation, .deleteAccount, .deleteCard, .deletePresentation:
                 return .delete
-            case .updateSettings, .updateProfile, .updatePresentationTheme:
+            case .updateSettings, .updateProfile, .updatePresentationTheme, .updateWorkProfile:
                 return .put
             case .updatePlatform:
                 return .post
@@ -518,6 +531,22 @@ extension APIClient {
                 return "/presentations/\(id)/export"
             case .getExportStatus(let exportId):
                 return "/presentations/exports/\(exportId)"
+            case .workTasks:
+                return "/tasks"
+            case .generateWorkTask(let taskId, _, _):
+                return "/tasks/\(taskId)/generate"
+            case .listWork:
+                return "/work"
+            case .getWork(let id):
+                return "/work/\(id)"
+            case .workChat(let id, _):
+                return "/work/\(id)/chat"
+            case .workExport(let id, _):
+                return "/work/\(id)/export"
+            case .workExportStatus(let exportId):
+                return "/work/exports/\(exportId)"
+            case .getWorkProfile, .updateWorkProfile:
+                return "/settings/profile"
             case .dtmSubjects:
                 return "/dtm/subjects"
             case .dtmTopics:
@@ -532,6 +561,8 @@ extension APIClient {
                 return "/subscriptions/recovery-offer"
             case .cancelSurvey:
                 return "/subscriptions/cancel-survey"
+            case .savePersona:
+                return "/account/persona"
             case .accountStreak:
                 return "/account/streak"
             case .registerPushDevice:
@@ -582,6 +613,10 @@ extension APIClient {
                 return ["question_id": questionId, "chosen_key": chosenKey]
             case .cancelSurvey(let reason):
                 return ["reason": reason]
+            case .savePersona(let role, let goals):
+                var b: [String: Any] = ["goals": goals]
+                if let role { b["role"] = role }
+                return b
             case .registerPushDevice(let token, let platform):
                 return ["token": token, "platform": platform]
             case .chat(let conversationId, let text, let projectId, let model, let attachments):
@@ -669,6 +704,14 @@ extension APIClient {
                 return ["instruction": instruction]
             case .exportPresentation(_, let format):
                 return ["format": format]
+            case .generateWorkTask(_, let inputs, let language):
+                return ["inputs": inputs, "language": language]
+            case .workChat(_, let instruction):
+                return ["instruction": instruction]
+            case .workExport(_, let format):
+                return ["format": format]
+            case .updateWorkProfile(let fields):
+                return fields
             default:
                 return nil
             }

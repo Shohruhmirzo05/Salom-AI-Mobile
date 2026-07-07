@@ -79,6 +79,8 @@ struct ContentView: View {
         .onChange(of: session.contentType) { _, newValue in
             if newValue == .main && !showSplash {
                  checkAndShowPaywall()
+                 // Push onboarding persona answers now that we're logged in.
+                 PersonaStore.syncIfPending()
             }
         }
     }
