@@ -90,66 +90,56 @@ struct PersonaFlowView: View {
     let onComplete: (String?, [String]) -> Void
 
     @AppStorage(AppStorageKeys.preferredLanguageCode) private var lang: String = "uz"
-    @State private var step: Int = 0            // 0 = role, 1 = value, 2 = goals
+    @Environment(\.dismiss) private var dismiss
+    @State private var path: [Step] = []
     @State private var role: PersonaRole?
     @State private var goals: Set<String> = []
 
+    private enum Step: Hashable { case value, goals }
+    private var defaultAccent: Color { Color(red: 0.30, green: 0.55, blue: 0.98) }
+
     var body: some View {
-        ZStack {
-            backdrop
-            VStack(spacing: 0) {
-                header
-                Group {
+        NavigationStack(path: $path) {
+            roleStep
+                .navigationDestination(for: Step.self) { step in
                     switch step {
-                    case 0: roleStep
-                    case 1: valueStep
-                    default: goalsStep
+                    case .value: valueStep
+                    case .goals: goalsStep
                     }
                 }
-                .transition(.asymmetric(insertion: .move(edge: .trailing).combined(with: .opacity),
-                                        removal: .move(edge: .leading).combined(with: .opacity)))
-            }
         }
+        .tint(.white)   // native back chevron + toolbar buttons in white
     }
 
-    // Dark onboarding backdrop with the current accent glow.
-    private var backdrop: some View {
+    // Dark onboarding backdrop with an accent glow (accent follows the role).
+    private func backdrop(_ accent: Color) -> some View {
         ZStack {
-            Color(red: 0.008, green: 0.024, blue: 0.09).ignoresSafeArea()
-            let accent = role?.accent ?? Color(red: 0.30, green: 0.55, blue: 0.98)
+            Color(red: 0.008, green: 0.024, blue: 0.09)
             Circle().fill(accent.opacity(0.28)).frame(width: 340, height: 340).blur(radius: 100).offset(x: -110, y: -230)
             Circle().fill(accent.opacity(0.20)).frame(width: 320, height: 320).blur(radius: 100).offset(x: 120, y: 260)
         }
-        .animation(.easeInOut(duration: 0.5), value: role?.id)
+        .ignoresSafeArea()
+        .animation(.easeInOut(duration: 0.5), value: accent)
     }
 
-    private var header: some View {
-        HStack {
-            if step > 0 {
-                Button { withAnimation(.spring(response: 0.4, dampingFraction: 0.85)) { step -= 1 } } label: {
-                    Image(systemName: "chevron.left").font(.system(size: 15, weight: .semibold))
-                        .foregroundColor(.white.opacity(0.7)).frame(width: 34, height: 34)
-                        .background(.ultraThinMaterial, in: Circle())
-                }
-            }
-            Spacer()
-            // Progress dots
-            HStack(spacing: 6) {
-                ForEach(0..<3) { i in
-                    Capsule().fill(i == step ? Color.white : Color.white.opacity(0.25))
-                        .frame(width: i == step ? 20 : 6, height: 6)
-                }
-            }
-            Spacer()
-            Button { onComplete(role?.id, Array(goals)) } label: {
-                Text(L4(uz: "O‘tkazish", kr: "Ўтказиш", ru: "Пропустить", en: "Skip").t(lang))
-                    .font(.system(size: 14, weight: .medium)).foregroundColor(.white.opacity(0.55))
+    // Progress dots for the toolbar's principal slot.
+    private func dots(_ current: Int) -> some View {
+        HStack(spacing: 6) {
+            ForEach(0..<3) { i in
+                Capsule().fill(i == current ? Color.white : Color.white.opacity(0.25))
+                    .frame(width: i == current ? 20 : 6, height: 6)
             }
         }
-        .padding(.horizontal, 22).padding(.top, 64).padding(.bottom, 8)
     }
 
-    // MARK: Step 0 — role
+    private var skipButton: some View {
+        Button { onComplete(role?.id, Array(goals)) } label: {
+            Text(L4(uz: "O‘tkazish", kr: "Ўтказиш", ru: "Пропустить", en: "Skip").t(lang))
+                .font(.system(size: 15, weight: .regular)).foregroundColor(.white.opacity(0.6))
+        }
+    }
+
+    // MARK: Step 0 — role (NavigationStack root)
     private var roleStep: some View {
         VStack(alignment: .leading, spacing: 6) {
             Text(L4(uz: "Sizni yaxshiroq tanishimiz uchun", kr: "Сизни яхшироқ танишимиз учун",
@@ -167,7 +157,7 @@ struct PersonaFlowView: View {
                         Button {
                             HapticManager.shared.fire(.selection)
                             role = r
-                            withAnimation(.spring(response: 0.45, dampingFraction: 0.85)) { step = 1 }
+                            path.append(.value)   // native push → native slide + back
                         } label: { roleCard(r) }
                         .buttonStyle(.plain)
                     }
@@ -177,6 +167,16 @@ struct PersonaFlowView: View {
         }
         .padding(.horizontal, 22)
         .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .top)
+        .background(backdrop(defaultAccent))
+        .navigationBarTitleDisplayMode(.inline)
+        .toolbarBackground(.hidden, for: .navigationBar)
+        .toolbar {
+            ToolbarItem(placement: .topBarLeading) {
+                Button { dismiss() } label: { Image(systemName: "chevron.left") }
+            }
+            ToolbarItem(placement: .principal) { dots(0) }
+            ToolbarItem(placement: .topBarTrailing) { skipButton }
+        }
     }
 
     private func roleCard(_ r: PersonaRole) -> some View {
@@ -200,14 +200,17 @@ struct PersonaFlowView: View {
     // MARK: Step 1 — tailored value (real photo)
     @ViewBuilder private var valueStep: some View {
         if let r = role {
+            VStack(spacing: 0) {
             ScrollView(showsIndicators: false) {
                 VStack(alignment: .leading, spacing: 16) {
-                    // Real Pexels photo with a soft gradient scrim.
+                    // Real Pexels photo with a shimmer placeholder + gradient scrim.
                     ZStack(alignment: .bottomLeading) {
                         AsyncImage(url: URL(string: r.photo)) { phase in
                             switch phase {
                             case .success(let img): img.resizable().scaledToFill()
-                            default: Rectangle().fill(r.accent.opacity(0.25))
+                            case .empty: ShimmerView()
+                            case .failure: Rectangle().fill(r.accent.opacity(0.25))
+                            @unknown default: Rectangle().fill(r.accent.opacity(0.25))
                             }
                         }
                         .frame(height: 200).frame(maxWidth: .infinity).clipped()
@@ -242,7 +245,15 @@ struct PersonaFlowView: View {
                 .padding(.horizontal, 22).padding(.top, 6).padding(.bottom, 24)
             }
             primaryButton(L4(uz: "Davom etish", kr: "Давом этиш", ru: "Продолжить", en: "Continue").t(lang)) {
-                withAnimation(.spring(response: 0.45, dampingFraction: 0.85)) { step = 2 }
+                path.append(.goals)
+            }
+            }
+            .background(backdrop(r.accent))
+            .navigationBarTitleDisplayMode(.inline)
+            .toolbarBackground(.hidden, for: .navigationBar)
+            .toolbar {
+                ToolbarItem(placement: .principal) { dots(1) }
+                ToolbarItem(placement: .topBarTrailing) { skipButton }
             }
         }
     }
@@ -267,6 +278,13 @@ struct PersonaFlowView: View {
         }
         .padding(.horizontal, 22)
         .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .top)
+        .background(backdrop(role?.accent ?? defaultAccent))
+        .navigationBarTitleDisplayMode(.inline)
+        .toolbarBackground(.hidden, for: .navigationBar)
+        .toolbar {
+            ToolbarItem(placement: .principal) { dots(2) }
+            ToolbarItem(placement: .topBarTrailing) { skipButton }
+        }
     }
 
     private func primaryButton(_ title: String, action: @escaping () -> Void) -> some View {
@@ -278,6 +296,27 @@ struct PersonaFlowView: View {
                 .clipShape(RoundedRectangle(cornerRadius: 18, style: .continuous))
         }
         .padding(.horizontal, 22).padding(.bottom, 40)
+    }
+}
+
+/// Reusable skeleton shimmer for image loading (AsyncImage `.empty` phase).
+struct ShimmerView: View {
+    @State private var move = false
+    var body: some View {
+        Rectangle()
+            .fill(Color.white.opacity(0.06))
+            .overlay(
+                GeometryReader { geo in
+                    LinearGradient(colors: [.clear, Color.white.opacity(0.18), .clear],
+                                   startPoint: .leading, endPoint: .trailing)
+                        .frame(width: geo.size.width * 0.5)
+                        .offset(x: move ? geo.size.width * 1.1 : -geo.size.width * 0.6)
+                }
+            )
+            .clipped()
+            .onAppear {
+                withAnimation(.linear(duration: 1.15).repeatForever(autoreverses: false)) { move = true }
+            }
     }
 }
 

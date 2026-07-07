@@ -34,7 +34,7 @@ enum PersonaStore {
             do {
                 _ = try await APIClient.shared.requestData(.savePersona(role: role, goals: goals))
                 d.set(false, forKey: pendingKey)
-                Analytics.shared.track("persona_saved", ["role": role ?? "skip", "goals": goals.count])
+                Analytics.shared.trackOnce("persona_saved", ["role": role ?? "skip", "goals": goals.count])
             } catch {
                 // Leave the pending flag set — retry on next launch.
                 print("⚠️ persona sync failed: \(error)")

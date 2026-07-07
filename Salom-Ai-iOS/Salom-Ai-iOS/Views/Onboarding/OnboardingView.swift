@@ -72,6 +72,7 @@ struct OnboardingView: View {
         .fullScreenCover(isPresented: $showPersona) {
             PersonaFlowView { role, goals in
                 PersonaStore.saveLocal(role: role, goals: goals)
+                Analytics.shared.trackOnce("onboarding_completed", ["role": role ?? "skip", "goals": goals.count])
                 HapticManager.shared.fire(.success)
                 showPersona = false
                 viewModel.markAsCompleted()
@@ -83,6 +84,7 @@ struct OnboardingView: View {
         HapticManager.shared.fire(.lightImpact)
         if viewModel.isLastPage {
             // Last capability scene → ask the persona questions before finishing.
+            Analytics.shared.trackOnce("onboarding_persona_shown")
             showPersona = true
         } else {
             viewModel.goNext()

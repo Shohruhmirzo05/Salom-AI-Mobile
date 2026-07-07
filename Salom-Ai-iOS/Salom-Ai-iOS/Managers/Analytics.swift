@@ -39,6 +39,17 @@ final class Analytics {
         return s
     }
 
+    /// Stable per-install device id — lets the admin attribute PRE-LOGIN events
+    /// (onboarding/persona) to a device, and lets the backend de-dupe once-per-
+    /// device events so a single device can't flood analytics.
+    private var deviceId: String {
+        let key = "salom_device_id"
+        if let s = UserDefaults.standard.string(forKey: key) { return s }
+        let s = UIDevice.current.identifierForVendor?.uuidString ?? UUID().uuidString
+        UserDefaults.standard.set(s, forKey: key)
+        return s
+    }
+
     /// Device/app version reported with each batch → admin version breakdown.
     private var deviceInfo: (os: String, app: String, model: String) {
         let os = UIDevice.current.systemVersion  // e.g. "17.5.1"
@@ -60,6 +71,16 @@ final class Analytics {
         if count >= 12 { flush() }
     }
 
+    /// Record an event AT MOST ONCE per install — for one-time milestones like
+    /// onboarding/persona, so a device never sends the same event thousands of
+    /// times. (The backend also de-dupes these as a safety net.)
+    func trackOnce(_ name: String, _ props: [String: Any]? = nil) {
+        let key = "salom_once_\(name)"
+        guard !UserDefaults.standard.bool(forKey: key) else { return }
+        UserDefaults.standard.set(true, forKey: key)
+        track(name, props)
+    }
+
     @objc private func flushNow() { flush() }
 
     func flush() {
@@ -77,6 +98,7 @@ final class Analytics {
         let dev = deviceInfo
         let body: [String: Any] = [
             "events": eventsJSON, "platform": "ios", "session_id": sessionId,
+            "device_id": deviceId,
             "os_version": dev.os, "app_version": dev.app, "device_model": dev.model
         ]
         guard let data = try? JSONSerialization.data(withJSONObject: body) else { return }
