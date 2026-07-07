@@ -22,6 +22,13 @@ private let DTM_ICON: [String: String] = [
     "biologiya": "leaf.fill", "geografiya": "globe",
 ]
 
+// 3D icon slug (self-hosted, salom-ai.uz/icons3d) per subject — matches the web DTM grid.
+private let DTM_3D: [String: String] = [
+    "matematika": "abacus", "ona_tili": "book", "tarix": "building",
+    "ingliz_tili": "speaking", "fizika": "atom", "kimyo": "testtube",
+    "biologiya": "dna", "geografiya": "worldmap",
+]
+
 struct DtmView: View {
     var onMenu: () -> Void = {}
     @AppStorage(AppStorageKeys.preferredLanguageCode) private var languageCode: String = "uz"
@@ -82,11 +89,7 @@ struct DtmView: View {
 
     private func subjectCard(_ s: DtmSubject) -> some View {
         VStack(alignment: .leading, spacing: 10) {
-            Image(systemName: DTM_ICON[s.key] ?? "graduationcap.fill")
-                .font(.system(size: 20, weight: .semibold))
-                .foregroundColor(cyan)
-                .frame(width: 44, height: 44)
-                .background(Circle().fill(cyan.opacity(0.14)))
+            Icon3DView(slug: DTM_3D[s.key] ?? "grad", size: 44)
             Spacer(minLength: 0)
             Text(s.label).font(.system(size: 15, weight: .semibold)).foregroundColor(.white).lineLimit(2)
             Text(s.questionCount > 0 ? "\(s.questionCount) \(L.questions)" : L.comingSoon)

@@ -1655,9 +1655,13 @@ struct ChatView: View {
                                 ProgressView()
                                     .tint(.white)
                             } else {
-                                Image(systemName: viewModel.isImageMode ? "wand.and.stars" : "paperplane.fill")
-                                    .font(.system(size: 20, weight: .bold))
-                                    .foregroundColor(.white)
+                                if viewModel.isImageMode {
+                                    Image(systemName: "wand.and.stars")
+                                        .font(.system(size: 20, weight: .bold))
+                                        .foregroundColor(.white)
+                                } else {
+                                    Icon3DView(slug: "rocket", size: 24)
+                                }
                             }
                         }
                     }
