@@ -35,6 +35,7 @@ struct ContentView: View {
             } else {
                 ChatContainerView()
                     .transition(.opacity)
+                    .featureTipToast(isPro: subs.isPro)
             }
         }
         .animation(.easeInOut(duration: 0.35), value: showSplash)
@@ -61,6 +62,14 @@ struct ContentView: View {
             )
             .presentationDetents([.height(320)])
         }
+        .sheet(isPresented: $showValueShowcase) {
+            // "What can you do with Salom AI?" — first-run value showcase.
+            ValueShowcaseSheet(onSeePro: { showPaywall = true })
+                .presentationDetents([.large])
+        }
+        .onReceive(NotificationCenter.default.publisher(for: .showValueShowcase)) { _ in
+            showValueShowcase = true
+        }
         .onChange(of: showSplash) { _, isSplashActive in
             if !isSplashActive {
                 print("DEBUG: Splash finished. Checking paywall.")
@@ -78,6 +87,9 @@ struct ContentView: View {
     @State private var hasShownPaywall = false
     @State private var winBackOffer: RecoveryOffer?
     @AppStorage("winback_last_shown_day") private var winBackLastShownDay: String = ""
+    // First-run value showcase ("what can you do") — shown once, before any paywall.
+    @AppStorage("value_shown_v1") private var valueShown: Bool = false
+    @State private var showValueShowcase = false
 
     private func checkAndShowPaywall() {
         guard !hasShownPaywall else { return }
@@ -98,6 +110,17 @@ struct ContentView: View {
             }
 
             guard !isPro else { return }
+
+            // First-ever open → show the value showcase (once) INSTEAD of the
+            // paywall, so a brand-new user learns the breadth before being sold.
+            // Its "See Pro" button opens the paywall on demand.
+            if !valueShown {
+                await MainActor.run {
+                    valueShown = true
+                    showValueShowcase = true
+                }
+                return
+            }
 
             // ONE decision: win-back (for abandoned-payment users, once/day) takes
             // precedence; otherwise the generic paywall. Never both → no flash.

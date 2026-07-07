@@ -294,6 +294,17 @@ struct ChatSideMenuView: View {
                 select(.dtm)
             }
 
+            // Re-open the "what can you do" value showcase.
+            MenuItemRow(
+                systemName: "sparkles",
+                title: "Nimalar qila olaman?",
+                subtitle: "Salom AI imkoniyatlari",
+                isHighlighted: false
+            ) {
+                withAnimation(.easeInOut(duration: 0.25)) { isOpen = false }
+                NotificationCenter.default.post(name: .showValueShowcase, object: nil)
+            }
+
             MenuItemRow(
                 systemName: MainSection.notifications.icon,
                 title: MainSection.notifications.title,

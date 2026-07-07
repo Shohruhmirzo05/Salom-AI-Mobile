@@ -55,6 +55,16 @@ struct ChatContainerView: View {
         .onChange(of: selectedSection) { _, newValue in
             Analytics.shared.track("screen_view", ["path": "/\(newValue.rawValue)"])
         }
+        .onReceive(NotificationCenter.default.publisher(for: .openSection)) { note in
+            // Value showcase (or any deep link) → switch section + close the menu.
+            if let raw = note.userInfo?["section"] as? String,
+               let section = MainSection(rawValue: raw) {
+                withAnimation(.easeInOut(duration: 0.25)) {
+                    selectedSection = section
+                    isMenuOpen = false
+                }
+            }
+        }
     }
 
     @ViewBuilder
