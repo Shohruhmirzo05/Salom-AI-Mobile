@@ -36,6 +36,18 @@ struct DtmTopics: Decodable {
     let topics: [DtmTopicStat]
 }
 
+struct DtmLevel: Decodable, Identifiable {
+    let key: String     // easy | med | hard
+    let label: String
+    let count: Int
+    var id: String { key }
+}
+struct DtmLevels: Decodable {
+    let subject: String
+    let subjectLabel: String
+    let levels: [DtmLevel]
+}
+
 struct DtmOption: Decodable, Hashable { let key: String; let text: String }
 
 struct DtmQuestion: Decodable, Identifiable {
@@ -75,8 +87,11 @@ enum DtmService {
     static func topics(subject: String) async throws -> DtmTopics {
         try await APIClient.shared.request(.dtmTopics(subject: subject), decodeTo: DtmTopics.self)
     }
-    static func quiz(subject: String, topic: String?) async throws -> DtmQuizResponse {
-        try await APIClient.shared.request(.dtmQuiz(subject: subject, topic: topic), decodeTo: DtmQuizResponse.self)
+    static func levels(subject: String) async throws -> DtmLevels {
+        try await APIClient.shared.request(.dtmLevels(subject: subject), decodeTo: DtmLevels.self)
+    }
+    static func quiz(subject: String, topic: String? = nil, difficulty: String? = nil) async throws -> DtmQuizResponse {
+        try await APIClient.shared.request(.dtmQuiz(subject: subject, topic: topic, difficulty: difficulty), decodeTo: DtmQuizResponse.self)
     }
     static func answer(questionId: Int, chosenKey: String) async throws -> DtmAnswerResponse {
         try await APIClient.shared.request(.dtmAnswer(questionId: questionId, chosenKey: chosenKey), decodeTo: DtmAnswerResponse.self)
@@ -104,7 +119,18 @@ struct DtmL {
     }
 
     var title: String { pick("DTM mashqlari", "Подготовка к ДТМ", "DTM practice") }
-    var subtitle: String { pick("Fan tanlang — darajangizga mos testlar", "Выберите предмет — тесты под ваш уровень", "Pick a subject — tests at your level") }
+    var subtitle: String { pick("Fan tanlang — imtihonga tayyorlaning", "Выберите предмет — готовьтесь к экзамену", "Pick a subject — prep for the exam") }
+    var chooseLevel: String { pick("Darajani tanlang", "Выберите уровень", "Choose a level") }
+    var levelHint: String { pick("Har bir daraja — alohida savollar to‘plami.", "Каждый уровень — отдельный набор вопросов.", "Each level is its own question set.") }
+    var lvEasy: String { pick("Boshlang‘ich", "Начальный", "Beginner") }
+    var lvMed: String { pick("O‘rta", "Средний", "Intermediate") }
+    var lvHard: String { pick("Yuqori", "Продвинутый", "Advanced") }
+    var lvEasyD: String { pick("Asosiy tushunchalar", "Базовые понятия", "Core basics") }
+    var lvMedD: String { pick("Standart DTM darajasi", "Стандарт DTM", "Standard DTM level") }
+    var lvHardD: String { pick("Eng qiyin savollar", "Самые сложные", "Hardest questions") }
+    var question: String { pick("Savol", "Вопрос", "Question") }
+    func levelLabel(_ key: String) -> String { key == "easy" ? lvEasy : key == "hard" ? lvHard : lvMed }
+    func levelDesc(_ key: String) -> String { key == "easy" ? lvEasyD : key == "hard" ? lvHardD : lvMedD }
     var adaptive: String { pick("Moslashuvchan mashq", "Адаптивная практика", "Adaptive practice") }
     var adaptiveHint: String { pick("AI zaif mavzularingizdan savol beradi", "ИИ подбирает вопросы по слабым темам", "AI targets your weak topics") }
     var sections: String { pick("Bo‘limlar", "Разделы", "Sections") }

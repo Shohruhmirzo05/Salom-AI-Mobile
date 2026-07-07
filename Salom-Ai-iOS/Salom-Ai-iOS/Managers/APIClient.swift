@@ -364,7 +364,8 @@ extension APIClient {
         // DTM (adaptive test-prep)
         case dtmSubjects
         case dtmTopics(subject: String)
-        case dtmQuiz(subject: String, topic: String?)
+        case dtmLevels(subject: String)
+        case dtmQuiz(subject: String, topic: String?, difficulty: String?)
         case dtmAnswer(questionId: Int, chosenKey: String)
         case dtmProgress
 
@@ -385,7 +386,7 @@ extension APIClient {
             case .listConversations, .getConversation, .getConversationMessages, .perplexityUsage, .currentSubscription, .getSettings, .getModels, .getUsageStats, .listPlans, .oauthUser, .savedCards, .paymentStatus, .notifications, .unreadNotificationCount,
                  .presentationsConfig, .listPresentations, .getPresentation, .getExportStatus,
                  .workTasks, .listWork, .getWork, .workExportStatus, .getWorkProfile,
-                 .dtmSubjects, .dtmTopics, .dtmQuiz, .dtmProgress, .recoveryOffer, .accountStreak:
+                 .dtmSubjects, .dtmTopics, .dtmLevels, .dtmQuiz, .dtmProgress, .recoveryOffer, .accountStreak:
                 return .get
             case .deleteConversation, .deleteAccount, .deleteCard, .deletePresentation:
                 return .delete
@@ -551,6 +552,8 @@ extension APIClient {
                 return "/dtm/subjects"
             case .dtmTopics:
                 return "/dtm/topics"
+            case .dtmLevels:
+                return "/dtm/levels"
             case .dtmQuiz:
                 return "/dtm/quiz"
             case .dtmAnswer:
@@ -572,11 +575,12 @@ extension APIClient {
 
         private var queryItems: [URLQueryItem] {
             switch self {
-            case .dtmTopics(let subject):
+            case .dtmTopics(let subject), .dtmLevels(let subject):
                 return [URLQueryItem(name: "subject", value: subject)]
-            case .dtmQuiz(let subject, let topic):
+            case .dtmQuiz(let subject, let topic, let difficulty):
                 var q = [URLQueryItem(name: "subject", value: subject)]
                 if let topic, !topic.isEmpty { q.append(URLQueryItem(name: "topic", value: topic)) }
+                if let difficulty, !difficulty.isEmpty { q.append(URLQueryItem(name: "difficulty", value: difficulty)) }
                 return q
             case .listConversations(let limit, let offset):
                 return [

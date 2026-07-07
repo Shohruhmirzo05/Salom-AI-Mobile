@@ -2,13 +2,14 @@
 //  DtmHubView.swift
 //  Salom-Ai-iOS
 //
-//  Subject hub: level badge, adaptive-practice CTA, weak-area focus, and
-//  sections with mastery. Pushes the quiz onto the NavigationStack path.
+//  Level selection: pick Boshlang'ich / O'rta / Yuqori (each its own question set
+//  with a live count) → pushes the quiz onto the NavigationStack. Replaces the old
+//  adaptive "hub" that confused users. Mirrors the web DTM level cards.
 //
 
 import SwiftUI
 
-struct DtmHubView: View {
+struct DtmLevelsView: View {
     let subject: String
     let label: String
     @Binding var path: NavigationPath
@@ -17,60 +18,30 @@ struct DtmHubView: View {
     private var L: DtmL { DtmL(languageCode) }
     private let cyan = Color(hex: "#33E1ED")
 
-    @State private var hub: DtmTopics?
+    @State private var levels: [DtmLevel] = []
     @State private var loading = true
+
+    // Accent gradient + a 1/2/3 step so difficulty reads at a glance.
+    private func meta(_ key: String) -> (grad: [Color], step: Int) {
+        switch key {
+        case "easy": return ([Color(hex: "#38BDF8"), Color(hex: "#22D3EE")], 1)
+        case "hard": return ([Color(hex: "#34D399"), Color(hex: "#10B981")], 3)
+        default: return ([Color(hex: "#FBBF24"), Color(hex: "#FB923C")], 2)
+        }
+    }
 
     var body: some View {
         ZStack {
             SalomTheme.Gradients.background.ignoresSafeArea()
             ScrollView {
-                VStack(alignment: .leading, spacing: 18) {
-                    if let h = hub {
-                        HStack {
-                            Text("\(L.yourLevel): \(h.levelLabel)")
-                                .font(.caption.weight(.semibold)).foregroundColor(cyan)
-                                .padding(.horizontal, 12).padding(.vertical, 7)
-                                .salomGlassPill()
-                            Spacer()
-                        }
-                    }
-
-                    // Adaptive practice — primary CTA
-                    Button { path.append(DtmRoute.quiz(subject: subject, topic: nil)) } label: {
-                        HStack(spacing: 14) {
-                            Image(systemName: "sparkles").font(.system(size: 20)).foregroundColor(.white)
-                                .frame(width: 48, height: 48)
-                                .background(Circle().fill(LinearGradient(colors: [cyan, .purple], startPoint: .topLeading, endPoint: .bottomTrailing)))
-                            VStack(alignment: .leading, spacing: 2) {
-                                Text(L.adaptive).font(.system(size: 16, weight: .bold)).foregroundColor(.white)
-                                Text(L.adaptiveHint).font(.caption).foregroundColor(.white.opacity(0.6))
-                            }
-                            Spacer()
-                            Image(systemName: "chevron.right").foregroundColor(cyan)
-                        }.padding(16).salomGlassCard(22, interactive: true)
-                    }.buttonStyle(.plain)
-
-                    // Focus areas (weak topics)
-                    if let h = hub, h.topics.contains(where: { $0.seen > 0 }) {
-                        Text(L.focus).font(.headline).foregroundColor(.white)
-                        let weak = Array(h.topics.filter { $0.seen > 0 }.sorted { $0.mastery < $1.mastery }.prefix(3))
-                        ForEach(weak) { t in
-                            Button { path.append(DtmRoute.quiz(subject: subject, topic: t.key.isEmpty ? nil : t.key)) } label: {
-                                Text("\(L.tr(t.topic)) · \(t.mastery)%").font(.caption.weight(.medium)).foregroundColor(.orange)
-                                    .padding(.horizontal, 12).padding(.vertical, 7)
-                                    .background(Capsule().fill(Color.orange.opacity(0.12)))
-                                    .overlay(Capsule().stroke(Color.orange.opacity(0.3)))
-                            }.buttonStyle(.plain)
-                        }
-                    }
-
-                    Text(L.sections).font(.headline).foregroundColor(.white)
+                VStack(alignment: .leading, spacing: 14) {
+                    Text(L.levelHint).font(.subheadline).foregroundColor(.white.opacity(0.6))
                     if loading {
-                        ProgressView().tint(.white).frame(maxWidth: .infinity)
-                    } else if let h = hub, !h.topics.isEmpty {
-                        ForEach(h.topics) { t in sectionRow(t) }
-                    } else {
+                        ProgressView().tint(.white).frame(maxWidth: .infinity).padding(.top, 44)
+                    } else if levels.isEmpty {
                         infoBanner(L.comingSoon)
+                    } else {
+                        ForEach(levels) { lv in levelCard(lv) }
                     }
                 }.padding(16)
             }
@@ -80,24 +51,32 @@ struct DtmHubView: View {
         .task { await load() }
     }
 
-    private func sectionRow(_ t: DtmTopicStat) -> some View {
-        Button { path.append(DtmRoute.quiz(subject: subject, topic: t.key.isEmpty ? nil : t.key)) } label: {
-            VStack(alignment: .leading, spacing: 8) {
-                HStack {
-                    Text(L.tr(t.topic)).font(.system(size: 15, weight: .medium)).foregroundColor(.white).lineLimit(1)
-                    Spacer()
-                    Text(t.seen > 0 ? "\(t.mastery)% \(L.mastery)" : L.notStarted).font(.caption).foregroundColor(.white.opacity(0.5))
+    private func levelCard(_ lv: DtmLevel) -> some View {
+        let m = meta(lv.key)
+        let empty = lv.count == 0
+        return Button {
+            guard !empty else { return }
+            path.append(DtmRoute.quiz(subject: subject, difficulty: lv.key, levelLabel: L.levelLabel(lv.key)))
+        } label: {
+            HStack(spacing: 14) {
+                Text("\(m.step)")
+                    .font(.system(size: 20, weight: .heavy)).foregroundColor(.white)
+                    .frame(width: 46, height: 46)
+                    .background(Circle().fill(LinearGradient(colors: m.grad, startPoint: .topLeading, endPoint: .bottomTrailing)))
+                VStack(alignment: .leading, spacing: 3) {
+                    Text(L.levelLabel(lv.key)).font(.system(size: 16, weight: .bold)).foregroundColor(.white)
+                    Text("\(L.levelDesc(lv.key)) · \(empty ? L.comingSoon : "\(lv.count) \(L.questions)")")
+                        .font(.caption).foregroundColor(.white.opacity(0.55))
                 }
-                GeometryReader { geo in
-                    ZStack(alignment: .leading) {
-                        Capsule().fill(Color.white.opacity(0.1)).frame(height: 6)
-                        Capsule().fill(masteryColor(t.mastery)).frame(width: max(t.seen > 0 ? 8 : 0, geo.size.width * CGFloat(t.mastery) / 100), height: 6)
-                    }
-                }.frame(height: 6)
-                Text("\(t.questionCount) \(L.questions)").font(.system(size: 11)).foregroundColor(.white.opacity(0.35))
+                Spacer()
+                Image(systemName: "chevron.right").foregroundColor(.white.opacity(0.4))
             }
-            .padding(14).salomGlassCard(16)
-        }.buttonStyle(.plain)
+            .padding(16)
+            .salomGlassCard(20, interactive: !empty)
+            .opacity(empty ? 0.5 : 1)
+        }
+        .buttonStyle(.plain)
+        .disabled(empty)
     }
 
     private func infoBanner(_ text: String) -> some View {
@@ -107,11 +86,9 @@ struct DtmHubView: View {
         }.padding(14).salomGlassCard(14)
     }
 
-    private func masteryColor(_ m: Int) -> Color { m >= 75 ? .green : m >= 50 ? .orange : m > 0 ? .red : .white.opacity(0.15) }
-
     private func load() async {
         loading = true
-        hub = try? await DtmService.topics(subject: subject)
+        levels = (try? await DtmService.levels(subject: subject))?.levels ?? []
         loading = false
     }
 }

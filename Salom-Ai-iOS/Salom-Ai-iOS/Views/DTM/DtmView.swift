@@ -11,8 +11,8 @@
 import SwiftUI
 
 enum DtmRoute: Hashable {
-    case hub(subject: String, label: String)
-    case quiz(subject: String, topic: String?)
+    case levels(subject: String, label: String)
+    case quiz(subject: String, difficulty: String, levelLabel: String)
 }
 
 // SF Symbol per subject for a native, scannable grid.
@@ -55,10 +55,10 @@ struct DtmView: View {
             }
             .navigationDestination(for: DtmRoute.self) { route in
                 switch route {
-                case .hub(let subject, let label):
-                    DtmHubView(subject: subject, label: label, path: $path)
-                case .quiz(let subject, let topic):
-                    DtmQuizView(subject: subject, topic: topic, path: $path)
+                case .levels(let subject, let label):
+                    DtmLevelsView(subject: subject, label: label, path: $path)
+                case .quiz(let subject, let difficulty, let levelLabel):
+                    DtmQuizView(subject: subject, difficulty: difficulty, levelLabel: levelLabel, path: $path)
                 }
             }
         }
@@ -77,7 +77,7 @@ struct DtmView: View {
                 } else {
                     LazyVGrid(columns: [GridItem(.flexible(), spacing: 12), GridItem(.flexible(), spacing: 12)], spacing: 12) {
                         ForEach(subjects) { s in
-                            Button { path.append(DtmRoute.hub(subject: s.key, label: s.label)) } label: {
+                            Button { path.append(DtmRoute.levels(subject: s.key, label: s.label)) } label: {
                                 subjectCard(s)
                             }.buttonStyle(.plain)
                         }

@@ -11,7 +11,8 @@ import SwiftUI
 
 struct DtmQuizView: View {
     let subject: String
-    let topic: String?
+    let difficulty: String
+    let levelLabel: String
     @Binding var path: NavigationPath
 
     @AppStorage(AppStorageKeys.preferredLanguageCode) private var languageCode: String = "uz"
@@ -28,7 +29,6 @@ struct DtmQuizView: View {
     @State private var showResult = false
     @State private var showPaywall = false
     @State private var comingSoon = false
-    @State private var levelLabel = ""
 
     var body: some View {
         ZStack {
@@ -131,7 +131,7 @@ struct DtmQuizView: View {
                         .background(LinearGradient(colors: [cyan, .purple], startPoint: .leading, endPoint: .trailing)).foregroundColor(.white).clipShape(RoundedRectangle(cornerRadius: 16))
                 }
                 Button { if path.count > 0 { path.removeLast() } } label: {
-                    Text(L.sections).fontWeight(.medium).frame(maxWidth: .infinity).padding(.vertical, 14).foregroundColor(.white)
+                    Text(L.chooseLevel).fontWeight(.medium).frame(maxWidth: .infinity).padding(.vertical, 14).foregroundColor(.white)
                         .salomGlassCard(16, interactive: true)
                 }.buttonStyle(.plain)
             }.padding(.horizontal, 24)
@@ -151,10 +151,9 @@ struct DtmQuizView: View {
         loading = true; comingSoon = false; showResult = false
         defer { loading = false }
         do {
-            let data = try await DtmService.quiz(subject: subject, topic: topic)
+            let data = try await DtmService.quiz(subject: subject, difficulty: difficulty)
             if data.questions.isEmpty { comingSoon = true; return }
-            Analytics.shared.track("dtm_quiz_started", ["subject": subject, "topic": topic ?? "adaptive"])
-            levelLabel = data.levelLabel ?? ""
+            Analytics.shared.track("dtm_quiz_started", ["subject": subject, "level": difficulty])
             questions = data.questions; idx = 0; score = 0; chosen = nil; feedback = nil
         } catch let APIError.server(status, _) where status == 403 {
             showPaywall = true
