@@ -537,4 +537,14 @@ struct CurrentSubscriptionFull: Codable {
     let expiresAt: Date?
     let autoRenew: Bool?
     let savedCard: SavedCard?
+    // Payment recovery: a failed auto-renew paused the sub; the saved card can be retried.
+    let inRecovery: Bool?
+    let recoveryUntil: Date?
+    let canRetry: Bool?
+}
+
+struct RetryPaymentResponse: Codable {
+    let ok: Bool
+    let alreadyActive: Bool?
+    let expiresAt: String?
 }

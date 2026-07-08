@@ -10,6 +10,8 @@ struct SubscriptionView: View {
     @State private var showCancelAlert = false
     @State private var isTogglingAutoRenew = false
     @State private var billingPeriod: BillingPeriod = .yearly   // prioritise yearly
+    @State private var isRetrying = false
+    @State private var retryError: String?
     
     @AppStorage(AppStorageKeys.preferredLanguageCode)
     private var languageCode: String = "uz"
@@ -28,6 +30,7 @@ struct SubscriptionView: View {
                             .tint(.white)
                             .padding(.top, 40)
                     } else {
+                        RecoverySection()
                         CurrentPlanSection()
                         AutoRenewSection()
                         PlansGrid()
@@ -86,6 +89,43 @@ struct SubscriptionView: View {
         }
     }
     
+    @ViewBuilder
+    private func RecoverySection() -> some View {
+        if let current = subscriptionManager.currentPlan, current.inRecovery == true {
+            VStack(alignment: .leading, spacing: 12) {
+                HStack(spacing: 10) {
+                    Image(systemName: "exclamationmark.triangle.fill").foregroundColor(.orange)
+                    Text("To'lov amalga oshmadi").font(.headline).foregroundColor(.white)
+                }
+                Text("Obunangiz vaqtincha to'xtatildi. Kartangizni to'ldiring va qayta urinib ko'ring.")
+                    .font(.subheadline).foregroundColor(.white.opacity(0.7))
+                if let err = retryError {
+                    Text(err).font(.caption).foregroundColor(.red)
+                }
+                Button {
+                    Task {
+                        isRetrying = true; retryError = nil
+                        let (ok, msg) = await subscriptionManager.retryPayment()
+                        isRetrying = false
+                        if !ok { retryError = msg ?? "To'lov amalga oshmadi. Keyinroq urinib ko'ring." }
+                    }
+                } label: {
+                    HStack(spacing: 8) {
+                        if isRetrying { ProgressView().tint(.white) }
+                        else { Image(systemName: "creditcard.fill"); Text("Qayta urinib ko'rish").fontWeight(.semibold) }
+                    }
+                    .frame(maxWidth: .infinity).padding(.vertical, 14)
+                    .background(LinearGradient(colors: [Color(hex: "#33E1ED"), .purple], startPoint: .leading, endPoint: .trailing))
+                    .foregroundColor(.white).clipShape(RoundedRectangle(cornerRadius: 14))
+                }
+                .disabled(isRetrying)
+            }
+            .padding(16)
+            .background(RoundedRectangle(cornerRadius: 18).fill(Color.orange.opacity(0.10)))
+            .overlay(RoundedRectangle(cornerRadius: 18).stroke(Color.orange.opacity(0.3)))
+        }
+    }
+
     @ViewBuilder
     private func CurrentPlanSection() -> some View {
         if let current = subscriptionManager.currentPlan, current.active {

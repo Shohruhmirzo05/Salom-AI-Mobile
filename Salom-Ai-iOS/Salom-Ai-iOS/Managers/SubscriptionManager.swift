@@ -345,6 +345,20 @@ final class SubscriptionManager: ObservableObject {
         }
     }
 
+    /// Manually retry a failed card payment with the same saved card. Returns
+    /// (success, errorMessage). Reactivates the subscription on success.
+    func retryPayment() async -> (Bool, String?) {
+        do {
+            let response = try await APIClient.shared.request(.retryPayment, decodeTo: RetryPaymentResponse.self)
+            await checkSubscriptionStatus()
+            return (response.ok, nil)
+        } catch let APIError.server(_, message) {
+            return (false, message)
+        } catch {
+            return (false, nil)
+        }
+    }
+
     // MARK: - Retention: cancel survey + win-back
 
     /// Record WHY the user is leaving / didn't pay. Feeds the admin "Nega to'lov

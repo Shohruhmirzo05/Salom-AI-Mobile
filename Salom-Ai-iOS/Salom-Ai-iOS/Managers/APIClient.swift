@@ -318,6 +318,7 @@ extension APIClient {
         case getUsageStats
         case autoRenew(cardId: Int?, enabled: Bool)
         case cancelSubscription
+        case retryPayment
 
         // Cards
         case tokenizeCardRequest(cardNumber: String, expireDate: String)
@@ -498,6 +499,8 @@ extension APIClient {
                 return "/subscriptions/auto-renew"
             case .cancelSubscription:
                 return "/subscriptions/cancel"
+            case .retryPayment:
+                return "/subscriptions/retry-payment"
             case .tokenizeCardRequest:
                 return "/cards/tokenize/request"
             case .tokenizeCardVerify:
@@ -673,7 +676,7 @@ extension APIClient {
                 var body: [String: Any] = ["enabled": enabled]
                 if let cardId { body["card_id"] = cardId }
                 return body
-            case .cancelSubscription:
+            case .cancelSubscription, .retryPayment:
                 return [:]
             case .tokenizeCardRequest(let cardNumber, let expireDate):
                 return ["card_number": cardNumber, "expire_date": expireDate]
