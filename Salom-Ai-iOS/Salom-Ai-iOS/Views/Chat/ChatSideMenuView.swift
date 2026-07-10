@@ -9,7 +9,7 @@ import SwiftUI
 
 enum MainSection: String, CaseIterable, Identifiable {
     case chat
-//    case voice
+    case apps
     case ish
     case realtime
     case presentations
@@ -22,7 +22,7 @@ enum MainSection: String, CaseIterable, Identifiable {
     var title: LocalizedStringKey {
         switch self {
         case .chat: return "Salom AI"
-//        case .voice: return "Ovozli suhbat"
+        case .apps: return "Ilovalar"
         case .ish: return "Ish — hujjatlar"
         case .realtime: return "Ovozli suhbat"
         case .presentations: return "Presentatsiyalar"
@@ -35,7 +35,7 @@ enum MainSection: String, CaseIterable, Identifiable {
     var subtitle: LocalizedStringKey {
         switch self {
         case .chat: return "O'zbekcha AI yordamchi"
-//        case .voice: return "Tez orada"
+        case .apps: return "Barcha vositalar — bir joyda"
         case .ish: return "Tijorat taklifi, shartnoma, hisobot…"
         case .realtime: return "Real vaqt ovozli AI"
         case .presentations: return "AI presentatsiya yaratish"
@@ -48,7 +48,7 @@ enum MainSection: String, CaseIterable, Identifiable {
     var icon: String {
         switch self {
         case .chat: return "sparkles"
-//        case .voice: return "waveform.and.mic"
+        case .apps: return "square.grid.2x2.fill"
         case .ish: return "briefcase.fill"
         case .realtime: return "waveform.circle.fill"
         case .presentations: return "rectangle.on.rectangle.angled"
@@ -275,43 +275,15 @@ struct ChatSideMenuView: View {
                 }
             }
             
-            // "Salom AI" (new-chat) row removed — the enlarged + button below covers it.
-            // Notifications moved to a bell in the header. Order: work → voice →
-            // presentations → DTM → showcase.
+            // One entry to the Ilovalar hub — all features live there as a grid (no more
+            // per-feature rows). Notifications = header bell; new-chat = the + button.
             MenuItemRow(
-                icon3d: "briefcase",
-                title: MainSection.ish.title,
-                subtitle: MainSection.ish.subtitle,
-                isHighlighted: selectedSection == .ish
+                icon3d: "sparkles",
+                title: MainSection.apps.title,
+                subtitle: MainSection.apps.subtitle,
+                isHighlighted: selectedSection == .apps
             ) {
-                select(.ish)
-            }
-
-            MenuItemRow(
-                icon3d: "voice",
-                title: MainSection.realtime.title,
-                subtitle: MainSection.realtime.subtitle,
-                isHighlighted: selectedSection == .realtime
-            ) {
-                select(.realtime)
-            }
-
-            MenuItemRow(
-                icon3d: "present",
-                title: MainSection.presentations.title,
-                subtitle: MainSection.presentations.subtitle,
-                isHighlighted: selectedSection == .presentations
-            ) {
-                select(.presentations)
-            }
-
-            MenuItemRow(
-                icon3d: "grad",
-                title: MainSection.dtm.title,
-                subtitle: MainSection.dtm.subtitle,
-                isHighlighted: selectedSection == .dtm
-            ) {
-                select(.dtm)
+                select(.apps)
             }
 
             // Re-open the "what can you do" value showcase.

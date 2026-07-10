@@ -73,7 +73,20 @@ struct ChatContainerView: View {
         case .chat:
             ChatView(viewModel: chatViewModel, isMenuOpen: $isMenuOpen)
                 .navigationBarHidden(true)
-            
+
+        case .apps:
+            IlovalarView(
+                onOpen: { section in
+                    HapticManager.shared.fire(.lightImpact)
+                    withAnimation(.easeInOut(duration: 0.25)) { selectedSection = section }
+                },
+                onMenu: {
+                    HapticManager.shared.fire(.selection)
+                    withAnimation(.spring(response: 0.45, dampingFraction: 0.86)) { isMenuOpen = true }
+                }
+            )
+            .navigationBarHidden(true)
+
             //        case .voice:
             //            SectionScaffold(
             //                icon: MainSection.voice.icon,
