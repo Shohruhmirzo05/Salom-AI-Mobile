@@ -11,6 +11,9 @@ struct ChatContainerView: View {
     @StateObject private var chatViewModel = ChatViewModel()
     @State private var isMenuOpen = false
     @State private var selectedSection: MainSection = .chat
+    // Native navigation stack for the Ilovalar hub → tools are PUSHED (real nav
+    // bar + system back button), not swapped in place.
+    @State private var appsPath: [MainSection] = []
     @AppStorage(AppStorageKeys.preferredLanguageCode) private var languageCode: String = "uz"
 
     var body: some View {
@@ -20,12 +23,15 @@ struct ChatContainerView: View {
                     .animation(.easeInOut(duration: 0.25), value: selectedSection)
             }
             .disabled(isMenuOpen)
-            // Edge-swipe from the left to open the drawer (chat root only, so it
-            // doesn't fight pushed views' native back-swipe).
+            // Edge-swipe from the left edge opens the drawer in ANY section.
+            // Skipped only where it would fight a view's own native back-swipe:
+            // when an Ilovalar tool is pushed, or inside DTM's own nav stack.
             .simultaneousGesture(
                 DragGesture(minimumDistance: 18)
                     .onEnded { v in
-                        guard selectedSection == .chat, !isMenuOpen else { return }
+                        guard !isMenuOpen else { return }
+                        if selectedSection == .apps && !appsPath.isEmpty { return }
+                        if selectedSection == .dtm { return }
                         if v.startLocation.x < 28, v.translation.width > 70, abs(v.translation.height) < 60 {
                             HapticManager.shared.fire(.selection)
                             withAnimation(.spring(response: 0.45, dampingFraction: 0.86)) { isMenuOpen = true }
@@ -75,17 +81,29 @@ struct ChatContainerView: View {
                 .navigationBarHidden(true)
 
         case .apps:
-            IlovalarView(
-                onOpen: { section in
-                    HapticManager.shared.fire(.lightImpact)
-                    withAnimation(.easeInOut(duration: 0.25)) { selectedSection = section }
-                },
-                onMenu: {
-                    HapticManager.shared.fire(.selection)
-                    withAnimation(.spring(response: 0.45, dampingFraction: 0.86)) { isMenuOpen = true }
+            NavigationStack(path: $appsPath) {
+                IlovalarView(
+                    onOpen: { section in
+                        // Document tools push onto the hub's nav stack (native
+                        // nav bar + back button). Voice/DTM/image own their own
+                        // surfaces, so switch the whole section for those.
+                        switch section {
+                        case .ish, .presentations, .referats:
+                            appsPath.append(section)
+                        default:
+                            withAnimation(.easeInOut(duration: 0.25)) { selectedSection = section }
+                        }
+                    },
+                    onMenu: {
+                        HapticManager.shared.fire(.selection)
+                        withAnimation(.spring(response: 0.45, dampingFraction: 0.86)) { isMenuOpen = true }
+                    }
+                )
+                .navigationBarHidden(true)
+                .navigationDestination(for: MainSection.self) { section in
+                    pushedTool(section)
                 }
-            )
-            .navigationBarHidden(true)
+            }
 
             //        case .voice:
             //            SectionScaffold(
@@ -167,6 +185,37 @@ struct ChatContainerView: View {
         }
     }
     
+    // A document tool pushed onto the Ilovalar nav stack: real navigation bar
+    // (system back button returns to the hub) + a toolbar menu button for the
+    // drawer. Transparent toolbar so the app's dark background shows through.
+    @ViewBuilder
+    private func pushedTool(_ section: MainSection) -> some View {
+        ZStack {
+            SalomTheme.Gradients.background.ignoresSafeArea()
+            Group {
+                switch section {
+                case .ish: WorkListView()
+                case .presentations: PresentationsListView()
+                case .referats: ReferatsListView()
+                default: EmptyView()
+                }
+            }
+            .frame(maxWidth: .infinity, maxHeight: .infinity)
+        }
+        .navigationTitle(section.title)
+        .navigationBarTitleDisplayMode(.inline)
+        .toolbar {
+            ToolbarItem(placement: .topBarTrailing) {
+                GlassIconButton(systemName: "line.3.horizontal", size: 36) {
+                    HapticManager.shared.fire(.selection)
+                    withAnimation(.spring(response: 0.45, dampingFraction: 0.86)) { isMenuOpen = true }
+                }
+            }
+        }
+        .toolbarBackground(.hidden, for: .navigationBar)
+        .toolbarColorScheme(.dark, for: .navigationBar)
+    }
+
     @ViewBuilder
     private func SectionScaffold<Content: View, Trailing: View>(
         icon: String,

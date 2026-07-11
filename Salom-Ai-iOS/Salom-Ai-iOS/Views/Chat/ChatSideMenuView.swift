@@ -282,7 +282,7 @@ struct ChatSideMenuView: View {
             // One entry to the Ilovalar hub — all features live there as a grid (no more
             // per-feature rows). Notifications = header bell; new-chat = the + button.
             MenuItemRow(
-                icon3d: "sparkles",
+                icon3d: "rocket",
                 title: MainSection.apps.title,
                 subtitle: MainSection.apps.subtitle,
                 isHighlighted: selectedSection == .apps
