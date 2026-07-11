@@ -108,7 +108,8 @@ struct ChatContainerView: View {
             SectionScaffold(
                 icon: MainSection.ish.icon,
                 title: "Ish — hujjatlar",
-                subtitle: "Kasbiy hujjatlarni tayyorlang"
+                subtitle: "Kasbiy hujjatlarni tayyorlang",
+                onBack: { selectedSection = .apps }
             ) {
                 WorkListView()
                     .frame(maxWidth: .infinity, maxHeight: .infinity)
@@ -118,9 +119,21 @@ struct ChatContainerView: View {
             SectionScaffold(
                 icon: MainSection.presentations.icon,
                 title: "Presentatsiyalar",
-                subtitle: "AI presentatsiya yaratish"
+                subtitle: "AI presentatsiya yaratish",
+                onBack: { selectedSection = .apps }
             ) {
                 PresentationsListView()
+                    .frame(maxWidth: .infinity, maxHeight: .infinity)
+            }
+
+        case .referats:
+            SectionScaffold(
+                icon: MainSection.referats.icon,
+                title: "Referat / Insho",
+                subtitle: "AI referat va insho",
+                onBack: { selectedSection = .apps }
+            ) {
+                ReferatsListView()
                     .frame(maxWidth: .infinity, maxHeight: .infinity)
             }
 
@@ -159,6 +172,7 @@ struct ChatContainerView: View {
         icon: String,
         title: LocalizedStringKey,
         subtitle: LocalizedStringKey,
+        onBack: (() -> Void)? = nil,
         @ViewBuilder trailing: () -> Trailing = { EmptyView() },
         @ViewBuilder content: () -> Content
     ) -> some View {
@@ -167,7 +181,7 @@ struct ChatContainerView: View {
                 .ignoresSafeArea()
 
             VStack(spacing: 0) {
-                ShellHeader(icon: icon, title: title, subtitle: subtitle, trailing: trailing)
+                ShellHeader(icon: icon, title: title, subtitle: subtitle, onBack: onBack, trailing: trailing)
                 ShellSeparator()
                 content()
             }
@@ -180,16 +194,24 @@ struct ChatContainerView: View {
         icon: String,
         title: LocalizedStringKey,
         subtitle: LocalizedStringKey,
+        onBack: (() -> Void)? = nil,
         @ViewBuilder trailing: () -> Trailing = { EmptyView() }
     ) -> some View {
         HStack(spacing: 12) {
+            // When a section is opened from the Ilovalar hub it shows a
+            // back-to-hub chevron; otherwise the leading control opens the side
+            // menu (matches the web's per-tool back button).
             Button {
                 HapticManager.shared.fire(.selection)
-                withAnimation(.spring(response: 0.45, dampingFraction: 0.86)) {
-                    isMenuOpen = true
+                if let onBack {
+                    withAnimation(.easeInOut(duration: 0.25)) { onBack() }
+                } else {
+                    withAnimation(.spring(response: 0.45, dampingFraction: 0.86)) {
+                        isMenuOpen = true
+                    }
                 }
             } label: {
-                Image(systemName: "line.3.horizontal")
+                Image(systemName: onBack != nil ? "chevron.left" : "line.3.horizontal")
                     .font(.system(size: 18, weight: .medium))
                     .foregroundColor(.white)
                     .salomGlassCircle(40)

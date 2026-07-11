@@ -281,6 +281,9 @@ extension APIClient {
         case logout(refreshToken: String)
         case oauthVerify(provider: OAuthProvider, idToken: String, platform: String = "ios")
         case oauthUser
+        // Telegram "login via bot code" (no Mini App initData on native iOS)
+        case telegramCodeStart(phone: String)
+        case telegramCodeVerify(token: String, code: String, platform: String = "ios")
         case updateProfile(language: String?, displayName: String?, avatarUrl: String?)
         case updatePlatform(platform: String)
         
@@ -351,6 +354,16 @@ extension APIClient {
         case exportPresentation(id: Int, format: String)
         case getExportStatus(exportId: Int)
 
+        // Referats (AI referat / insho writer)
+        case referatsConfig
+        case listReferats
+        case getReferat(id: Int)
+        case createReferat(topic: String, language: String, targetWords: Int, audience: String?)
+        case deleteReferat(id: Int)
+        case chatEditReferat(id: Int, instruction: String)
+        case exportReferat(id: Int, format: String)
+        case getReferatExportStatus(exportId: Int)
+
         // Ish / Work (task studio)
         case workTasks
         case generateWorkTask(taskId: String, inputs: [String: String], language: String)
@@ -386,10 +399,11 @@ extension APIClient {
             switch self {
             case .listConversations, .getConversation, .getConversationMessages, .perplexityUsage, .currentSubscription, .getSettings, .getModels, .getUsageStats, .listPlans, .oauthUser, .savedCards, .paymentStatus, .notifications, .unreadNotificationCount,
                  .presentationsConfig, .listPresentations, .getPresentation, .getExportStatus,
+                 .referatsConfig, .listReferats, .getReferat, .getReferatExportStatus,
                  .workTasks, .listWork, .getWork, .workExportStatus, .getWorkProfile,
                  .dtmSubjects, .dtmTopics, .dtmLevels, .dtmQuiz, .dtmProgress, .recoveryOffer, .accountStreak:
                 return .get
-            case .deleteConversation, .deleteAccount, .deleteCard, .deletePresentation:
+            case .deleteConversation, .deleteAccount, .deleteCard, .deletePresentation, .deleteReferat:
                 return .delete
             case .updateSettings, .updateProfile, .updatePresentationTheme, .updateWorkProfile:
                 return .put
@@ -402,7 +416,7 @@ extension APIClient {
         
         fileprivate var requiresAuth: Bool {
             switch self {
-            case .requestOTP, .verifyOTP, .refresh, .oauthVerify:
+            case .requestOTP, .verifyOTP, .refresh, .oauthVerify, .telegramCodeStart, .telegramCodeVerify:
                 return false
             default:
                 return true
@@ -463,6 +477,10 @@ extension APIClient {
                 return "/chat/save"
             case .oauthVerify:
                 return "/auth/oauth/verify"
+            case .telegramCodeStart:
+                return "/auth/telegram/code/start"
+            case .telegramCodeVerify:
+                return "/auth/telegram/code/verify"
             case .oauthUser, .updateProfile:
                 return "/auth/me"
             case .updatePlatform:
@@ -535,6 +553,18 @@ extension APIClient {
                 return "/presentations/\(id)/export"
             case .getExportStatus(let exportId):
                 return "/presentations/exports/\(exportId)"
+            case .referatsConfig:
+                return "/referats/config"
+            case .listReferats, .createReferat:
+                return "/referats"
+            case .getReferat(let id), .deleteReferat(let id):
+                return "/referats/\(id)"
+            case .chatEditReferat(let id, _):
+                return "/referats/\(id)/chat"
+            case .exportReferat(let id, _):
+                return "/referats/\(id)/export"
+            case .getReferatExportStatus(let exportId):
+                return "/referats/exports/\(exportId)"
             case .workTasks:
                 return "/tasks"
             case .generateWorkTask(let taskId, _, _):
@@ -616,6 +646,10 @@ extension APIClient {
                 return ["refresh_token": refreshToken]
             case .oauthVerify(let provider, let idToken, let platform):
                 return ["provider": provider.rawValue, "id_token": idToken, "platform": platform]
+            case .telegramCodeStart(let phone):
+                return ["phone": phone]
+            case .telegramCodeVerify(let token, let code, let platform):
+                return ["token": token, "code": code, "platform": platform]
             case .dtmAnswer(let questionId, let chosenKey):
                 return ["question_id": questionId, "chosen_key": chosenKey]
             case .cancelSurvey(let reason):
@@ -710,6 +744,14 @@ extension APIClient {
             case .chatEditPresentation(_, let instruction):
                 return ["instruction": instruction]
             case .exportPresentation(_, let format):
+                return ["format": format]
+            case .createReferat(let topic, let language, let targetWords, let audience):
+                var body: [String: Any] = ["topic": topic, "language": language, "target_words": targetWords]
+                if let audience, !audience.isEmpty { body["audience"] = audience }
+                return body
+            case .chatEditReferat(_, let instruction):
+                return ["instruction": instruction]
+            case .exportReferat(_, let format):
                 return ["format": format]
             case .generateWorkTask(_, let inputs, let language):
                 return ["inputs": inputs, "language": language]

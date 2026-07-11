@@ -13,6 +13,7 @@ enum MainSection: String, CaseIterable, Identifiable {
     case ish
     case realtime
     case presentations
+    case referats
     case dtm
     case notifications
     case settings
@@ -26,6 +27,7 @@ enum MainSection: String, CaseIterable, Identifiable {
         case .ish: return "Ish — hujjatlar"
         case .realtime: return "Ovozli suhbat"
         case .presentations: return "Presentatsiyalar"
+        case .referats: return "Referat / Insho"
         case .dtm: return "DTM testlar"
         case .notifications: return "Bildirishnomalar"
         case .settings: return "Sozlamalar"
@@ -39,6 +41,7 @@ enum MainSection: String, CaseIterable, Identifiable {
         case .ish: return "Tijorat taklifi, shartnoma, hisobot…"
         case .realtime: return "Real vaqt ovozli AI"
         case .presentations: return "AI presentatsiya yaratish"
+        case .referats: return "AI referat va insho"
         case .dtm: return "Moslashuvchan test tayyorgarlik"
         case .notifications: return "Xabarlar tarixi"
         case .settings: return "Ilova sozlamalari"
@@ -52,6 +55,7 @@ enum MainSection: String, CaseIterable, Identifiable {
         case .ish: return "briefcase.fill"
         case .realtime: return "waveform.circle.fill"
         case .presentations: return "rectangle.on.rectangle.angled"
+        case .referats: return "text.book.closed.fill"
         case .dtm: return "graduationcap.fill"
         case .notifications: return "bell"
         case .settings: return "gearshape"
