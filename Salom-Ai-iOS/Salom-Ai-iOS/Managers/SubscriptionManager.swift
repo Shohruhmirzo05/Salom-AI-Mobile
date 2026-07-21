@@ -94,6 +94,10 @@ final class SubscriptionManager: ObservableObject {
     /// fires (e.g. the user paid — or abandoned — in the Payme app and returned
     /// manually). Polls the real payment status; shows nothing until it's terminal.
     func refreshAfterForeground() async {
+        guard TokenStore.shared.accessToken != nil else {
+            resetPaymentRecovery()
+            return
+        }
         await checkSubscriptionStatus()
         guard pendingPaymentId != nil else { return }
         await resolvePayment(id: pendingPaymentId, trustedStatus: nil)
@@ -167,6 +171,15 @@ final class SubscriptionManager: ObservableObject {
         pendingPaymentId = paymentId
         pendingCheckoutPlan = plan
         pendingCheckoutAt = Date()
+    }
+
+    /// Discards UI and transaction state that belongs to an interrupted redirect
+    /// checkout. Authentication has its own external-app/browser lifecycle; stale
+    /// payment state must never be resumed when Google, Apple, or Telegram returns.
+    func resetPaymentRecovery() {
+        clearPendingCheckout()
+        paymentToast = nil
+        showPaymentSurvey = false
     }
 
     private func clearPendingCheckout() {
@@ -364,8 +377,9 @@ final class SubscriptionManager: ObservableObject {
     /// Record WHY the user is leaving / didn't pay. Feeds the admin "Nega to'lov
     /// qilishmadi?" breakdown. Also mirrors the web `cancel_survey` analytics event.
     @discardableResult
-    func submitCancelSurvey(reason: String) async -> Bool {
-        Analytics.shared.track("cancel_survey", ["reason": reason])
+    func submitCancelSurvey(reason: String, paywallID: String? = nil) async -> Bool {
+        if let paywallID { PaywallAttributionStore.shared.set(context: PaywallContextID(rawValue: paywallID) ?? .general, source: "ios") }
+        Analytics.shared.track("cancel_survey", ["reason": reason, "paywall_id": paywallID ?? PaywallAttributionStore.shared.paywallID ?? "unknown"])
         do {
             let _ = try await APIClient.shared.requestData(.cancelSurvey(reason: reason))
             return true

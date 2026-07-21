@@ -8,6 +8,12 @@
 import SwiftUI
 import PhotosUI
 
+private struct SettingsLanguageOption: Identifiable {
+    let code: String
+    let label: String
+    var id: String { code }
+}
+
 struct SettingsScreen: View {
     @AppStorage(AppStorageKeys.phoneNumber)
     private var phoneNumber: String = ""
@@ -24,6 +30,9 @@ struct SettingsScreen: View {
     @AppStorage(AppStorageKeys.avatarUrl)
     private var storedAvatarUrl: String = ""
 
+    @AppStorage(AppStorageKeys.preferredThemeMode)
+    private var themeModeRaw: String = AppThemeMode.auto.rawValue
+
     private let session = SessionManager.shared
 
     @State private var showDeleteConfirmation = false
@@ -33,6 +42,13 @@ struct SettingsScreen: View {
     @State private var isPremium: Bool = false
     @State private var selectedAvatarItem: PhotosPickerItem?
     @State private var avatarUploading = false
+
+    private let languageOptions = [
+        SettingsLanguageOption(code: "uz", label: "Oʻzbekcha"),
+        SettingsLanguageOption(code: "uz-Cyrl", label: "Кириллча"),
+        SettingsLanguageOption(code: "ru", label: "Русский"),
+        SettingsLanguageOption(code: "en", label: "English")
+    ]
 
     private func uploadAvatar(_ item: PhotosPickerItem) async {
         guard let data = try? await item.loadTransferable(type: Data.self) else { return }
@@ -56,13 +72,13 @@ struct SettingsScreen: View {
             return storedEmail.components(separatedBy: "@").first ?? storedEmail
         }
         if !phoneNumber.isEmpty { return phoneNumber }
-        return String(localized: "Foydalanuvchi")
+        return String.appLocalized("Foydalanuvchi")
     }
 
     private var profileSubtitle: String {
         if !storedEmail.isEmpty { return storedEmail }
         if !phoneNumber.isEmpty { return phoneNumber }
-        return String(localized: "Ma'lumot yo'q")
+        return String.appLocalized("Ma'lumot yo'q")
     }
 
     private var profileInitials: String {
@@ -83,15 +99,15 @@ struct SettingsScreen: View {
             FormContent()
                 .padding(.top, 12)
         }
-        .alert(String(localized: "Hisobni o'chirish"), isPresented: $showDeleteConfirmation) {
-            Button(String(localized: "Bekor qilish"), role: .cancel) { }
-            Button(String(localized: "O'chirish"), role: .destructive) {
+        .alert(String.appLocalized("Hisobni o'chirish"), isPresented: $showDeleteConfirmation) {
+            Button(String.appLocalized("Bekor qilish"), role: .cancel) { }
+            Button(String.appLocalized("O'chirish"), role: .destructive) {
                 Task { await deleteAccount() }
             }
         } message: {
             Text("Hisobingizni butunlay o'chirishni xohlaysizmi? Bu amal barcha suhbatlar, xabarlar va ma'lumotlaringizni butunlay o'chiradi. Bu amalni bekor qilib bo'lmaydi!")
         }
-        .alert(String(localized: "Xatolik"), isPresented: .init(
+        .alert(String.appLocalized("Xatolik"), isPresented: .init(
             get: { deleteError != nil },
             set: { if !$0 { deleteError = nil } }
         )) {
@@ -109,9 +125,14 @@ struct SettingsScreen: View {
             VStack(spacing: 20) {
                 ProfileCard()
                 SubscriptionSection()
+                AppearanceSection()
                 SupportSection()
                 LanguageSection()
                 DangerZone()
+                Text("Versiya 1.2.5 • Salom AI")
+                    .font(.caption)
+                    .foregroundColor(SalomTheme.Colors.textTertiary)
+                    .padding(.top, 4)
             }
             .padding(.horizontal, 20)
             .padding(.bottom, 40)
@@ -135,17 +156,17 @@ struct SettingsScreen: View {
                         .clipShape(Circle())
                     } else {
                         Circle().fill(SalomTheme.Gradients.accent).frame(width: 64, height: 64)
-                        Text(profileInitials).font(.system(size: 24, weight: .bold)).foregroundColor(.white)
+                        Text(profileInitials).font(.system(size: 24, weight: .bold)).foregroundColor(SalomTheme.Colors.onAccent)
                     }
 
                     if avatarUploading {
                         Circle().fill(Color.black.opacity(0.45)).frame(width: 64, height: 64)
-                        ProgressView().tint(.white)
+                        ProgressView().tint(SalomTheme.Colors.onMedia)
                     }
 
                     Image(systemName: "camera.fill")
                         .font(.system(size: 10))
-                        .foregroundColor(.black)
+                        .foregroundColor(SalomTheme.Colors.onAccent)
                         .frame(width: 22, height: 22)
                         .background(SalomTheme.Colors.accentPrimary)
                         .clipShape(Circle())
@@ -159,7 +180,7 @@ struct SettingsScreen: View {
             VStack(alignment: .leading, spacing: 6) {
                 Text(profileName)
                     .font(.system(size: 19, weight: .semibold))
-                    .foregroundColor(.white)
+                    .foregroundColor(SalomTheme.Colors.textPrimary)
                     .lineLimit(1)
                 Text(profileSubtitle)
                     .font(.subheadline)
@@ -192,17 +213,17 @@ struct SettingsScreen: View {
                 HStack(spacing: 12) {
                     ZStack {
                         Circle()
-                            .fill(isPremium ? Color.yellow.opacity(0.15) : Color.white.opacity(0.08))
+                            .fill(isPremium ? Color.yellow.opacity(0.15) : SalomTheme.Colors.surfaceMuted)
                             .frame(width: 40, height: 40)
                         Image(systemName: isPremium ? "crown.fill" : "sparkles")
                             .font(.system(size: 18))
                             .foregroundColor(isPremium ? .yellow : .gray)
                     }
                     VStack(alignment: .leading, spacing: 2) {
-                        Text(currentPlanName.isEmpty ? String(localized: "Yuklanmoqda...") : currentPlanName)
+                        Text(currentPlanName.isEmpty ? String.appLocalized("Yuklanmoqda...") : currentPlanName)
                             .font(.body.weight(.semibold))
-                            .foregroundColor(.white)
-                        Text(isPremium ? String(localized: "Faol obuna") : String(localized: "Bepul tarif"))
+                            .foregroundColor(SalomTheme.Colors.textPrimary)
+                        Text(isPremium ? String.appLocalized("Faol obuna") : String.appLocalized("Bepul tarif"))
                             .font(.caption)
                             .foregroundColor(SalomTheme.Colors.textSecondary)
                     }
@@ -216,6 +237,60 @@ struct SettingsScreen: View {
         }
         .glassCard(cornerRadius: 24)
         .task { await fetchSubscriptionStatus() }
+    }
+
+    // MARK: - Appearance
+
+    @ViewBuilder
+    private func AppearanceSection() -> some View {
+        VStack(alignment: .leading, spacing: 14) {
+            VStack(alignment: .leading, spacing: 3) {
+                Text("Ko‘rinish")
+                    .font(.footnote.weight(.semibold))
+                    .foregroundColor(SalomTheme.Colors.textSecondary)
+                Text("Avto qurilmangiz sozlamasiga moslashadi")
+                    .font(.caption)
+                    .foregroundColor(SalomTheme.Colors.textTertiary)
+            }
+
+            let currentMode = AppThemeMode(rawValue: themeModeRaw) ?? .auto
+            Menu {
+                ForEach(AppThemeMode.allCases) { mode in
+                    Button {
+                        themeModeRaw = mode.rawValue
+                        HapticManager.shared.fire(.selection)
+                    } label: {
+                        HStack {
+                            Label {
+                                Text(mode.title)
+                            } icon: {
+                                Image(systemName: mode.systemImage)
+                            }
+                            if currentMode == mode { Image(systemName: "checkmark") }
+                        }
+                    }
+                }
+            } label: {
+                HStack(spacing: 12) {
+                    Image(systemName: currentMode.systemImage)
+                        .font(.system(size: 17, weight: .semibold))
+                        .foregroundColor(SalomTheme.Colors.accentPrimary)
+                    Text(currentMode.title)
+                        .font(.body.weight(.semibold))
+                        .foregroundColor(SalomTheme.Colors.textPrimary)
+                    Spacer()
+                    Image(systemName: "chevron.down")
+                        .font(.caption.weight(.semibold))
+                        .foregroundColor(SalomTheme.Colors.textTertiary)
+                }
+                .padding(.horizontal, 14)
+                .frame(height: 50)
+                .background(SalomTheme.Colors.surface, in: RoundedRectangle(cornerRadius: 15, style: .continuous))
+                .overlay(RoundedRectangle(cornerRadius: 15, style: .continuous).stroke(SalomTheme.Colors.border))
+            }
+            .buttonStyle(.plain)
+        }
+        .glassCard(cornerRadius: 24)
     }
 
     // MARK: - Support Section
@@ -243,7 +318,7 @@ struct SettingsScreen: View {
                     VStack(alignment: .leading, spacing: 2) {
                         Text("Fikr-mulohaza yuborish")
                             .font(.body.weight(.semibold))
-                            .foregroundColor(.white)
+                            .foregroundColor(SalomTheme.Colors.textPrimary)
                         Text("Taklif va shikoyatlar")
                             .font(.caption)
                             .foregroundColor(SalomTheme.Colors.textSecondary)
@@ -266,7 +341,7 @@ struct SettingsScreen: View {
                     VStack(alignment: .leading, spacing: 2) {
                         Text("Telegram orqali yordam")
                             .font(.body.weight(.semibold))
-                            .foregroundColor(.white)
+                            .foregroundColor(SalomTheme.Colors.textPrimary)
                         Text("Jonli qo'llab-quvvatlash — bir tap")
                             .font(.caption)
                             .foregroundColor(SalomTheme.Colors.textSecondary)
@@ -291,46 +366,42 @@ struct SettingsScreen: View {
                 .font(.footnote.weight(.semibold))
                 .foregroundColor(SalomTheme.Colors.textSecondary)
 
-            VStack(spacing: 8) {
-                LanguageRow(code: "uz",      label: "Oʻzbekcha",  flag: "🇺🇿")
-                LanguageRow(code: "uz-Cyrl", label: "Кириллча",   flag: "🇺🇿")
-                LanguageRow(code: "ru",      label: "Русский",     flag: "🇷🇺")
-                LanguageRow(code: "en",      label: "English",     flag: "🇬🇧")
+            let currentLanguage = languageOptions.first(where: { $0.code == languageCode }) ?? languageOptions[0]
+            Menu {
+                ForEach(languageOptions) { option in
+                    Button {
+                        guard languageCode != option.code else { return }
+                        languageCode = option.code
+                        HapticManager.shared.fire(.selection)
+                        Task { await updateLanguage(code: option.code) }
+                    } label: {
+                        HStack {
+                            Label(option.label, systemImage: "globe")
+                            if languageCode == option.code { Image(systemName: "checkmark") }
+                        }
+                    }
+                }
+            } label: {
+                HStack(spacing: 12) {
+                    Image(systemName: "globe")
+                        .font(.system(size: 17, weight: .semibold))
+                        .foregroundColor(SalomTheme.Colors.accentPrimary)
+                    Text(currentLanguage.label)
+                        .font(.body.weight(.semibold))
+                        .foregroundColor(SalomTheme.Colors.textPrimary)
+                    Spacer()
+                    Image(systemName: "chevron.down")
+                        .font(.caption.weight(.semibold))
+                        .foregroundColor(SalomTheme.Colors.textTertiary)
+                }
+                .padding(.horizontal, 14)
+                .frame(height: 50)
+                .background(SalomTheme.Colors.surface, in: RoundedRectangle(cornerRadius: 15, style: .continuous))
+                .overlay(RoundedRectangle(cornerRadius: 15, style: .continuous).stroke(SalomTheme.Colors.border))
             }
+            .buttonStyle(.plain)
         }
         .glassCard(cornerRadius: 24)
-    }
-
-    @ViewBuilder
-    private func LanguageRow(code: String, label: String, flag: String) -> some View {
-        Button {
-            if languageCode != code {
-                languageCode = code
-                Task { await updateLanguage(code: code) }
-            }
-        } label: {
-            HStack(spacing: 12) {
-                Text(flag)
-                    .font(.title3)
-                Text(label)
-                    .font(.body.weight(.medium))
-                    .foregroundColor(.white)
-                Spacer()
-                if languageCode == code {
-                    Image(systemName: "checkmark.circle.fill")
-                        .foregroundColor(SalomTheme.Colors.accentPrimary)
-                        .font(.system(size: 20))
-                } else {
-                    Circle()
-                        .stroke(Color.white.opacity(0.2), lineWidth: 1.5)
-                        .frame(width: 20, height: 20)
-                }
-            }
-            .padding(.vertical, 10)
-            .padding(.horizontal, 4)
-            .contentShape(Rectangle())
-        }
-        .buttonStyle(.plain)
     }
 
     // MARK: - Danger Zone
@@ -355,7 +426,7 @@ struct SettingsScreen: View {
             }
 
             Divider()
-                .background(Color.white.opacity(0.08))
+                .background(SalomTheme.Colors.border)
                 .padding(.vertical, 10)
 
             // Delete Account
@@ -372,7 +443,7 @@ struct SettingsScreen: View {
                         Image(systemName: "trash")
                             .font(.system(size: 14))
                     }
-                    Text(isDeleting ? String(localized: "O'chirilmoqda...") : String(localized: "Hisobni o'chirish"))
+                    Text(isDeleting ? String.appLocalized("O'chirilmoqda...") : String.appLocalized("Hisobni o'chirish"))
                         .font(.footnote.weight(.medium))
                     Spacer()
                 }
@@ -400,7 +471,7 @@ struct SettingsScreen: View {
         } catch {
             await MainActor.run {
                 isDeleting = false
-                deleteError = String(localized: "Hisobni o'chirishda xatolik yuz berdi: ") + error.localizedDescription
+                deleteError = String.appLocalized("Hisobni o'chirishda xatolik yuz berdi: ") + error.localizedDescription
                 HapticManager.shared.fire(.error)
             }
         }
@@ -414,13 +485,13 @@ struct SettingsScreen: View {
                     self.currentPlanName = plan.capitalized
                     self.isPremium = true
                 } else {
-                    self.currentPlanName = String(localized: "Bepul")
+                    self.currentPlanName = String.appLocalized("Bepul")
                     self.isPremium = false
                 }
             }
         } catch {
             await MainActor.run {
-                self.currentPlanName = String(localized: "Bepul")
+                self.currentPlanName = String.appLocalized("Bepul")
                 self.isPremium = false
             }
         }

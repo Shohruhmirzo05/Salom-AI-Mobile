@@ -35,9 +35,9 @@ struct DtmLevelsView: View {
             SalomTheme.Gradients.background.ignoresSafeArea()
             ScrollView {
                 VStack(alignment: .leading, spacing: 14) {
-                    Text(L.levelHint).font(.subheadline).foregroundColor(.white.opacity(0.6))
+                    Text(L.levelHint).font(.subheadline).foregroundColor(SalomTheme.Colors.textSecondary)
                     if loading {
-                        ProgressView().tint(.white).frame(maxWidth: .infinity).padding(.top, 44)
+                        ProgressView().tint(SalomTheme.Colors.accentPrimary).frame(maxWidth: .infinity).padding(.top, 44)
                     } else if levels.isEmpty {
                         infoBanner(L.comingSoon)
                     } else {
@@ -60,16 +60,16 @@ struct DtmLevelsView: View {
         } label: {
             HStack(spacing: 14) {
                 Text("\(m.step)")
-                    .font(.system(size: 20, weight: .heavy)).foregroundColor(.white)
+                    .font(.system(size: 20, weight: .heavy)).foregroundColor(SalomTheme.Colors.onMedia)
                     .frame(width: 46, height: 46)
                     .background(Circle().fill(LinearGradient(colors: m.grad, startPoint: .topLeading, endPoint: .bottomTrailing)))
                 VStack(alignment: .leading, spacing: 3) {
-                    Text(L.levelLabel(lv.key)).font(.system(size: 16, weight: .bold)).foregroundColor(.white)
+                    Text(L.levelLabel(lv.key)).font(.system(size: 16, weight: .bold)).foregroundColor(SalomTheme.Colors.textPrimary)
                     Text("\(L.levelDesc(lv.key)) · \(empty ? L.comingSoon : "\(lv.count) \(L.questions)")")
-                        .font(.caption).foregroundColor(.white.opacity(0.55))
+                        .font(.caption).foregroundColor(SalomTheme.Colors.textSecondary)
                 }
                 Spacer()
-                Image(systemName: "chevron.right").foregroundColor(.white.opacity(0.4))
+                Image(systemName: "chevron.right").foregroundColor(SalomTheme.Colors.textTertiary)
             }
             .padding(16)
             .salomGlassCard(20, interactive: !empty)
@@ -82,7 +82,7 @@ struct DtmLevelsView: View {
     private func infoBanner(_ text: String) -> some View {
         HStack(spacing: 10) {
             Image(systemName: "info.circle").foregroundColor(cyan)
-            Text(text).font(.footnote).foregroundColor(.white.opacity(0.8)); Spacer()
+            Text(text).font(.footnote).foregroundColor(SalomTheme.Colors.textSecondary); Spacer()
         }.padding(14).salomGlassCard(14)
     }
 

@@ -103,7 +103,7 @@ struct NotificationHistoryView: View {
 
             if viewModel.isLoading {
                 ProgressView()
-                    .progressViewStyle(CircularProgressViewStyle(tint: .white))
+                    .progressViewStyle(CircularProgressViewStyle(tint: SalomTheme.Colors.accentPrimary))
             } else if let error = viewModel.error {
                 ErrorStateView(message: error) {
                     Task { await viewModel.load() }
@@ -127,7 +127,7 @@ struct NotificationHistoryView: View {
                 HStack {
                     Text("\(viewModel.unreadCount) ta o'qilmagan")
                         .font(.system(size: 13, weight: .medium))
-                        .foregroundColor(.white.opacity(0.6))
+                        .foregroundColor(SalomTheme.Colors.textSecondary)
                     Spacer()
                     Button {
                         HapticManager.shared.fire(.lightImpact)
@@ -174,13 +174,13 @@ private struct NotificationRow: View {
                 ZStack {
                     Circle()
                         .fill(notification.isRead
-                              ? Color.white.opacity(0.06)
+                              ? SalomTheme.Colors.surfaceMuted
                               : SalomTheme.Colors.accentPrimary.opacity(0.15))
                         .frame(width: 40, height: 40)
                     Image(systemName: iconName)
                         .font(.system(size: 16, weight: .semibold))
                         .foregroundColor(notification.isRead
-                                         ? .white.opacity(0.4)
+                                         ? SalomTheme.Colors.textTertiary
                                          : SalomTheme.Colors.accentPrimary)
                 }
 
@@ -188,7 +188,7 @@ private struct NotificationRow: View {
                     HStack(alignment: .top) {
                         Text(notification.title)
                             .font(.system(size: 15, weight: notification.isRead ? .medium : .bold))
-                            .foregroundColor(.white)
+                            .foregroundColor(SalomTheme.Colors.textPrimary)
                             .lineLimit(1)
                         Spacer()
                         if !notification.isRead {
@@ -201,25 +201,25 @@ private struct NotificationRow: View {
 
                     Text(notification.body)
                         .font(.system(size: 14))
-                        .foregroundColor(notification.isRead ? .white.opacity(0.4) : .white.opacity(0.7))
+                        .foregroundColor(notification.isRead ? SalomTheme.Colors.textTertiary : SalomTheme.Colors.textSecondary)
                         .lineLimit(2)
                         .multilineTextAlignment(.leading)
 
                     Text(relativeDate(notification.createdAt))
                         .font(.system(size: 12))
-                        .foregroundColor(.white.opacity(0.3))
+                        .foregroundColor(SalomTheme.Colors.textTertiary)
                 }
             }
             .padding(12)
             .background(
                 RoundedRectangle(cornerRadius: 14, style: .continuous)
                     .fill(notification.isRead
-                          ? Color.white.opacity(0.03)
-                          : Color.white.opacity(0.06))
+                          ? SalomTheme.Colors.surface
+                          : SalomTheme.Colors.controlFillActive)
             )
             .overlay(
                 RoundedRectangle(cornerRadius: 14, style: .continuous)
-                    .stroke(Color.white.opacity(notification.isRead ? 0.04 : 0.08))
+                    .stroke(notification.isRead ? SalomTheme.Colors.separator : SalomTheme.Colors.accentPrimary.opacity(0.28))
             )
         }
         .buttonStyle(.plain)
@@ -242,18 +242,18 @@ private struct EmptyStateView: View {
         VStack(spacing: 16) {
             ZStack {
                 Circle()
-                    .fill(Color.white.opacity(0.06))
+                    .fill(SalomTheme.Colors.surfaceMuted)
                     .frame(width: 80, height: 80)
                 Image(systemName: "bell.slash")
                     .font(.system(size: 32, weight: .medium))
-                    .foregroundColor(.white.opacity(0.3))
+                    .foregroundColor(SalomTheme.Colors.textTertiary)
             }
             Text("Bildirishnomalar yo'q")
                 .font(.system(size: 16, weight: .semibold))
-                .foregroundColor(.white.opacity(0.5))
+                .foregroundColor(SalomTheme.Colors.textSecondary)
             Text("Yangi xabarlar bu yerda ko'rinadi")
                 .font(.system(size: 14))
-                .foregroundColor(.white.opacity(0.3))
+                .foregroundColor(SalomTheme.Colors.textTertiary)
         }
     }
 }
@@ -268,10 +268,10 @@ private struct ErrorStateView: View {
         VStack(spacing: 16) {
             Image(systemName: "wifi.exclamationmark")
                 .font(.system(size: 36))
-                .foregroundColor(.white.opacity(0.3))
+                .foregroundColor(SalomTheme.Colors.textTertiary)
             Text("Xatolik yuz berdi")
                 .font(.system(size: 16, weight: .semibold))
-                .foregroundColor(.white.opacity(0.5))
+                .foregroundColor(SalomTheme.Colors.textSecondary)
             Button(action: onRetry) {
                 Text("Qayta urinish")
                     .font(.system(size: 14, weight: .semibold))

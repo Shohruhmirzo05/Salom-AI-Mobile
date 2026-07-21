@@ -103,29 +103,29 @@ struct ImageViewer: View {
             if status == .notDetermined {
                 let granted = await PHPhotoLibrary.requestAuthorization(for: .addOnly) == .authorized
                 if !granted {
-                    saveStatus = "Galereyaga saqlash uchun ruxsat kerak."
+                    saveStatus = String.appLocalized("Galereyaga saqlash uchun ruxsat kerak.")
                     return
                 }
             } else if status == .denied || status == .restricted || status == .limited {
-                saveStatus = "Galereyaga saqlash uchun ruxsat kerak."
+                saveStatus = String.appLocalized("Galereyaga saqlash uchun ruxsat kerak.")
                 return
             }
             
             let (data, _) = try await URLSession.shared.data(from: url)
             guard let image = UIImage(data: data) else {
-                saveStatus = "Rasmni ochib bo'lmadi."
+                saveStatus = String.appLocalized("Rasmni ochib bo'lmadi.")
                 return
             }
             try await PHPhotoLibrary.shared().performChanges {
                 PHAssetChangeRequest.creationRequestForAsset(from: image)
             }
-            saveStatus = "Galereyaga saqlandi ✅"
+            saveStatus = String.appLocalized("Galereyaga saqlandi ✅")
             
             // Hide status after 2 seconds
             try? await Task.sleep(nanoseconds: 2 * 1_000_000_000)
             saveStatus = nil
         } catch {
-            saveStatus = "Saqlashda xatolik"
+            saveStatus = String.appLocalized("Saqlashda xatolik")
         }
     }
 }

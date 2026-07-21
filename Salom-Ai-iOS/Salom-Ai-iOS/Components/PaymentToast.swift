@@ -117,10 +117,10 @@ private struct PaymentToastBanner: View {
             VStack(alignment: .leading, spacing: 2) {
                 Text(toast.kind.title)
                     .font(.system(size: 15, weight: .semibold))
-                    .foregroundColor(.white)
+                    .foregroundColor(SalomTheme.Colors.textPrimary)
                 Text(toast.kind.subtitle)
                     .font(.system(size: 12.5))
-                    .foregroundColor(.white.opacity(0.55))
+                    .foregroundColor(SalomTheme.Colors.textSecondary)
                     .lineLimit(1)
             }
 

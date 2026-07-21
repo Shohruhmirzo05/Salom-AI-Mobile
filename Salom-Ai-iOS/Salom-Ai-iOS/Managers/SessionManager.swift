@@ -34,18 +34,24 @@ final class SessionManager: ObservableObject {
     }
     
     func bootstrap(hasCompletedOnboarding: Bool) {
-
-        
         if TokenStore.shared.accessToken != nil {
             contentType = .main
             Task {
                 try? await APIClient.shared.requestData(.updatePlatform(platform: "ios"))
                 await SubscriptionManager.shared.checkSubscriptionStatus()
             }
+        } else {
+            // Repair stale state left by expired tokens or older builds. A user
+            // who already completed onboarding should return to authentication,
+            // not replay onboarding or enter an unauthenticated chat shell.
+            contentType = hasCompletedOnboarding ? .login : .onboarding
         }
     }
     
     func setAuthenticated() {
+        // A successful authentication callback is not a payment callback. Clear
+        // any abandoned checkout left in this app process before entering main.
+        SubscriptionManager.shared.resetPaymentRecovery()
         contentType = .main
         UserDefaults.standard.set(true, forKey: AppStorageKeys.isAuthenticated)
         
@@ -58,8 +64,9 @@ final class SessionManager: ObservableObject {
     }
     
     func logout() {
+        SubscriptionManager.shared.resetPaymentRecovery()
         TokenStore.shared.clear()
-        contentType = .onboarding
+        contentType = .login
         UserDefaults.standard.set(false, forKey: AppStorageKeys.isAuthenticated)
         UserDefaults.standard.removeObject(forKey: AppStorageKeys.displayName)
         UserDefaults.standard.removeObject(forKey: AppStorageKeys.userEmail)

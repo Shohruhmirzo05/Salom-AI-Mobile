@@ -15,7 +15,7 @@ import SwiftUI
 
 struct L4 { let uz: String; let kr: String; let ru: String; let en: String
     func t(_ code: String) -> String {
-        switch code { case "kr": return kr; case "ru": return ru; case "en": return en; default: return uz }
+        switch code { case "kr", "uz-Cyrl": return kr; case "ru": return ru; case "en": return en; default: return uz }
     }
 }
 
@@ -41,7 +41,7 @@ private let PERSONA_ROLES: [PersonaRole] = [
             .init(uz: "Referat, insho va uy vazifasiga yordam", kr: "Реферат, иншо ва уй вазифаси", ru: "Помощь с рефератами и эссе", en: "Help with referats & essays"),
             .init(uz: "Har qanday mavzuni sodda tilda tushuntirish", kr: "Ҳар қандай мавзуни содда тилда", ru: "Объяснение любой темы просто", en: "Any topic explained simply"),
           ]),
-    .init(id: "teacher", emoji: "📚", accent: Color(red: 0.13, green: 0.70, blue: 0.53),
+    .init(id: "teacher", emoji: "📚", accent: SalomTheme.Colors.signal,
           title: .init(uz: "O‘qituvchi", kr: "Ўқитувчи", ru: "Учитель", en: "Teacher"),
           tagline: .init(uz: "Dars rejasi, testlar, hisobotlar", kr: "Дарс режаси, тестлар, ҳисоботлар", ru: "Планы, тесты, отчёты", en: "Lesson plans, tests, reports"),
           photo: "https://images.pexels.com/photos/37795357/pexels-photo-37795357.jpeg?auto=compress&cs=tinysrgb&w=1000",
@@ -115,15 +115,15 @@ struct PersonaFlowView: View {
                     }
                 }
         }
-        .tint(.white)   // native back chevron + toolbar buttons in white
+        .tint(SalomTheme.Colors.accentPrimary)
     }
 
-    // Dark onboarding backdrop with an accent glow (accent follows the role).
+    // Adaptive onboarding backdrop with an accent glow (accent follows the role).
     private func backdrop(_ accent: Color) -> some View {
         ZStack {
-            Color(red: 0.008, green: 0.024, blue: 0.09)
-            Circle().fill(accent.opacity(0.28)).frame(width: 340, height: 340).blur(radius: 100).offset(x: -110, y: -230)
-            Circle().fill(accent.opacity(0.20)).frame(width: 320, height: 320).blur(radius: 100).offset(x: 120, y: 260)
+            SalomTheme.Colors.bgMain
+            Circle().fill(accent.opacity(0.20)).frame(width: 340, height: 340).blur(radius: 100).offset(x: -110, y: -230)
+            Circle().fill(accent.opacity(0.14)).frame(width: 320, height: 320).blur(radius: 100).offset(x: 120, y: 260)
         }
         .ignoresSafeArea()
         .animation(.easeInOut(duration: 0.5), value: accent)
@@ -133,7 +133,7 @@ struct PersonaFlowView: View {
     private func dots(_ current: Int) -> some View {
         HStack(spacing: 6) {
             ForEach(0..<3) { i in
-                Capsule().fill(i == current ? Color.white : Color.white.opacity(0.25))
+                Capsule().fill(i == current ? SalomTheme.Colors.textPrimary : SalomTheme.Colors.textTertiary.opacity(0.35))
                     .frame(width: i == current ? 20 : 6, height: 6)
             }
         }
@@ -142,7 +142,7 @@ struct PersonaFlowView: View {
     private var skipButton: some View {
         Button { onComplete(role?.id, Array(goals)) } label: {
             Text(L4(uz: "O‘tkazish", kr: "Ўтказиш", ru: "Пропустить", en: "Skip").t(lang))
-                .font(.system(size: 15, weight: .regular)).foregroundColor(.white.opacity(0.6))
+                .font(.system(size: 15, weight: .regular)).foregroundColor(SalomTheme.Colors.textSecondary)
         }
     }
 
@@ -151,12 +151,12 @@ struct PersonaFlowView: View {
         VStack(alignment: .leading, spacing: 6) {
             Text(L4(uz: "Sizni yaxshiroq tanishimiz uchun", kr: "Сизни яхшироқ танишимиз учун",
                     ru: "Чтобы узнать вас лучше", en: "So we get to know you").t(lang))
-                .font(.system(size: 24, weight: .bold)).foregroundColor(.white)
+                .font(.system(size: 24, weight: .bold)).foregroundColor(SalomTheme.Colors.textPrimary)
             Text(L4(uz: "Kimsiz? Javobingizga qarab eng foydali vositalarni ko‘rsatamiz.",
                     kr: "Кимсиз? Жавобингизга қараб фойдали воситаларни кўрсатамиз.",
                     ru: "Кто вы? Покажем самые полезные инструменты.",
                     en: "Who are you? We'll show the most useful tools.").t(lang))
-                .font(.system(size: 14)).foregroundColor(.white.opacity(0.55))
+                .font(.system(size: 14)).foregroundColor(SalomTheme.Colors.textSecondary)
 
             ScrollView(showsIndicators: false) {
                 VStack(spacing: 12) {
@@ -192,16 +192,16 @@ struct PersonaFlowView: View {
                 .frame(width: 54, height: 54)
                 .background(r.accent.opacity(0.18), in: RoundedRectangle(cornerRadius: 15, style: .continuous))
             VStack(alignment: .leading, spacing: 3) {
-                Text(r.title.t(lang)).font(.system(size: 16, weight: .semibold)).foregroundColor(.white)
-                Text(r.tagline.t(lang)).font(.system(size: 12.5)).foregroundColor(.white.opacity(0.55)).lineLimit(1)
+                Text(r.title.t(lang)).font(.system(size: 16, weight: .semibold)).foregroundColor(SalomTheme.Colors.textPrimary)
+                Text(r.tagline.t(lang)).font(.system(size: 12.5)).foregroundColor(SalomTheme.Colors.textSecondary).lineLimit(1)
             }
             Spacer(minLength: 4)
-            Image(systemName: "chevron.right").font(.system(size: 14, weight: .semibold)).foregroundColor(.white.opacity(0.3))
+            Image(systemName: "chevron.right").font(.system(size: 14, weight: .semibold)).foregroundColor(SalomTheme.Colors.textTertiary)
         }
         .padding(14)
-        .background(.ultraThinMaterial, in: RoundedRectangle(cornerRadius: 20, style: .continuous))
+        .background(SalomTheme.Colors.surface.opacity(0.82), in: RoundedRectangle(cornerRadius: 20, style: .continuous))
         .overlay(RoundedRectangle(cornerRadius: 20, style: .continuous)
-            .strokeBorder(LinearGradient(colors: [r.accent.opacity(0.5), .white.opacity(0.06)], startPoint: .topLeading, endPoint: .bottomTrailing), lineWidth: 1))
+            .strokeBorder(LinearGradient(colors: [r.accent.opacity(0.5), SalomTheme.Colors.border], startPoint: .topLeading, endPoint: .bottomTrailing), lineWidth: 1))
     }
 
     // MARK: Step 1 — tailored value (real photo)
@@ -228,22 +228,22 @@ struct PersonaFlowView: View {
                     }
                     .frame(height: 200)
                     .clipShape(RoundedRectangle(cornerRadius: 22, style: .continuous))
-                    .overlay(RoundedRectangle(cornerRadius: 22, style: .continuous).strokeBorder(Color.white.opacity(0.1)))
+                    .overlay(RoundedRectangle(cornerRadius: 22, style: .continuous).strokeBorder(SalomTheme.Colors.border))
 
                     Text(L4(uz: "Ajoyib! Salom AI siz uchun:", kr: "Ажойиб! Салом AI сиз учун:",
                             ru: "Отлично! Salom AI для вас:", en: "Great! Salom AI for you:").t(lang))
-                        .font(.system(size: 20, weight: .bold)).foregroundColor(.white)
+                        .font(.system(size: 20, weight: .bold)).foregroundColor(SalomTheme.Colors.textPrimary)
 
                     VStack(spacing: 10) {
                         ForEach(Array(r.values.enumerated()), id: \.offset) { _, v in
                             HStack(spacing: 12) {
                                 Image(systemName: "checkmark.circle.fill").font(.system(size: 20)).foregroundColor(r.accent)
-                                Text(v.t(lang)).font(.system(size: 14.5, weight: .medium)).foregroundColor(.white.opacity(0.92))
+                                Text(v.t(lang)).font(.system(size: 14.5, weight: .medium)).foregroundColor(SalomTheme.Colors.textPrimary)
                                 Spacer(minLength: 0)
                             }
                             .padding(13)
                             .frame(maxWidth: .infinity, alignment: .leading)
-                            .background(.ultraThinMaterial, in: RoundedRectangle(cornerRadius: 16, style: .continuous))
+                            .background(SalomTheme.Colors.surface.opacity(0.82), in: RoundedRectangle(cornerRadius: 16, style: .continuous))
                         }
                     }
                     Spacer(minLength: 8)
@@ -267,10 +267,10 @@ struct PersonaFlowView: View {
     private func goalsStep(_ r: PersonaRole) -> some View {
         VStack(alignment: .leading, spacing: 6) {
             Text(L4(uz: "Nima bilan boshlaymiz?", kr: "Нима билан бошлаймиз?", ru: "С чего начнём?", en: "Where shall we start?").t(lang))
-                .font(.system(size: 24, weight: .bold)).foregroundColor(.white)
+                .font(.system(size: 24, weight: .bold)).foregroundColor(SalomTheme.Colors.textPrimary)
             Text(L4(uz: "Bir nechtasini tanlang (ixtiyoriy).", kr: "Бир нечтасини танланг (ихтиёрий).",
                     ru: "Выберите несколько (необязательно).", en: "Pick a few (optional).").t(lang))
-                .font(.system(size: 14)).foregroundColor(.white.opacity(0.55))
+                .font(.system(size: 14)).foregroundColor(SalomTheme.Colors.textSecondary)
 
             ScrollView(showsIndicators: false) {
                 FlowChips(goals: $goals, lang: lang)
@@ -295,7 +295,7 @@ struct PersonaFlowView: View {
     private func primaryButton(_ title: String, action: @escaping () -> Void) -> some View {
         Button(action: action) {
             HStack { Text(title); Image(systemName: "arrow.right") }
-                .font(.system(size: 16, weight: .semibold)).foregroundColor(.black)
+                .font(.system(size: 16, weight: .semibold)).foregroundColor(SalomTheme.Colors.onAccent)
                 .frame(maxWidth: .infinity).padding(.vertical, 15)
                 .background((role?.accent ?? Color(red: 0.30, green: 0.55, blue: 0.98)))
                 .clipShape(RoundedRectangle(cornerRadius: 18, style: .continuous))
@@ -309,10 +309,10 @@ struct ShimmerView: View {
     @State private var move = false
     var body: some View {
         Rectangle()
-            .fill(Color.white.opacity(0.06))
+            .fill(SalomTheme.Colors.surfaceMuted)
             .overlay(
                 GeometryReader { geo in
-                    LinearGradient(colors: [.clear, Color.white.opacity(0.18), .clear],
+                    LinearGradient(colors: [.clear, SalomTheme.Colors.textPrimary.opacity(0.12), .clear],
                                    startPoint: .leading, endPoint: .trailing)
                         .frame(width: geo.size.width * 0.5)
                         .offset(x: move ? geo.size.width * 1.1 : -geo.size.width * 0.6)
@@ -342,15 +342,15 @@ private struct FlowChips: View {
                     HStack(spacing: 8) {
                         Text(g.emoji).font(.system(size: 18))
                         Text(g.label.t(lang)).font(.system(size: 13.5, weight: .medium))
-                            .foregroundColor(.white).lineLimit(1).minimumScaleFactor(0.85)
+                            .foregroundColor(SalomTheme.Colors.textPrimary).lineLimit(1).minimumScaleFactor(0.85)
                         Spacer(minLength: 0)
-                        if on { Image(systemName: "checkmark").font(.system(size: 11, weight: .bold)).foregroundColor(.cyan) }
+                        if on { Image(systemName: "checkmark").font(.system(size: 11, weight: .bold)).foregroundColor(SalomTheme.Colors.accentPrimary) }
                     }
                     .padding(.horizontal, 12).padding(.vertical, 12)
                     .frame(maxWidth: .infinity, alignment: .leading)
-                    .background(.ultraThinMaterial, in: RoundedRectangle(cornerRadius: 14, style: .continuous))
+                    .background(SalomTheme.Colors.surface.opacity(0.82), in: RoundedRectangle(cornerRadius: 14, style: .continuous))
                     .overlay(RoundedRectangle(cornerRadius: 14, style: .continuous)
-                        .strokeBorder(on ? Color.cyan.opacity(0.6) : Color.white.opacity(0.08), lineWidth: on ? 1.5 : 1))
+                        .strokeBorder(on ? SalomTheme.Colors.accentPrimary.opacity(0.7) : SalomTheme.Colors.border, lineWidth: on ? 1.5 : 1))
                 }
                 .buttonStyle(.plain)
             }

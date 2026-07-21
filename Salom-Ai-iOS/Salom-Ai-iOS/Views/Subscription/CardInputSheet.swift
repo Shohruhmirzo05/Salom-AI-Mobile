@@ -52,11 +52,7 @@ struct CardInputSheet: View {
         }
         .toolbar {
             ToolbarItem(placement: .principal) {
-                Image("click-logo")
-                    .resizable()
-                    .aspectRatio(contentMode: .fit)
-                    .frame(height: 50)
-//                    .padding(.top)
+                ClickBrandMark(iconSize: 34, fontSize: 27)
             }
         }
         .safeAreaInset(edge: .bottom) {
@@ -69,7 +65,7 @@ struct CardInputSheet: View {
         VStack(spacing: 12) {
             Text("Karta ma'lumotlari")
                 .font(.title2.weight(.bold))
-                .foregroundColor(.white)
+                .foregroundColor(SalomTheme.Colors.textPrimary)
             
             Text("To'lov xavfsiz Click tizimi orqali amalga oshiriladi")
                 .font(.subheadline)
@@ -91,7 +87,7 @@ struct CardInputSheet: View {
                 
                 HStack(spacing: 12) {
                     Image(systemName: "creditcard")
-                        .foregroundColor(focusedField == .card ? clickBlue : .white.opacity(0.3))
+                        .foregroundColor(focusedField == .card ? clickBlue : SalomTheme.Colors.textTertiary)
                         .animation(.easeInOut(duration: 0.2), value: focusedField)
                     
                     TextField("8600 1234 5678 9012", text: $cardNumber)
@@ -104,16 +100,16 @@ struct CardInputSheet: View {
                                 focusedField = .expiry
                             }
                         }
-                        .foregroundColor(.white)
+                        .foregroundColor(SalomTheme.Colors.textPrimary)
                         .font(.body.monospacedDigit())
                 }
                 .padding(16)
-                .background(Color.white.opacity(focusedField == .card ? 0.1 : 0.05))
+                .background(focusedField == .card ? SalomTheme.Colors.surfaceMuted : SalomTheme.Colors.surface)
                 .cornerRadius(14)
                 .overlay(
                     RoundedRectangle(cornerRadius: 14)
                         .stroke(
-                            focusedField == .card ? clickBlue.opacity(0.5) : Color.white.opacity(0.08),
+                            focusedField == .card ? clickBlue.opacity(0.5) : SalomTheme.Colors.border,
                             lineWidth: 1
                         )
                 )
@@ -128,7 +124,7 @@ struct CardInputSheet: View {
                 
                 HStack(spacing: 12) {
                     Image(systemName: "calendar")
-                        .foregroundColor(focusedField == .expiry ? clickBlue : .white.opacity(0.3))
+                        .foregroundColor(focusedField == .expiry ? clickBlue : SalomTheme.Colors.textTertiary)
                         .animation(.easeInOut(duration: 0.2), value: focusedField)
                     
                     TextField("MM/YY", text: $expiryDate)
@@ -137,16 +133,16 @@ struct CardInputSheet: View {
                         .onChange(of: expiryDate) { newValue in
                             expiryDate = formatExpiry(newValue)
                         }
-                        .foregroundColor(.white)
+                        .foregroundColor(SalomTheme.Colors.textPrimary)
                         .font(.body.monospacedDigit())
                 }
                 .padding(16)
-                .background(Color.white.opacity(focusedField == .expiry ? 0.1 : 0.05))
+                .background(focusedField == .expiry ? SalomTheme.Colors.surfaceMuted : SalomTheme.Colors.surface)
                 .cornerRadius(14)
                 .overlay(
                     RoundedRectangle(cornerRadius: 14)
                         .stroke(
-                            focusedField == .expiry ? clickBlue.opacity(0.5) : Color.white.opacity(0.08),
+                            focusedField == .expiry ? clickBlue.opacity(0.5) : SalomTheme.Colors.border,
                             lineWidth: 1
                         )
                 )
@@ -206,7 +202,7 @@ struct CardInputSheet: View {
                 HStack(spacing: 8) {
                     if isLoading {
                         ProgressView()
-                            .tint(.white)
+                            .tint(SalomTheme.Colors.onAccent)
                             .scaleEffect(0.9)
                     } else {
                         Text("Davom etish")
@@ -222,7 +218,7 @@ struct CardInputSheet: View {
                     ? LinearGradient(colors: [clickBlue, Color(hex: "0050DD")], startPoint: .leading, endPoint: .trailing)
                     : LinearGradient(colors: [Color.gray.opacity(0.3), Color.gray.opacity(0.3)], startPoint: .leading, endPoint: .trailing)
                 )
-                .foregroundColor(isValid ? .white : .gray)
+                .foregroundColor(isValid ? SalomTheme.Colors.onAccent : .gray)
                 .cornerRadius(16)
             }
             .disabled(!isValid || isLoading)
@@ -235,10 +231,10 @@ struct CardInputSheet: View {
         VStack(spacing: 4) {
             Image(systemName: icon)
                 .font(.caption)
-                .foregroundColor(.white.opacity(0.4))
-            Text(text)
+                .foregroundColor(SalomTheme.Colors.textSecondary)
+            Text(String.appLocalized(text))
                 .font(.caption2)
-                .foregroundColor(.white.opacity(0.3))
+                .foregroundColor(SalomTheme.Colors.textTertiary)
         }
         .frame(maxWidth: .infinity)
     }
@@ -265,7 +261,7 @@ struct CardInputSheet: View {
         } else {
             HapticManager.shared.fire(.error)
             withAnimation(.easeInOut(duration: 0.3)) {
-                errorMessage = subscriptionManager.lastError ?? "Tokenizatsiya amalga oshmadi. Qayta urinib ko'ring."
+                errorMessage = subscriptionManager.lastError ?? String.appLocalized("Tokenizatsiya amalga oshmadi. Qayta urinib ko'ring.")
             }
         }
         

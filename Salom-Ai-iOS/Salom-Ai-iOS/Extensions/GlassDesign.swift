@@ -28,7 +28,7 @@ extension View {
                 .background(.ultraThinMaterial, in: RoundedRectangle(cornerRadius: cornerRadius, style: .continuous))
                 .overlay(
                     RoundedRectangle(cornerRadius: cornerRadius, style: .continuous)
-                        .stroke(Color.white.opacity(0.10), lineWidth: 1)
+                        .stroke(SalomTheme.Colors.border, lineWidth: 1)
                 )
         }
     }
@@ -42,7 +42,7 @@ extension View {
         } else {
             self.frame(width: size, height: size)
                 .background(.ultraThinMaterial, in: Circle())
-                .overlay(Circle().stroke(Color.white.opacity(0.12), lineWidth: 1))
+                .overlay(Circle().stroke(SalomTheme.Colors.border, lineWidth: 1))
         }
     }
 
@@ -54,7 +54,7 @@ extension View {
         } else {
             self
                 .background(.ultraThinMaterial, in: Capsule())
-                .overlay(Capsule().stroke(Color.white.opacity(0.12), lineWidth: 1))
+                .overlay(Capsule().stroke(SalomTheme.Colors.border, lineWidth: 1))
         }
     }
 }
@@ -74,7 +74,7 @@ struct GlassIconButton: View {
         } label: {
             Image(systemName: systemName)
                 .font(.system(size: 16, weight: .semibold))
-                .foregroundColor(.white)
+                .foregroundColor(SalomTheme.Colors.textPrimary)
                 .salomGlassCircle(size)
                 .scaleEffect(pressed ? 0.92 : 1)
         }
@@ -95,9 +95,9 @@ struct GlassButtonModifier: ViewModifier {
     func body(content: Content) -> some View {
         if prominent {
             content
-                .foregroundColor(.white)
+                .foregroundColor(SalomTheme.Colors.onAccent)
                 .background(
-                    LinearGradient(colors: [Color(hex: "#1ED6FF"), Color(hex: "#7C3AED")],
+                    LinearGradient(colors: [SalomTheme.Colors.accentPrimary, SalomTheme.Colors.accentTertiary],
                                    startPoint: .leading, endPoint: .trailing),
                     in: Capsule()
                 )

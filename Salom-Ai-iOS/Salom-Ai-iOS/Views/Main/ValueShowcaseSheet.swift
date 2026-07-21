@@ -42,7 +42,7 @@ struct ValueShowcaseSheet: View {
 
     var body: some View {
         ZStack(alignment: .top) {
-            Color.black.ignoresSafeArea()
+            SalomTheme.Colors.bgMain.ignoresSafeArea()
 
             ScrollView(showsIndicators: false) {
                 VStack(alignment: .leading, spacing: 16) {
@@ -56,17 +56,17 @@ struct ValueShowcaseSheet: View {
                         Button { dismiss() } label: {
                             Image(systemName: "xmark")
                                 .font(.system(size: 13, weight: .semibold))
-                                .foregroundColor(.white.opacity(0.55))
+                                .foregroundColor(SalomTheme.Colors.textSecondary)
                                 .frame(width: 30, height: 30)
-                                .background(Color.white.opacity(0.06)).clipShape(Circle())
+                                .background(SalomTheme.Colors.surfaceMuted).clipShape(Circle())
                         }
                     }
 
                     VStack(alignment: .leading, spacing: 4) {
                         Text("Salom AI bilan nimalar qila olasiz?")
-                            .font(.system(size: 22, weight: .bold)).foregroundColor(.white)
-                        Text("Bu shunchaki chat emas — o‘quv va ish yordamchisi 👇")
-                            .font(.system(size: 14)).foregroundColor(.white.opacity(0.55))
+                            .font(.system(size: 22, weight: .bold)).foregroundColor(SalomTheme.Colors.textPrimary)
+                        Text("Bu shunchaki chat emas — o‘quv va ish yordamchisi")
+                            .font(.system(size: 14)).foregroundColor(SalomTheme.Colors.textSecondary)
                     }
 
                     VStack(spacing: 10) {
@@ -79,16 +79,16 @@ struct ValueShowcaseSheet: View {
                     VStack(spacing: 10) {
                         Button { dismiss() } label: {
                             HStack { Text("Boshlash"); Image(systemName: "arrow.right") }
-                                .font(.system(size: 16, weight: .semibold)).foregroundColor(.black)
+                                .font(.system(size: 16, weight: .semibold)).foregroundColor(SalomTheme.Colors.onAccent)
                                 .frame(maxWidth: .infinity).padding(.vertical, 14)
-                                .background(Color.cyan).clipShape(RoundedRectangle(cornerRadius: 16, style: .continuous))
+                                .background(SalomTheme.Colors.accentPrimary).clipShape(RoundedRectangle(cornerRadius: 16, style: .continuous))
                         }
                         Button {
                             dismiss()
                             DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) { onSeePro() }
                         } label: {
                             HStack { Image(systemName: "crown.fill"); Text("Pro imkoniyatlarni ko‘rish") }
-                                .font(.system(size: 15, weight: .semibold)).foregroundColor(Color.yellow.opacity(0.9))
+                                .font(.system(size: 15, weight: .semibold)).foregroundColor(Color.orange)
                                 .frame(maxWidth: .infinity).padding(.vertical, 12)
                                 .background(LinearGradient(colors: [.yellow.opacity(0.18), .orange.opacity(0.18)], startPoint: .leading, endPoint: .trailing))
                                 .overlay(RoundedRectangle(cornerRadius: 16, style: .continuous).strokeBorder(Color.yellow.opacity(0.3)))
@@ -108,28 +108,32 @@ struct ValueShowcaseSheet: View {
             Icon3DView(slug: item.n3d, size: 42)
             VStack(alignment: .leading, spacing: 2) {
                 HStack(spacing: 6) {
-                    Text(item.title).font(.system(size: 15, weight: .semibold)).foregroundColor(.white)
+                    Text(String.appLocalized(item.title)).font(.system(size: 15, weight: .semibold)).foregroundColor(SalomTheme.Colors.textPrimary)
                     if item.pro {
                         HStack(spacing: 2) {
                             Image(systemName: "crown.fill").font(.system(size: 8))
                             Text("Pro").font(.system(size: 9, weight: .bold))
                         }
-                        .foregroundColor(Color.yellow.opacity(0.9))
+                        .foregroundColor(Color.orange)
                         .padding(.horizontal, 6).padding(.vertical, 2)
                         .background(Color.yellow.opacity(0.15))
                         .overlay(Capsule().strokeBorder(Color.yellow.opacity(0.25)))
                         .clipShape(Capsule())
                     }
                 }
-                Text(item.desc).font(.system(size: 12.5)).foregroundColor(.white.opacity(0.5)).lineLimit(1)
+                Text(String.appLocalized(item.desc))
+                    .font(.system(size: 12.5))
+                    .foregroundColor(SalomTheme.Colors.textSecondary)
+                    .lineLimit(2)
+                    .fixedSize(horizontal: false, vertical: true)
             }
             Spacer(minLength: 4)
-            Image(systemName: "chevron.right").font(.system(size: 13, weight: .semibold)).foregroundColor(.white.opacity(0.25))
+            Image(systemName: "chevron.right").font(.system(size: 13, weight: .semibold)).foregroundColor(SalomTheme.Colors.textTertiary)
         }
         .padding(.horizontal, 12).padding(.vertical, 11)
         .frame(maxWidth: .infinity, alignment: .leading)
-        .background(RoundedRectangle(cornerRadius: 16, style: .continuous).fill(Color.white.opacity(0.04)))
-        .overlay(RoundedRectangle(cornerRadius: 16, style: .continuous).strokeBorder(Color.white.opacity(0.08)))
+        .background(RoundedRectangle(cornerRadius: 16, style: .continuous).fill(SalomTheme.Colors.surface))
+        .overlay(RoundedRectangle(cornerRadius: 16, style: .continuous).strokeBorder(SalomTheme.Colors.border))
     }
 
     private func open(_ item: ShowcaseItem) {

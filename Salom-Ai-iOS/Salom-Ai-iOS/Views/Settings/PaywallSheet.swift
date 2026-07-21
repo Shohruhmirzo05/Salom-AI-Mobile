@@ -2,9 +2,8 @@
 //  PaywallSheet.swift
 //  Salom-Ai-iOS
 //
-//  Minimal premium paywall. Daily price as the hero number (cheap framing),
-//  monthly shown small for context. Benefits come from /subscriptions/plans
-//  so admin changes propagate. Pulls Click + brand logos for trust.
+//  Contextual, image-led premium paywall. The visual proves the result first;
+//  the charged price and payment terms stay explicit and easy to scan.
 //
 
 import SwiftUI
@@ -27,22 +26,6 @@ enum PlanPeriodHelper {
         return pct > 0 ? pct : nil
     }
 }
-
-/// General ✓/✗ comparison shown on every plan card (matches web). The higher tier
-/// gets every row; the lower tier shows the premium (proOnly) rows as ✗, so the
-/// gap is obvious and users are nudged up. NOT exact per-plan limits.
-struct PlanCompareFeature: Identifiable {
-    let id = UUID()
-    let label: String
-    let proOnly: Bool
-}
-let planCompareFeatures: [PlanCompareFeature] = [
-    .init(label: "📊 Taqdimot, referat va DTM", proOnly: false),
-    .init(label: "🎨 Rasm yaratish va ovozli rejim", proOnly: false),
-    .init(label: "🧠 Eng kuchli AI — Super Aqlli", proOnly: true),
-    .init(label: "🚀 Yuqori limitlar — ko‘proq rasm va ovoz", proOnly: true),
-    .init(label: "👑 Hamma imkoniyat — cheklovsiz", proOnly: true),
-]
 
 // MARK: - Navigation model
 
@@ -69,15 +52,24 @@ struct PaywallSheet: View {
     @Environment(\.dismiss) var dismiss
     @StateObject private var subscriptionManager = SubscriptionManager.shared
 
+    let context: PaywallContextID
+    let source: String
+
     @State private var path = NavigationPath()
     @State private var selectedPlanCode: String? = nil
-    @State private var billingPeriod: BillingPeriod = .yearly   // prioritise yearly
+    @State private var billingPeriod: BillingPeriod
 
     // "Why didn't you pay?" survey — shown once (per 30d) when the user closes the
     // paywall without subscribing. Feeds the admin Insights breakdown.
     @State private var askSurvey = false
     @State private var showSurvey = false
     @State private var surveyed = false
+
+    init(context: PaywallContextID = .general, source: String = "ios") {
+        self.context = context
+        self.source = source
+        _billingPeriod = State(initialValue: context.spec.defaultPeriod)
+    }
 
     var body: some View {
         NavigationStack(path: $path) {
@@ -88,7 +80,9 @@ struct PaywallSheet: View {
         }
         .environment(\.dismissAll, { dismiss() })
         .task {
-            Analytics.shared.track("paywall_shown", ["surface": "ios"])
+            PaywallAttributionStore.shared.set(context: context, source: source)
+            Analytics.shared.track("paywall_shown", ["surface": "ios", "paywall_id": context.rawValue, "source": source])
+            Analytics.shared.track("paywall_impression", ["platform": "ios", "paywall_id": context.rawValue, "source": source])
             if subscriptionManager.plans.isEmpty {
                 await subscriptionManager.fetchPlans()
             }
@@ -107,7 +101,7 @@ struct PaywallSheet: View {
             WhyNotPaySurvey(
                 onPick: { reason in
                     surveyed = true
-                    Task { await subscriptionManager.submitCancelSurvey(reason: reason) }
+                    Task { await subscriptionManager.submitCancelSurvey(reason: reason, paywallID: context.rawValue) }
                     showSurvey = false
                 },
                 onSkip: { showSurvey = false }
@@ -127,22 +121,22 @@ struct PaywallSheet: View {
 
     @ViewBuilder private var content: some View {
         ZStack(alignment: .bottom) {
-            Color.black.ignoresSafeArea()
+            SalomTheme.Colors.bgMain.ignoresSafeArea()
 
             ScrollView(showsIndicators: false) {
                 VStack(alignment: .leading, spacing: 24) {
                     headerArt
                     headerCopy
-                    highlightsStrip
                     if hasYearly { billingToggle }
                     planList
-                    if let selected = selectedPlan {
-                        benefitsBlock(for: selected)
-                    }
-                    trustRow
                     Spacer(minLength: 90)
                 }
+                // A vertical ScrollView does not always constrain its content's
+                // cross axis. Yearly prices are wider than monthly prices and
+                // could otherwise expand the entire paywall beyond the screen,
+                // pushing labels and controls off-canvas.
                 .padding(.horizontal, 22)
+                .containerRelativeFrame(.horizontal)
                 .padding(.top, 8)
                 .padding(.bottom, 130)
             }
@@ -154,9 +148,9 @@ struct PaywallSheet: View {
                 Button { handleDismiss() } label: {
                     Image(systemName: "xmark")
                         .font(.system(size: 13, weight: .semibold))
-                        .foregroundColor(.white.opacity(0.55))
+                        .foregroundColor(SalomTheme.Colors.textSecondary)
                         .frame(width: 30, height: 30)
-                        .background(Color.white.opacity(0.06))
+                        .background(SalomTheme.Colors.surfaceMuted)
                         .clipShape(Circle())
                 }
             }
@@ -164,77 +158,243 @@ struct PaywallSheet: View {
         .toolbarBackground(.hidden, for: .navigationBar)
     }
 
-    // MARK: - Header art (Salom AI mascot)
+    // MARK: - Image-first value proof
 
     @ViewBuilder private var headerArt: some View {
-        ZStack(alignment: .bottom) {
-            // Subtle radial glow behind the mascot
-            Circle()
-                .fill(
-                    RadialGradient(
-                        colors: [Color.white.opacity(0.08), .clear],
-                        center: .center,
-                        startRadius: 4,
-                        endRadius: 160
-                    )
-                )
-                .frame(height: 220)
-                .blur(radius: 8)
-                .offset(y: 20)
-
-            Image("main-character")
-                .resizable()
-                .scaledToFit()
-                .frame(height: 160)
+        switch context.artStyle {
+        case .beforeAfter, .imageCompare, .modelCompare:
+            comparisonArt
+        case .gallery, .toolkit:
+            galleryArt
+        case .presentation, .document, .secureDocument, .invoice, .fileAnalysis:
+            documentArt
+        case .quota, .score, .roadmap:
+            progressArt
+        case .voice:
+            voiceArt
+        case .recovery:
+            recoveryArt
+        case .proposal, .lesson, .student, .teacher, .business, .office:
+            immersiveArt
         }
-        .frame(maxWidth: .infinity)
     }
 
-    // Always-visible premium highlights (independent of admin-managed benefits),
-    // so the NEW AI presentations feature is sold on the paywall.
-    @ViewBuilder private var highlightsStrip: some View {
-        let items: [(String, String)] = [
-            ("rectangle.on.rectangle.angled", "AI presentatsiyalar — PPTX va PDF"),
-            ("bolt.fill", "Kuchliroq modellar va yuqori limitlar"),
-            ("waveform", "Real vaqt ovozli AI"),
-        ]
-        VStack(alignment: .leading, spacing: 10) {
-            ForEach(items, id: \.1) { item in
-                HStack(spacing: 10) {
-                    ZStack {
-                        RoundedRectangle(cornerRadius: 9, style: .continuous)
-                            .fill(LinearGradient(colors: [.purple.opacity(0.5), .blue.opacity(0.5)], startPoint: .topLeading, endPoint: .bottomTrailing))
-                            .frame(width: 30, height: 30)
-                        Image(systemName: item.0).font(.system(size: 13, weight: .semibold)).foregroundColor(.white)
-                    }
-                    Text(item.1).font(.system(size: 14, weight: .medium)).foregroundColor(.white.opacity(0.85))
-                    Spacer()
+    @ViewBuilder private var immersiveArt: some View {
+        ZStack(alignment: proofAlignment) {
+            CachedImage(imageUrl: context.spec.imageURL)
+                .frame(maxWidth: .infinity)
+                .frame(height: context.artStyle == .lesson ? 244 : 272)
+                .clipped()
+            LinearGradient(colors: [.clear, .black.opacity(0.76)], startPoint: .center, endPoint: .bottom)
+            proofCapsule
+                .padding(16)
+        }
+        .frame(maxWidth: .infinity)
+        .clipShape(RoundedRectangle(cornerRadius: context.artStyle == .proposal ? 18 : 28, style: .continuous))
+        .overlay(RoundedRectangle(cornerRadius: context.artStyle == .proposal ? 18 : 28, style: .continuous).strokeBorder(artAccent.opacity(0.45), lineWidth: 1))
+    }
+
+    @ViewBuilder private var documentArt: some View {
+        ZStack(alignment: .bottomLeading) {
+            LinearGradient(colors: [artAccent.opacity(0.22), SalomTheme.Colors.surfaceMuted], startPoint: .topLeading, endPoint: .bottomTrailing)
+            CachedImage(
+                imageUrl: context.spec.imageURL,
+                contentMode: context.artStyle == .presentation ? .fill : .fit
+            )
+                .frame(maxWidth: .infinity, maxHeight: .infinity)
+                .clipped()
+                .padding(context.artStyle == .presentation ? 0 : 22)
+                .shadow(color: .black.opacity(0.18), radius: 16, y: 8)
+            if context.artStyle == .secureDocument {
+                Image(systemName: "lock.shield.fill")
+                    .font(.system(size: 22, weight: .semibold))
+                    .foregroundColor(.white)
+                    .padding(12)
+                    .background(artAccent, in: Circle())
+                    .padding(16)
+                    .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topTrailing)
+            }
+            proofCapsule.padding(16)
+        }
+        .frame(maxWidth: .infinity)
+        .frame(height: context.artStyle == .invoice ? 252 : 272)
+        .clipShape(RoundedRectangle(cornerRadius: context.artStyle == .invoice ? 16 : 28, style: .continuous))
+        .overlay(RoundedRectangle(cornerRadius: context.artStyle == .invoice ? 16 : 28, style: .continuous).strokeBorder(artAccent.opacity(0.38), lineWidth: 1))
+    }
+
+    @ViewBuilder private var comparisonArt: some View {
+        GeometryReader { proxy in
+            let halfWidth = max((proxy.size.width - 1) / 2, 0)
+
+            ZStack {
+                HStack(spacing: 1) {
+                    CachedImage(imageUrl: context.spec.imageURL)
+                        .grayscale(1)
+                        .opacity(0.72)
+                        .frame(width: halfWidth, height: proxy.size.height)
+                        .clipped()
+                    CachedImage(imageUrl: context.spec.imageURL)
+                        .frame(width: halfWidth, height: proxy.size.height)
+                        .clipped()
                 }
+                Rectangle().fill(.white.opacity(0.72)).frame(width: 1, height: proxy.size.height)
+                Image(systemName: context.artStyle == .modelCompare ? "sparkles" : "arrow.right")
+                    .font(.system(size: 18, weight: .bold))
+                    .foregroundColor(.white)
+                    .frame(width: 46, height: 46)
+                    .background(.black.opacity(0.48), in: Circle())
+                    .overlay(Circle().strokeBorder(.white.opacity(0.38), lineWidth: 1))
+                proofCapsule
+                    .padding(16)
+                    .frame(width: proxy.size.width, height: proxy.size.height, alignment: .bottomLeading)
             }
         }
-        .padding(14)
-        .frame(maxWidth: .infinity, alignment: .leading)
-        .background(RoundedRectangle(cornerRadius: 16, style: .continuous).fill(Color.white.opacity(0.04)))
-        .overlay(RoundedRectangle(cornerRadius: 16, style: .continuous).strokeBorder(Color.white.opacity(0.06), lineWidth: 0.5))
+        .frame(height: 276)
+        .clipShape(RoundedRectangle(cornerRadius: 28, style: .continuous))
+        .overlay(RoundedRectangle(cornerRadius: 28, style: .continuous).strokeBorder(artAccent.opacity(0.45), lineWidth: 1))
+    }
+
+    @ViewBuilder private var galleryArt: some View {
+        GeometryReader { proxy in
+            let gap: CGFloat = 8
+            let small = (proxy.size.width - gap) * 0.36
+            HStack(spacing: gap) {
+                CachedImage(imageUrl: context.spec.imageURL)
+                    .frame(width: proxy.size.width - small - gap, height: 272)
+                    .clipped()
+                VStack(spacing: gap) {
+                    CachedImage(imageUrl: context.spec.imageURL)
+                        .frame(width: small, height: 132)
+                        .clipped()
+                    CachedImage(imageUrl: context.spec.imageURL)
+                        .scaleEffect(1.12)
+                        .frame(width: small, height: 132)
+                        .clipped()
+                }
+            }
+            .overlay(alignment: .bottomLeading) { proofCapsule.padding(16) }
+        }
+        .frame(height: 272)
+        .clipShape(RoundedRectangle(cornerRadius: 28, style: .continuous))
+        .overlay(RoundedRectangle(cornerRadius: 28, style: .continuous).strokeBorder(artAccent.opacity(0.4), lineWidth: 1))
+    }
+
+    @ViewBuilder private var progressArt: some View {
+        ZStack(alignment: .bottomLeading) {
+            CachedImage(imageUrl: context.spec.imageURL)
+                .frame(maxWidth: .infinity)
+                .frame(height: 272)
+                .clipped()
+            LinearGradient(colors: [.clear, .black.opacity(0.78)], startPoint: .center, endPoint: .bottom)
+            VStack(alignment: .leading, spacing: 10) {
+                if context.artStyle == .quota {
+                    GeometryReader { proxy in
+                        Capsule().fill(.white.opacity(0.22))
+                            .overlay(alignment: .leading) { Capsule().fill(artAccent).frame(width: proxy.size.width * 0.84) }
+                    }
+                    .frame(height: 9)
+                } else {
+                    HStack(spacing: 7) {
+                        ForEach(0..<3, id: \.self) { index in
+                            Circle().fill(index < 2 ? artAccent : .white.opacity(0.28)).frame(width: 10, height: 10)
+                            if index < 2 { Capsule().fill(.white.opacity(0.45)).frame(maxWidth: .infinity).frame(height: 2) }
+                        }
+                    }
+                }
+                proofCapsule
+            }
+            .padding(16)
+        }
+        .clipShape(RoundedRectangle(cornerRadius: 28, style: .continuous))
+        .overlay(RoundedRectangle(cornerRadius: 28, style: .continuous).strokeBorder(artAccent.opacity(0.42), lineWidth: 1))
+    }
+
+    @ViewBuilder private var voiceArt: some View {
+        ZStack {
+            LinearGradient(colors: [artAccent.opacity(0.25), SalomTheme.Colors.surfaceMuted], startPoint: .topLeading, endPoint: .bottomTrailing)
+            CachedImage(imageUrl: context.spec.imageURL)
+                .frame(width: 208, height: 208)
+                .clipShape(Circle())
+                .overlay(Circle().strokeBorder(.white.opacity(0.35), lineWidth: 1))
+                .shadow(color: artAccent.opacity(0.34), radius: 30)
+            Image(systemName: "waveform")
+                .font(.system(size: 22, weight: .bold))
+                .foregroundColor(.white)
+                .padding(13)
+                .background(.black.opacity(0.42), in: Circle())
+                .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topTrailing)
+                .padding(18)
+            proofCapsule
+                .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .bottomLeading)
+                .padding(16)
+        }
+        .frame(maxWidth: .infinity)
+        .frame(height: 272)
+        .clipShape(RoundedRectangle(cornerRadius: 36, style: .continuous))
+        .overlay(RoundedRectangle(cornerRadius: 36, style: .continuous).strokeBorder(artAccent.opacity(0.5), lineWidth: 1))
+    }
+
+    @ViewBuilder private var recoveryArt: some View {
+        ZStack(alignment: .bottomLeading) {
+            CachedImage(imageUrl: context.spec.imageURL)
+                .frame(maxWidth: .infinity)
+                .frame(height: 196)
+                .clipped()
+            LinearGradient(colors: [.clear, .black.opacity(0.8)], startPoint: .center, endPoint: .bottom)
+            HStack(spacing: 9) {
+                Image(systemName: "clock.arrow.circlepath")
+                Text(context.spec.proof)
+            }
+            .font(.system(size: 13, weight: .bold))
+            .foregroundColor(.white)
+            .padding(.horizontal, 12)
+            .padding(.vertical, 8)
+            .background(.black.opacity(0.45), in: Capsule())
+            .padding(16)
+        }
+        .clipShape(RoundedRectangle(cornerRadius: 24, style: .continuous))
+        .overlay(RoundedRectangle(cornerRadius: 24, style: .continuous).strokeBorder(artAccent.opacity(0.45), lineWidth: 1))
+    }
+
+    private var proofCapsule: some View {
+        Text(context.spec.proof)
+            .font(.system(size: 13, weight: .bold))
+            .foregroundColor(.white)
+            .padding(.horizontal, 12)
+            .padding(.vertical, 7)
+            .background(.black.opacity(0.45), in: Capsule())
+            .overlay(Capsule().strokeBorder(.white.opacity(0.22), lineWidth: 0.5))
+    }
+
+    private var proofAlignment: Alignment {
+        switch context.artStyle {
+        case .teacher, .office: .bottomTrailing
+        default: .bottomLeading
+        }
+    }
+
+    private var artAccent: Color {
+        switch context {
+        case .accountingReport, .commercialOffer, .invoiceExport, .dtmScorePlan, .teacherFirstValue:
+            Color(red: 0.08, green: 0.74, blue: 0.54)
+        case .lessonPlan, .dtmDailyLimit, .paymentRecovery:
+            Color(red: 0.98, green: 0.62, blue: 0.12)
+        case .imageReferenceEdit, .imageGenerationLimit, .smartModelUpgrade:
+            Color(red: 0.64, green: 0.35, blue: 0.96)
+        case .voiceSessionLimit, .studentFirstValue, .general:
+            SalomTheme.Colors.accentSecondary
+        default:
+            SalomTheme.Colors.accentPrimary
+        }
     }
 
     @ViewBuilder private var headerCopy: some View {
-        VStack(alignment: .leading, spacing: 8) {
-            HStack(spacing: 8) {
-                Image("app-icon-transparent")
-                    .resizable()
-                    .scaledToFit()
-                    .frame(width: 24, height: 24)
-                Text("Salom AI Pro")
-                    .font(.system(size: 22, weight: .semibold))
-                    .foregroundColor(.white)
-                    .tracking(-0.4)
-            }
-            Text("Cheklovsiz suhbat, ovoz va eng aqlli modellar.")
-                .font(.system(size: 14))
-                .foregroundColor(.white.opacity(0.5))
-                .lineSpacing(2)
-        }
+        Text(context.spec.title)
+            .font(.system(size: 28, weight: .bold))
+            .foregroundColor(SalomTheme.Colors.textPrimary)
+            .tracking(-0.7)
+            .frame(maxWidth: .infinity, alignment: .center)
+            .multilineTextAlignment(.center)
     }
 
     // MARK: - Plans
@@ -252,22 +412,22 @@ struct PaywallSheet: View {
                     }
                 } label: {
                     HStack(spacing: 5) {
-                        Text(p == .yearly ? "Yillik" : "Oylik")
+                        Text(String.appLocalized(p == .yearly ? "Yillik" : "Oylik"))
                             .font(.system(size: 13.5, weight: .semibold))
                         if p == .yearly, maxSavingsPct > 0 {
                             Text("−\(maxSavingsPct)%")
                                 .font(.system(size: 10, weight: .bold))
-                                .foregroundColor(.white)
+                                .foregroundColor(SalomTheme.Colors.onAccent)
                                 .padding(.horizontal, 5).padding(.vertical, 1)
-                                .background(Capsule().fill(Color.green))
+                                .background(Capsule().fill(SalomTheme.Colors.signal))
                         }
                     }
-                    .foregroundColor(billingPeriod == p ? .black : .white.opacity(0.6))
+                    .foregroundColor(billingPeriod == p ? SalomTheme.Colors.textPrimary : SalomTheme.Colors.textSecondary)
                     .frame(maxWidth: .infinity)
                     .padding(.vertical, 10)
                     .background(
                         RoundedRectangle(cornerRadius: 10, style: .continuous)
-                            .fill(billingPeriod == p ? Color.white : Color.clear)
+                            .fill(billingPeriod == p ? SalomTheme.Colors.surface : Color.clear)
                     )
                     .contentShape(Rectangle())   // whole segment tappable, not just the text
                 }
@@ -275,18 +435,18 @@ struct PaywallSheet: View {
             }
         }
         .padding(4)
-        .background(RoundedRectangle(cornerRadius: 13, style: .continuous).fill(Color.white.opacity(0.06)))
+        .background(RoundedRectangle(cornerRadius: 13, style: .continuous).fill(SalomTheme.Colors.surfaceMuted))
     }
 
     @ViewBuilder private var planList: some View {
         if paidPlans.isEmpty {
             ProgressView()
-                .tint(.white.opacity(0.5))
+                .tint(SalomTheme.Colors.textSecondary)
                 .frame(maxWidth: .infinity, minHeight: 200)
         } else {
             VStack(spacing: 10) {
                 ForEach(displayedPlans, id: \.code) { plan in
-                    DailyPriceRow(
+                    PlanPriceRow(
                         plan: plan,
                         selected: selectedPlanCode == plan.code,
                         isRecommended: plan.code == recommendedPlan?.code,
@@ -302,89 +462,6 @@ struct PaywallSheet: View {
         }
     }
 
-    // MARK: - Benefits
-
-    @ViewBuilder private func benefitsBlock(for plan: SubscriptionPlan) -> some View {
-        let isPro = plan.code.contains("pro")
-        VStack(alignment: .leading, spacing: 10) {
-            Text("\(plan.name) imkoniyatlari")
-                .font(.system(size: 12, weight: .semibold))
-                .foregroundColor(.white.opacity(0.4))
-                .tracking(0.6)
-                .textCase(.uppercase)
-
-            // ✓/✗ comparison — Pro gets all rows; lower tier shows premium rows as ✗.
-            VStack(alignment: .leading, spacing: 9) {
-                ForEach(planCompareFeatures) { f in
-                    let included = isPro || !f.proOnly
-                    HStack(alignment: .top, spacing: 10) {
-                        ZStack {
-                            Circle()
-                                .fill(Color.white.opacity(included ? 0.08 : 0.04))
-                                .frame(width: 18, height: 18)
-                            Image(systemName: included ? "checkmark" : "xmark")
-                                .font(.system(size: 9, weight: .bold))
-                                .foregroundColor(.white.opacity(included ? 0.85 : 0.3))
-                        }
-                        .padding(.top, 1)
-                        Text(f.label)
-                            .font(.system(size: 13.5))
-                            .foregroundColor(.white.opacity(included ? 0.78 : 0.3))
-                            .strikethrough(!included, color: .white.opacity(0.3))
-                            .lineSpacing(2)
-                    }
-                }
-            }
-        }
-        .padding(16)
-        .frame(maxWidth: .infinity, alignment: .leading)
-        .background(
-            RoundedRectangle(cornerRadius: 16, style: .continuous)
-                .fill(Color.white.opacity(0.025))
-        )
-        .overlay(
-            RoundedRectangle(cornerRadius: 16, style: .continuous)
-                .strokeBorder(Color.white.opacity(0.05), lineWidth: 0.5)
-        )
-    }
-
-    // MARK: - Trust row
-
-    @ViewBuilder private var trustRow: some View {
-        HStack(spacing: 8) {
-            trustChip(icon: "lock.fill", label: "Xavfsiz")
-            trustChip(icon: "arrow.uturn.backward", label: "Istalgan vaqt bekor")
-            trustClickChip()
-        }
-    }
-
-    private func trustChip(icon: String, label: String) -> some View {
-        HStack(spacing: 5) {
-            Image(systemName: icon)
-                .font(.system(size: 9, weight: .semibold))
-            Text(label)
-                .font(.system(size: 11, weight: .medium))
-        }
-        .foregroundColor(.white.opacity(0.5))
-        .padding(.horizontal, 10)
-        .padding(.vertical, 6)
-        .background(
-            Capsule().fill(Color.white.opacity(0.04))
-        )
-    }
-
-    private func trustClickChip() -> some View {
-        HStack(spacing: 5) {
-            Image("click-logo")
-                .resizable()
-                .scaledToFit()
-                .frame(height: 12)
-        }
-        .padding(.horizontal, 10)
-        .padding(.vertical, 6)
-        .background(Capsule().fill(Color.white.opacity(0.04)))
-    }
-
     // MARK: - CTA
 
     @ViewBuilder private var stickyCTA: some View {
@@ -392,39 +469,44 @@ struct PaywallSheet: View {
             VStack(spacing: 8) {
                 Button {
                     HapticManager.shared.fire(.mediumImpact)
-                    Analytics.shared.track("paywall_plan_clicked", ["plan": selected.code])
+                    Analytics.shared.track("paywall_plan_clicked", ["plan": selected.code, "paywall_id": context.rawValue, "source": source])
+                    Analytics.shared.track("paywall_plan_selected", ["plan": selected.code, "paywall_id": context.rawValue, "source": source])
                     path.append(PaymentStep.methodChoice(planCode: selected.code))
                 } label: {
                     HStack(spacing: 6) {
-                        Text("Boshlash")
+                        Text(context.spec.cta)
                             .font(.system(size: 16, weight: .semibold))
-                        Text("·")
+                            .lineLimit(1)
+                            .minimumScaleFactor(0.85)
+                        Spacer()
+                        Text(formatPrice(selected.priceUzs))
                             .font(.system(size: 16, weight: .semibold))
-                            .opacity(0.4)
-                        Text("\(formatPrice(Int(selected.pricePerDay.rounded()))) / kun")
-                            .font(.system(size: 16, weight: .semibold))
+                            .lineLimit(1)
+                            .minimumScaleFactor(0.85)
                     }
-                    .foregroundColor(.black)
+                    .padding(.horizontal, 18)
+                    .foregroundColor(SalomTheme.Colors.onAccent)
                     .frame(maxWidth: .infinity)
                     .frame(height: 54)
-                    .background(Color.white)
+                    .background(SalomTheme.Colors.accentSecondary)
                     .clipShape(RoundedRectangle(cornerRadius: 14, style: .continuous))
                 }
                 .buttonStyle(.plain)
 
-                Text("Obuna avtomatik yangilanadi · to'lovlar qaytarilmaydi")
+                Text(String.appLocalized("Obuna avtomatik yangilanadi · to'lovlar qaytarilmaydi"))
                     .font(.system(size: 11))
-                    .foregroundColor(.white.opacity(0.35))
+                    .foregroundColor(SalomTheme.Colors.textTertiary)
                     .multilineTextAlignment(.center)
-                Link("Foydalanish shartlari", destination: URL(string: "https://salom-ai.uz/terms-of-service")!)
+                Link(String.appLocalized("Foydalanish shartlari"), destination: URL(string: "https://salom-ai.uz/terms-of-service")!)
                     .font(.system(size: 11, weight: .medium))
-                    .foregroundColor(.white.opacity(0.5))
+                    .foregroundColor(SalomTheme.Colors.textSecondary)
             }
             .padding(.horizontal, 22)
             .padding(.bottom, 12)
+            .frame(maxWidth: .infinity)
             .background(
                 LinearGradient(
-                    colors: [Color.black.opacity(0), Color.black],
+                    colors: [SalomTheme.Colors.bgMain.opacity(0), SalomTheme.Colors.bgMain],
                     startPoint: .top, endPoint: .bottom
                 )
                 .frame(height: 130)
@@ -476,7 +558,9 @@ struct PaywallSheet: View {
 
     private var recommendedPlan: SubscriptionPlan? {
         let list = displayedPlans
-        if list.count >= 2 { return list[1] }   // the higher tier
+        if let contextual = list.first(where: { $0.code.lowercased().contains(context.spec.recommendedTier) }) {
+            return contextual
+        }
         return list.first
     }
 
@@ -500,9 +584,9 @@ struct PaywallSheet: View {
     }
 }
 
-// MARK: - Plan row with daily-price as hero
+// MARK: - Compact plan row with the full charged price
 
-private struct DailyPriceRow: View {
+private struct PlanPriceRow: View {
     let plan: SubscriptionPlan
     let selected: Bool
     let isRecommended: Bool
@@ -516,7 +600,7 @@ private struct DailyPriceRow: View {
                     // Radio
                     Circle()
                         .strokeBorder(
-                            selected ? Color.white : Color.white.opacity(0.18),
+                            selected ? SalomTheme.Colors.accentPrimary : SalomTheme.Colors.border,
                             lineWidth: selected ? 5 : 1
                         )
                         .frame(width: 18, height: 18)
@@ -525,50 +609,43 @@ private struct DailyPriceRow: View {
                     // Plan name + period
                     VStack(alignment: .leading, spacing: 3) {
                         HStack(spacing: 8) {
-                            Text(plan.name)
+                            Text(localizedPlanTier(plan))
                                 .font(.system(size: 15, weight: .semibold))
-                                .foregroundColor(.white)
+                                .foregroundColor(SalomTheme.Colors.textPrimary)
+                                .lineLimit(1)
+                                .minimumScaleFactor(0.86)
                             if isRecommended {
-                                Text("Tavsiya")
+                                Image(systemName: "star.fill")
                                     .font(.system(size: 10, weight: .semibold))
-                                    .tracking(0.3)
-                                    .foregroundColor(.black)
-                                    .padding(.horizontal, 6)
-                                    .padding(.vertical, 2)
-                                    .background(
-                                        Capsule().fill(Color.white)
-                                    )
+                                    .foregroundColor(SalomTheme.Colors.signal)
+                                    .accessibilityLabel(String.appLocalized("Tavsiya"))
                             }
                         }
                         HStack(spacing: 6) {
                             Text(periodLabel)
                                 .font(.system(size: 11.5))
-                                .foregroundColor(.white.opacity(0.4))
+                                .foregroundColor(SalomTheme.Colors.textTertiary)
                             if let s = savingsPct, s > 0 {
                                 Text("−\(s)% tejang")
                                     .font(.system(size: 10, weight: .bold))
-                                    .foregroundColor(.green)
+                                    .foregroundColor(SalomTheme.Colors.signal)
                             }
                         }
                     }
 
                     Spacer(minLength: 8)
 
-                    // BIG daily price (hero)
+                    // The actual charged amount is primary; no misleading daily framing.
                     VStack(alignment: .trailing, spacing: 1) {
-                        HStack(alignment: .firstTextBaseline, spacing: 4) {
-                            Text(formatPrice(Int(plan.pricePerDay.rounded())))
-                                .font(.system(size: 22, weight: .bold))
-                                .foregroundColor(.white)
-                                .tracking(-0.4)
-                            Text("/ kun")
-                                .font(.system(size: 12, weight: .medium))
-                                .foregroundColor(.white.opacity(0.5))
-                        }
-                        // Tiny total below — keep it small, this is intentional
-                        Text("\(formatPrice(plan.priceUzs)) / \(shortPeriodLabel)")
-                            .font(.system(size: 10.5))
-                            .foregroundColor(.white.opacity(0.32))
+                        Text(formatPrice(plan.priceUzs))
+                            .font(.system(size: 19, weight: .bold))
+                            .foregroundColor(SalomTheme.Colors.textPrimary)
+                            .tracking(-0.3)
+                            .lineLimit(1)
+                            .minimumScaleFactor(0.82)
+                        Text(shortPeriodLabel)
+                            .font(.system(size: 11))
+                            .foregroundColor(SalomTheme.Colors.textTertiary)
                     }
                 }
                 .padding(.horizontal, 16)
@@ -576,12 +653,12 @@ private struct DailyPriceRow: View {
             }
             .background(
                 RoundedRectangle(cornerRadius: 16, style: .continuous)
-                    .fill(Color.white.opacity(selected ? 0.06 : 0.025))
+                    .fill(selected ? SalomTheme.Colors.surfaceMuted : SalomTheme.Colors.surface)
             )
             .overlay(
                 RoundedRectangle(cornerRadius: 16, style: .continuous)
                     .strokeBorder(
-                        selected ? Color.white.opacity(0.9) : Color.white.opacity(0.06),
+                        selected ? SalomTheme.Colors.accentPrimary : SalomTheme.Colors.border,
                         lineWidth: selected ? 1 : 0.5
                     )
             )
@@ -592,20 +669,20 @@ private struct DailyPriceRow: View {
     private var periodLabel: String {
         let days = plan.durationDays ?? 30
         switch days {
-        case 30:  return "Oylik obuna"
-        case 90:  return "3 oylik obuna"
-        case 365: return "Yillik obuna"
-        default:  return "\(days) kun"
+        case 30:  return String.appLocalized("Oylik obuna")
+        case 90:  return String.appLocalized("3 oylik obuna")
+        case 365: return String.appLocalized("Yillik obuna")
+        default:  return String(format: String.appLocalized("%lld kun"), days)
         }
     }
 
     private var shortPeriodLabel: String {
         let days = plan.durationDays ?? 30
         switch days {
-        case 30:  return "oy"
-        case 90:  return "3 oy"
-        case 365: return "yil"
-        default:  return "\(days) kun"
+        case 30:  return String.appLocalized("oy")
+        case 90:  return String.appLocalized("3 oy")
+        case 365: return String.appLocalized("yil")
+        default:  return String(format: String.appLocalized("%lld kun"), days)
         }
     }
 }
@@ -647,6 +724,19 @@ struct SubscriptionPaymentFlow: View {
 
 // MARK: - Helpers
 
+private func localizedPlanTier(_ plan: SubscriptionPlan) -> String {
+    let code = plan.code.lowercased()
+    let tier: String
+    if code.contains("pro") {
+        tier = String.appLocalized("Pro")
+    } else if code.contains("standard") {
+        tier = String.appLocalized("Standard")
+    } else {
+        tier = plan.name
+    }
+    return tier
+}
+
 private func formatPrice(_ uzs: Int) -> String {
     let f = NumberFormatter()
     f.numberStyle = .decimal
@@ -673,36 +763,36 @@ struct WhyNotPaySurvey: View {
 
     var body: some View {
         VStack(alignment: .leading, spacing: 14) {
-            Text("Ketishdan oldin — nega to‘lamadingiz?")
+            Text(String.appLocalized("Ketishdan oldin — nega to‘lamadingiz?"))
                 .font(.system(size: 17, weight: .semibold))
-                .foregroundColor(.white)
+                .foregroundColor(SalomTheme.Colors.textPrimary)
                 .padding(.top, 20)
 
             VStack(spacing: 8) {
                 ForEach(reasons, id: \.key) { r in
                     Button { onPick(r.key) } label: {
                         HStack {
-                            Text(r.label)
+                            Text(String.appLocalized(r.label))
                                 .font(.system(size: 15, weight: .medium))
-                                .foregroundColor(.white.opacity(0.9))
+                                .foregroundColor(SalomTheme.Colors.textPrimary)
                             Spacer()
                         }
                         .padding(.horizontal, 14)
                         .padding(.vertical, 12)
-                        .background(RoundedRectangle(cornerRadius: 12, style: .continuous).fill(Color.white.opacity(0.06)))
+                        .background(RoundedRectangle(cornerRadius: 12, style: .continuous).fill(SalomTheme.Colors.surfaceMuted))
                     }
                 }
             }
 
-            Button("O‘tkazib yuborish", action: onSkip)
+            Button(String.appLocalized("O‘tkazib yuborish"), action: onSkip)
                 .font(.system(size: 13))
-                .foregroundColor(.white.opacity(0.4))
+                .foregroundColor(SalomTheme.Colors.textTertiary)
                 .frame(maxWidth: .infinity)
                 .padding(.top, 2)
         }
         .padding(.horizontal, 20)
         .padding(.bottom, 16)
         .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .top)
-        .background(Color.black.ignoresSafeArea())
+        .background(SalomTheme.Colors.bgMain.ignoresSafeArea())
     }
 }

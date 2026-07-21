@@ -27,22 +27,23 @@ struct UsageInfoView: View {
                             // Plan Card
                             VStack(alignment: .leading, spacing: 12) {
                                 HStack {
-                                    Text(data.plan.name)
+                                    Text(localizedUsagePlanName(code: data.plan.code, fallback: data.plan.name))
                                         .font(.title2)
                                         .fontWeight(.bold)
-                                        .foregroundColor(.white)
+                                        .foregroundColor(SalomTheme.Colors.textPrimary)
                                     Spacer()
-                                    Text("\(data.plan.priceUzs?.formatted() ?? "0") so'm/oy")
+                                    Text(String(format: String.appLocalized("%@ so'm/oy"), data.plan.priceUzs?.formatted() ?? "0"))
                                         .font(.subheadline)
                                         .foregroundColor(SalomTheme.Colors.accentPrimary)
                                 }
                                 
-                                Text("Yangilanadi: \(formatDate(data.resetDate ?? ""))")
+                                Text(String(format: String.appLocalized("Yangilanadi: %@"), formatDate(data.resetDate ?? "")))
                                     .font(.caption)
-                                    .foregroundColor(.white.opacity(0.6))
+                                    .foregroundColor(SalomTheme.Colors.textSecondary)
                             }
                             .padding()
-                            .background(Color.white.opacity(0.05))
+                            .background(SalomTheme.Colors.surface)
+                            .overlay(RoundedRectangle(cornerRadius: 16).stroke(SalomTheme.Colors.border))
                             .cornerRadius(16)
                             
                             // Limits
@@ -95,7 +96,8 @@ struct UsageInfoView: View {
                                 )
                             }
                             .padding()
-                            .background(Color.white.opacity(0.05))
+                            .background(SalomTheme.Colors.surface)
+                            .overlay(RoundedRectangle(cornerRadius: 16).stroke(SalomTheme.Colors.border))
                             .cornerRadius(16)
                         }
                         .padding()
@@ -119,10 +121,10 @@ struct UsageInfoView: View {
     
     @ViewBuilder func SectionHeader(title: String) -> some View {
         HStack {
-            Text(title)
+            Text(String.appLocalized(title))
                 .font(.caption)
                 .fontWeight(.medium)
-                .foregroundColor(.white.opacity(0.5))
+                .foregroundColor(SalomTheme.Colors.textTertiary)
                 .textCase(.uppercase)
             Spacer()
         }
@@ -147,19 +149,19 @@ struct UsageRow: View {
                 Image(systemName: icon)
                     .foregroundColor(SalomTheme.Colors.accentPrimary)
                     .frame(width: 20)
-                Text(title)
+                Text(String.appLocalized(title))
                     .font(.subheadline)
-                    .foregroundColor(.white)
+                    .foregroundColor(SalomTheme.Colors.textPrimary)
                 Spacer()
                 Text("\(used)/\(limit == -1 ? "∞" : "\(limit)")")
                     .font(.caption)
-                    .foregroundColor(.white.opacity(0.6))
+                    .foregroundColor(SalomTheme.Colors.textSecondary)
             }
             
             GeometryReader { geo in
                 ZStack(alignment: .leading) {
                     Capsule()
-                        .fill(Color.white.opacity(0.1))
+                        .fill(SalomTheme.Colors.surfaceMuted)
                         .frame(height: 6)
                     
                     Capsule()
@@ -175,6 +177,15 @@ struct UsageRow: View {
             }
             .frame(height: 6)
         }
+    }
+}
+
+private func localizedUsagePlanName(code: String, fallback: String) -> String {
+    switch code.lowercased() {
+    case "free", "lite": return String.appLocalized("Bepul")
+    case "standard": return String.appLocalized("Standard")
+    case "pro": return String.appLocalized("Pro")
+    default: return fallback
     }
 }
 

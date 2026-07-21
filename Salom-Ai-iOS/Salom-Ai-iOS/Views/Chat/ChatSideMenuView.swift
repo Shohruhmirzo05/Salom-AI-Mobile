@@ -97,14 +97,7 @@ struct ChatSideMenuView: View {
             
             HStack(spacing: 0) {
                 ZStack {
-                    LinearGradient(
-                        colors: [
-                            Color(hex: "#0A0B22"),
-                            Color(hex: "#090A1C")
-                        ],
-                        startPoint: .topLeading,
-                        endPoint: .bottomTrailing
-                    )
+                    SalomTheme.Gradients.background
                     .ignoresSafeArea()
                     
                     VStack(spacing: 0) {
@@ -114,7 +107,7 @@ struct ChatSideMenuView: View {
                             .padding(.bottom, 8)
                         
                         Divider()
-                            .background(Color.white.opacity(0.08))
+                            .background(SalomTheme.Colors.border)
                         
                         ScrollView(.vertical) {
                             VStack(alignment: .leading, spacing: 20) {
@@ -180,7 +173,7 @@ struct ChatSideMenuView: View {
                     .frame(width: 36, height: 36)
                 Text("Salom AI")
                     .font(.system(size: 18, weight: .bold))
-                    .foregroundColor(.white)
+                    .foregroundColor(SalomTheme.Colors.textPrimary)
 
                 Spacer()
 
@@ -191,7 +184,7 @@ struct ChatSideMenuView: View {
                 } label: {
                     Image(systemName: "bell")
                         .font(.system(size: 17, weight: .medium))
-                        .foregroundColor(.white.opacity(0.85))
+                        .foregroundColor(SalomTheme.Colors.textSecondary)
                         .frame(width: 38, height: 38)
                         .salomGlassCircle(38)
                         .overlay(alignment: .topTrailing) {
@@ -213,9 +206,9 @@ struct ChatSideMenuView: View {
                     .font(.system(size: 14, weight: .medium))
                     .foregroundColor(SalomTheme.Colors.textSecondary)
                 
-                TextField(String(localized: "Xabarlarni qidirish"), text: $viewModel.searchQuery)
+                TextField(String.appLocalized("Xabarlarni qidirish"), text: $viewModel.searchQuery)
                     .textFieldStyle(.plain)
-                    .foregroundColor(.white)
+                    .foregroundColor(SalomTheme.Colors.textPrimary)
                     .font(.system(size: 14))
             }
             .padding(.horizontal, 10)
@@ -245,29 +238,29 @@ struct ChatSideMenuView: View {
                             
                             Image(systemName: "crown.fill")
                                 .font(.system(size: 14, weight: .bold))
-                                .foregroundColor(.white)
+                                .foregroundColor(SalomTheme.Colors.onAccent)
                         }
                         
                         VStack(alignment: .leading, spacing: 2) {
                             Text("Premium ga o'tish")
                                 .font(.system(size: 15, weight: .bold))
-                                .foregroundColor(.white)
+                                .foregroundColor(SalomTheme.Colors.textPrimary)
                             Text("Cheklovsiz imkoniyatlar")
                                 .font(.caption2)
-                                .foregroundColor(.white.opacity(0.8))
+                                .foregroundColor(SalomTheme.Colors.textSecondary)
                         }
                         
                         Spacer()
                         
                         Image(systemName: "chevron.right")
                             .font(.system(size: 12, weight: .semibold))
-                            .foregroundColor(.white.opacity(0.5))
+                            .foregroundColor(SalomTheme.Colors.textTertiary)
                     }
                     .padding(.horizontal, 12)
                     .padding(.vertical, 10)
                     .background(
                         RoundedRectangle(cornerRadius: 16, style: .continuous)
-                            .fill(Color.white.opacity(0.08))
+                            .fill(SalomTheme.Colors.surfaceMuted)
                             .overlay(
                                 RoundedRectangle(cornerRadius: 16)
                                     .stroke(LinearGradient(colors: [.purple.opacity(0.5), .blue.opacity(0.5)], startPoint: .topLeading, endPoint: .bottomTrailing), lineWidth: 1)
@@ -275,7 +268,7 @@ struct ChatSideMenuView: View {
                     )
                 }
                 .fullScreenCover(isPresented: $showPaywall) {
-                    PaywallSheet()
+                    PaywallSheet(context: .general, source: "ios_side_menu")
                 }
             }
             
@@ -326,7 +319,7 @@ struct ChatSideMenuView: View {
                         Text("Yangi chat")
                             .font(.system(size: 14, weight: .semibold))
                     }
-                    .foregroundColor(.white)
+                    .foregroundColor(SalomTheme.Colors.onAccent)
                     .padding(.horizontal, 14)
                     .padding(.vertical, 9)
                     .background(
@@ -375,13 +368,13 @@ struct ChatSideMenuView: View {
                     .overlay(
                         Text(profileInitials)
                             .font(.system(size: 12, weight: .semibold))
-                            .foregroundColor(.white)
+                            .foregroundColor(SalomTheme.Colors.onAccent)
                     )
 
                 VStack(alignment: .leading, spacing: 2) {
                     Text(profileDisplayName)
                         .font(.system(size: 14, weight: .semibold))
-                        .foregroundColor(.white)
+                        .foregroundColor(SalomTheme.Colors.textPrimary)
                         .lineLimit(1)
                     Text("Sozlamalar")
                         .font(.caption2)
@@ -415,7 +408,7 @@ struct ChatSideMenuView: View {
                 if badge > 0 {
                     Text(badge > 99 ? "99+" : "\(badge)")
                         .font(.system(size: 9, weight: .bold))
-                        .foregroundColor(.white)
+                        .foregroundColor(SalomTheme.Colors.onAccent)
                         .padding(.horizontal, 4)
                         .padding(.vertical, 1)
                         .background(Capsule().fill(Color.red))
@@ -426,7 +419,7 @@ struct ChatSideMenuView: View {
             VStack(alignment: .leading, spacing: 2) {
                 Text(title)
                     .font(.system(size: 17, weight: .semibold))
-                    .foregroundColor(.white)
+                    .foregroundColor(SalomTheme.Colors.textPrimary)
                 Text(subtitle)
                     .font(.system(size: 13))
                     .foregroundColor(SalomTheme.Colors.textSecondary)
@@ -442,15 +435,15 @@ struct ChatSideMenuView: View {
                         isHighlighted
                         ? LinearGradient(
                             colors: [
-                                Color.white.opacity(0.10),
-                                Color.white.opacity(0.06)
+                                SalomTheme.Colors.surfaceMuted,
+                                SalomTheme.Colors.surface
                             ],
                             startPoint: .topLeading,
                             endPoint: .bottomTrailing
                         )
                         : LinearGradient(
                             colors: [
-                                Color.white.opacity(0.03)
+                                SalomTheme.Colors.surface
                             ],
                             startPoint: .topLeading,
                             endPoint: .bottomTrailing
@@ -459,16 +452,16 @@ struct ChatSideMenuView: View {
                     .shadow(color: Color.black.opacity(0.3), radius: 12, x: 0, y: 10)
                     .overlay(
                         RoundedRectangle(cornerRadius: 14, style: .continuous)
-                            .stroke(Color.white.opacity(0.06))
+                            .stroke(SalomTheme.Colors.border)
                     )
             )
         
         if let action {
-            row
-                .contentShape(Rectangle())
-                .onTapGesture {
-                    action()
-                }
+            Button(action: action) {
+                row
+                    .contentShape(Rectangle())
+            }
+            .buttonStyle(.plain)
         } else {
             row
         }
@@ -480,7 +473,7 @@ struct ChatSideMenuView: View {
             VStack(alignment: .leading, spacing: 4) {
                 Text(conversation.title ?? "Chat #\(conversation.id)")
                     .font(.system(size: 15, weight: .semibold))
-                    .foregroundColor(.white)
+                    .foregroundColor(SalomTheme.Colors.textPrimary)
                     .lineLimit(1)
                 if let updated = conversation.updatedAt {
                     Text(updated.formatted(date: .abbreviated, time: .shortened))
@@ -499,11 +492,11 @@ struct ChatSideMenuView: View {
             } label: {
                 Image(systemName: "trash")
                     .font(.system(size: 13, weight: .semibold))
-                    .foregroundColor(.white.opacity(0.7))
+                    .foregroundColor(SalomTheme.Colors.textSecondary)
                     .padding(6)
                     .background(
                         RoundedRectangle(cornerRadius: 8, style: .continuous)
-                            .fill(Color.white.opacity(0.06))
+                            .fill(SalomTheme.Colors.surfaceMuted)
                     )
             }
         }
@@ -513,13 +506,13 @@ struct ChatSideMenuView: View {
             RoundedRectangle(cornerRadius: 14, style: .continuous)
                 .fill(
                     isActive
-                    ? Color.white.opacity(0.06)
-                    : Color.white.opacity(0.03)
+                    ? SalomTheme.Colors.surfaceMuted
+                    : SalomTheme.Colors.surface
                 )
         )
         .overlay(
             RoundedRectangle(cornerRadius: 14, style: .continuous)
-                .stroke(Color.white.opacity(isActive ? 0.12 : 0.05))
+                .stroke(isActive ? SalomTheme.Colors.accentPrimary.opacity(0.45) : SalomTheme.Colors.border)
         )
         .shadow(color: Color.black.opacity(0.2), radius: 10, x: 0, y: 8)
         .contentShape(Rectangle())
@@ -539,7 +532,7 @@ struct ChatSideMenuView: View {
             VStack(alignment: .leading, spacing: 6) {
                 Text(hit.conversationTitle ?? "Chat #\(hit.conversationId ?? 0)")
                     .font(.system(size: 14, weight: .semibold))
-                    .foregroundColor(.white)
+                    .foregroundColor(SalomTheme.Colors.textPrimary)
                     .lineLimit(1)
                 Text(hit.text ?? "")
                     .font(.system(size: 13))
@@ -552,11 +545,11 @@ struct ChatSideMenuView: View {
         .padding(.vertical, 10)
         .background(
             RoundedRectangle(cornerRadius: 14, style: .continuous)
-                .fill(Color.white.opacity(0.03))
+                .fill(SalomTheme.Colors.surface)
         )
         .overlay(
             RoundedRectangle(cornerRadius: 14, style: .continuous)
-                .stroke(Color.white.opacity(0.05))
+                .stroke(SalomTheme.Colors.border)
         )
         .contentShape(Rectangle())
         .onTapGesture {

@@ -19,7 +19,7 @@ struct RewardOptionSheet: View {
     var body: some View {
         VStack(spacing: 20) {
             Capsule()
-                .fill(Color.white.opacity(0.2))
+                .fill(SalomTheme.Colors.textTertiary.opacity(0.5))
                 .frame(width: 40, height: 5)
                 .padding(.top, 10)
 
@@ -31,12 +31,12 @@ struct RewardOptionSheet: View {
             VStack(spacing: 6) {
                 Text("Limit tugadi")
                     .font(.headline)
-                    .foregroundColor(.white)
+                    .foregroundColor(SalomTheme.Colors.textPrimary)
                 Text(adReady
                      ? "Bitta qisqa reklama ko'rib, yana 1 ta xabar yuboring."
                      : "Cheksiz xabarlar uchun Pro rejaga o'ting.")
                     .font(.subheadline)
-                    .foregroundColor(.white.opacity(0.7))
+                    .foregroundColor(SalomTheme.Colors.textSecondary)
                     .multilineTextAlignment(.center)
             }
             .padding(.horizontal, 24)
@@ -53,7 +53,7 @@ struct RewardOptionSheet: View {
                         .frame(maxWidth: .infinity)
                         .padding(.vertical, 14)
                         .background(SalomTheme.Colors.accentPrimary)
-                        .foregroundColor(.white)
+                        .foregroundColor(SalomTheme.Colors.onAccent)
                         .clipShape(RoundedRectangle(cornerRadius: 14))
                     }
                 }
@@ -64,8 +64,12 @@ struct RewardOptionSheet: View {
                         .frame(maxWidth: .infinity)
                         .padding(.vertical, 14)
                         // Primary styling when it's the only action available.
-                        .background(adReady ? Color.white.opacity(0.08) : SalomTheme.Colors.accentPrimary)
-                        .foregroundColor(.white)
+                        .background(adReady ? SalomTheme.Colors.surfaceMuted : SalomTheme.Colors.accentPrimary)
+                        .foregroundColor(adReady ? SalomTheme.Colors.textPrimary : SalomTheme.Colors.onAccent)
+                        .overlay(
+                            RoundedRectangle(cornerRadius: 14)
+                                .stroke(adReady ? SalomTheme.Colors.border : Color.clear)
+                        )
                         .clipShape(RoundedRectangle(cornerRadius: 14))
                 }
             }

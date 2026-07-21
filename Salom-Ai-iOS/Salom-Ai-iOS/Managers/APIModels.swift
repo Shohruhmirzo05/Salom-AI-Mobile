@@ -19,6 +19,14 @@ struct TokenPair: Codable {
     let tokenType: String
 }
 
+// Telegram "login via bot code" — response of /auth/telegram/code/start.
+// (keyDecodingStrategy = .convertFromSnakeCase maps bot_url/expires_in.)
+struct TelegramCodeStartResponse: Codable {
+    let token: String
+    let botUrl: String
+    let expiresIn: Int
+}
+
 struct OAuthUser: Codable {
     let id: Int
     let email: String?

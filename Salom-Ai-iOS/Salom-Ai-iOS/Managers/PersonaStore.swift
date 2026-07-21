@@ -13,6 +13,9 @@ enum PersonaStore {
     private static let goalsKey = "persona_goals"
     private static let pendingKey = "persona_pending_sync"
 
+    static var role: String? { UserDefaults.standard.string(forKey: roleKey) }
+    static var goals: [String] { UserDefaults.standard.stringArray(forKey: goalsKey) ?? [] }
+
     /// Save answers locally (during onboarding, pre-auth) and mark for sync.
     static func saveLocal(role: String?, goals: [String]) {
         let d = UserDefaults.standard

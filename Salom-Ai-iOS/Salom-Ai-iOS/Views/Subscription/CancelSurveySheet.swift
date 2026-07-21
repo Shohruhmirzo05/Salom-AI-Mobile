@@ -39,11 +39,11 @@ struct CancelSurveySheet: View {
                     VStack(alignment: .leading, spacing: 16) {
                         Text("Nega obunani bekor qilmoqchisiz?")
                             .font(.system(size: 16, weight: .semibold))
-                            .foregroundColor(.white)
+                            .foregroundColor(SalomTheme.Colors.textPrimary)
                             .padding(.top, 4)
                         Text("Javobingiz xizmatni yaxshilashga yordam beradi.")
                             .font(.system(size: 13))
-                            .foregroundColor(.white.opacity(0.55))
+                            .foregroundColor(SalomTheme.Colors.textSecondary)
 
                         VStack(spacing: 10) {
                             ForEach(reasons, id: \.key) { r in
@@ -66,12 +66,12 @@ struct CancelSurveySheet: View {
         HStack {
             Text("Obunani bekor qilish")
                 .font(.system(size: 17, weight: .semibold))
-                .foregroundColor(.white)
+                .foregroundColor(SalomTheme.Colors.textPrimary)
             Spacer()
             Button { dismiss() } label: {
                 Image(systemName: "xmark")
                     .font(.system(size: 13, weight: .semibold))
-                    .foregroundColor(.white.opacity(0.6))
+                    .foregroundColor(SalomTheme.Colors.textSecondary)
                     .salomGlassCircle(34)
             }
             .disabled(working)
@@ -89,10 +89,10 @@ struct CancelSurveySheet: View {
             HStack(spacing: 12) {
                 Image(systemName: selected == key ? "largecircle.fill.circle" : "circle")
                     .font(.system(size: 18))
-                    .foregroundColor(selected == key ? SalomTheme.Colors.accentPrimary : .white.opacity(0.3))
-                Text(label)
+                    .foregroundColor(selected == key ? SalomTheme.Colors.accentPrimary : SalomTheme.Colors.textTertiary)
+                Text(String.appLocalized(label))
                     .font(.system(size: 15, weight: .medium))
-                    .foregroundColor(.white)
+                    .foregroundColor(SalomTheme.Colors.textPrimary)
                 Spacer()
             }
             .padding(.horizontal, 14)
@@ -109,10 +109,10 @@ struct CancelSurveySheet: View {
             } label: {
                 HStack(spacing: 8) {
                     if working { ProgressView().tint(.white).scaleEffect(0.85) }
-                    Text(working ? "Bekor qilinmoqda…" : "Bekor qilishni tasdiqlash")
+                    Text(String.appLocalized(working ? "Bekor qilinmoqda…" : "Bekor qilishni tasdiqlash"))
                         .font(.system(size: 16, weight: .semibold))
                 }
-                .foregroundColor(.white)
+                .foregroundColor(SalomTheme.Colors.onAccent)
                 .frame(maxWidth: .infinity)
                 .frame(height: 52)
                 .background(
@@ -129,7 +129,7 @@ struct CancelSurveySheet: View {
             } label: {
                 Text("Obunamni saqlab qolaman")
                     .font(.system(size: 14, weight: .medium))
-                    .foregroundColor(.white.opacity(0.6))
+                    .foregroundColor(SalomTheme.Colors.textSecondary)
             }
             .disabled(working)
         }

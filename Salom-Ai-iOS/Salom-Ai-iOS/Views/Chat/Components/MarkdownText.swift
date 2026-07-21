@@ -109,24 +109,24 @@ struct MarkdownText: View {
         case .heading(let level, let content):
             Text(MarkdownParser.inline(content))
                 .font(.system(size: level == 1 ? 19 : level == 2 ? 17 : 15.5, weight: .bold))
-                .foregroundColor(.white)
+                .foregroundColor(SalomTheme.Colors.textPrimary)
                 .padding(.top, 2)
                 .fixedSize(horizontal: false, vertical: true)
         case .paragraph(let content):
             Text(MarkdownParser.inline(content))
                 .font(.system(size: 15))
-                .foregroundColor(.white.opacity(0.92))
+                .foregroundColor(SalomTheme.Colors.textPrimary)
                 .fixedSize(horizontal: false, vertical: true)
         case .bullet(let content):
             HStack(alignment: .top, spacing: 8) {
                 Text("•").foregroundColor(SalomTheme.Colors.accentPrimary).font(.system(size: 15, weight: .bold))
-                Text(MarkdownParser.inline(content)).font(.system(size: 15)).foregroundColor(.white.opacity(0.92))
+                Text(MarkdownParser.inline(content)).font(.system(size: 15)).foregroundColor(SalomTheme.Colors.textPrimary)
                     .fixedSize(horizontal: false, vertical: true)
             }
         case .numbered(let num, let content):
             HStack(alignment: .top, spacing: 8) {
                 Text("\(num).").foregroundColor(SalomTheme.Colors.accentPrimary).font(.system(size: 15, weight: .semibold)).monospacedDigit()
-                Text(MarkdownParser.inline(content)).font(.system(size: 15)).foregroundColor(.white.opacity(0.92))
+                Text(MarkdownParser.inline(content)).font(.system(size: 15)).foregroundColor(SalomTheme.Colors.textPrimary)
                     .fixedSize(horizontal: false, vertical: true)
             }
         case .code(let code, let lang):
@@ -134,11 +134,11 @@ struct MarkdownText: View {
         case .quote(let content):
             HStack(alignment: .top, spacing: 8) {
                 RoundedRectangle(cornerRadius: 2).fill(SalomTheme.Colors.accentPrimary.opacity(0.5)).frame(width: 3)
-                Text(MarkdownParser.inline(content)).font(.system(size: 15)).italic().foregroundColor(.white.opacity(0.7))
+                Text(MarkdownParser.inline(content)).font(.system(size: 15)).italic().foregroundColor(SalomTheme.Colors.textSecondary)
                     .fixedSize(horizontal: false, vertical: true)
             }
         case .divider:
-            Rectangle().fill(Color.white.opacity(0.1)).frame(height: 1).padding(.vertical, 2)
+            Rectangle().fill(SalomTheme.Colors.separator).frame(height: 1).padding(.vertical, 2)
         }
     }
 }
@@ -151,7 +151,7 @@ struct CodeBlockView: View {
     var body: some View {
         VStack(alignment: .leading, spacing: 0) {
             HStack {
-                Text(language ?? "code").font(.system(size: 11, design: .monospaced)).foregroundColor(.white.opacity(0.4))
+                Text(language ?? "code").font(.system(size: 11, design: .monospaced)).foregroundColor(SalomTheme.Colors.textSecondary)
                 Spacer()
                 Button {
                     UIPasteboard.general.string = code
@@ -162,21 +162,21 @@ struct CodeBlockView: View {
                         Image(systemName: copied ? "checkmark" : "doc.on.doc").font(.system(size: 11))
                         Text(copied ? "Nusxalandi" : "Nusxa").font(.system(size: 11))
                     }
-                    .foregroundColor(copied ? .green : .white.opacity(0.5))
+                    .foregroundColor(copied ? SalomTheme.Colors.success : SalomTheme.Colors.textSecondary)
                 }
             }
             .padding(.horizontal, 12).padding(.vertical, 8)
-            .background(Color.white.opacity(0.05))
+            .background(SalomTheme.Colors.codeHeader)
 
             ScrollView(.horizontal, showsIndicators: false) {
                 Text(code)
                     .font(.system(size: 13, design: .monospaced))
-                    .foregroundColor(.white.opacity(0.9))
+                    .foregroundColor(SalomTheme.Colors.codeText)
                     .padding(12)
             }
         }
-        .background(Color.black.opacity(0.35))
+        .background(SalomTheme.Colors.codeBackground)
         .clipShape(RoundedRectangle(cornerRadius: 12, style: .continuous))
-        .overlay(RoundedRectangle(cornerRadius: 12).stroke(Color.white.opacity(0.08)))
+        .overlay(RoundedRectangle(cornerRadius: 12).stroke(SalomTheme.Colors.border))
     }
 }

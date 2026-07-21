@@ -47,7 +47,7 @@ struct ReferatEditorView: View {
         }
         .task { await loadAndPoll() }
         .sheet(item: $shareItem) { item in ShareSheet(items: [item.url]) }
-        .fullScreenCover(isPresented: $showPaywall) { PaywallSheet() }
+        .fullScreenCover(isPresented: $showPaywall) { PaywallSheet(context: .referatExport, source: "ios_referat_editor") }
     }
 
     // MARK: editor
@@ -59,18 +59,18 @@ struct ReferatEditorView: View {
                 VStack(alignment: .leading, spacing: 18) {
                     Text(doc?.title ?? referat?.title ?? "—")
                         .font(.system(size: 22, weight: .bold))
-                        .foregroundColor(.white)
+                        .foregroundColor(SalomTheme.Colors.textPrimary)
                         .fixedSize(horizontal: false, vertical: true)
 
                     ForEach(doc?.sections ?? [], id: \.stableId) { section in
                         VStack(alignment: .leading, spacing: 8) {
                             Text(section.heading)
                                 .font(.system(size: 17, weight: .semibold))
-                                .foregroundColor(.white)
+                                .foregroundColor(SalomTheme.Colors.textPrimary)
                             ForEach(Array(section.paragraphs.enumerated()), id: \.offset) { _, p in
                                 Text(p)
                                     .font(.system(size: 15))
-                                    .foregroundColor(.white.opacity(0.82))
+                                    .foregroundColor(SalomTheme.Colors.textPrimary)
                                     .fixedSize(horizontal: false, vertical: true)
                                     .lineSpacing(3)
                             }
@@ -81,11 +81,11 @@ struct ReferatEditorView: View {
                         VStack(alignment: .leading, spacing: 8) {
                             Text(L.references)
                                 .font(.system(size: 17, weight: .semibold))
-                                .foregroundColor(.white)
+                                .foregroundColor(SalomTheme.Colors.textPrimary)
                             ForEach(Array(refs.enumerated()), id: \.offset) { i, r in
                                 Text("\(i + 1). \(r)")
                                     .font(.system(size: 13))
-                                    .foregroundColor(.white.opacity(0.6))
+                                    .foregroundColor(SalomTheme.Colors.textSecondary)
                                     .fixedSize(horizontal: false, vertical: true)
                             }
                         }
@@ -105,13 +105,13 @@ struct ReferatEditorView: View {
     private var header: some View {
         HStack(spacing: 10) {
             Button { dismiss() } label: {
-                Image(systemName: "chevron.left").font(.system(size: 16, weight: .semibold)).foregroundColor(.white)
-                    .padding(8).background(Circle().fill(Color.white.opacity(0.08)))
+                Image(systemName: "chevron.left").font(.system(size: 16, weight: .semibold)).foregroundColor(SalomTheme.Colors.textPrimary)
+                    .padding(8).background(Circle().fill(SalomTheme.Colors.surfaceMuted))
             }
             VStack(alignment: .leading, spacing: 1) {
-                Text(referat?.title ?? "—").font(.system(size: 15, weight: .semibold)).foregroundColor(.white).lineLimit(1)
+                Text(referat?.title ?? "—").font(.system(size: 15, weight: .semibold)).foregroundColor(SalomTheme.Colors.textPrimary).lineLimit(1)
                 Text("\(referat?.wordCount ?? 0) \(L.words)\(referat?.mode == "preview" ? " · \(L.previewBadge)" : "")")
-                    .font(.caption2).foregroundColor(.white.opacity(0.45))
+                    .font(.caption2).foregroundColor(SalomTheme.Colors.textTertiary)
             }
             Spacer()
 
@@ -120,28 +120,28 @@ struct ReferatEditorView: View {
                 Button { Task { await runExport("pdf") } } label: { Label("PDF (.pdf)", systemImage: "doc.richtext") }
             } label: {
                 HStack(spacing: 6) {
-                    if exporting { ProgressView().tint(.white).scaleEffect(0.7) } else { Image(systemName: "square.and.arrow.up") }
+                    if exporting { ProgressView().tint(SalomTheme.Colors.onMedia).scaleEffect(0.7) } else { Image(systemName: "square.and.arrow.up") }
                     Text(exporting ? L.exporting : L.download).font(.system(size: 13, weight: .semibold))
                 }
                 .padding(.horizontal, 12).padding(.vertical, 8)
                 .background(Capsule().fill(LinearGradient(colors: [.cyan, .purple], startPoint: .leading, endPoint: .trailing)))
-                .foregroundColor(.white)
+                .foregroundColor(SalomTheme.Colors.onMedia)
             }
             .disabled(exporting)
         }
         .padding(.horizontal, 14).padding(.vertical, 10)
-        .background(Color.white.opacity(0.03))
+        .background(SalomTheme.Colors.surfaceMuted.opacity(0.72))
     }
 
     private var lockedCard: some View {
         VStack(alignment: .leading, spacing: 10) {
-            Text(L.lockedTitle).font(.system(size: 16, weight: .bold)).foregroundColor(.white)
-            Text(L.lockedDesc).font(.subheadline).foregroundColor(.white.opacity(0.65))
+            Text(L.lockedTitle).font(.system(size: 16, weight: .bold)).foregroundColor(SalomTheme.Colors.textPrimary)
+            Text(L.lockedDesc).font(.subheadline).foregroundColor(SalomTheme.Colors.textSecondary)
             Button { showPaywall = true } label: {
                 Label(L.upgrade, systemImage: "crown.fill").fontWeight(.semibold)
                     .padding(.horizontal, 20).padding(.vertical, 12)
                     .background(LinearGradient(colors: [.orange, .pink], startPoint: .leading, endPoint: .trailing))
-                    .foregroundColor(.white).clipShape(Capsule())
+                    .foregroundColor(SalomTheme.Colors.onMedia).clipShape(Capsule())
             }
         }
         .padding(16)
@@ -157,36 +157,37 @@ struct ReferatEditorView: View {
                 HStack(spacing: 8) {
                     Image(systemName: "sparkles").foregroundColor(.cyan)
                     TextField(L.chatPlaceholder, text: $instruction, axis: .vertical)
-                        .lineLimit(1...3).foregroundColor(.white).font(.system(size: 14))
+                        .lineLimit(1...3).foregroundColor(SalomTheme.Colors.textPrimary).font(.system(size: 14))
                 }
                 .padding(.horizontal, 12).padding(.vertical, 10)
-                .background(RoundedRectangle(cornerRadius: 18).fill(Color.white.opacity(0.06)))
+                .background(RoundedRectangle(cornerRadius: 18).fill(SalomTheme.Colors.controlFill))
+                .overlay(RoundedRectangle(cornerRadius: 18).stroke(SalomTheme.Colors.border))
 
                 Button { Task { await sendEdit() } } label: {
-                    if editing { ProgressView().tint(.white).scaleEffect(0.8) } else { Image(systemName: "arrow.up") }
+                    if editing { ProgressView().tint(SalomTheme.Colors.onMedia).scaleEffect(0.8) } else { Image(systemName: "arrow.up") }
                 }
                 .frame(width: 44, height: 44)
                 .background(Circle().fill(LinearGradient(colors: [.cyan, .purple], startPoint: .top, endPoint: .bottom)))
-                .foregroundColor(.white)
+                .foregroundColor(SalomTheme.Colors.onMedia)
                 .disabled(editing || instruction.trimmingCharacters(in: .whitespaces).isEmpty)
                 .opacity(editing || instruction.trimmingCharacters(in: .whitespaces).isEmpty ? 0.5 : 1)
             }
-            if editing { Text(L.applying).font(.caption2).foregroundColor(.white.opacity(0.4)).frame(maxWidth: .infinity, alignment: .leading).padding(.horizontal, 4) }
+            if editing { Text(L.applying).font(.caption2).foregroundColor(SalomTheme.Colors.textTertiary).frame(maxWidth: .infinity, alignment: .leading).padding(.horizontal, 4) }
         }
         .padding(.horizontal, 12).padding(.top, 8).padding(.bottom, 10)
-        .background(Color.white.opacity(0.03))
+        .background(SalomTheme.Colors.surfaceMuted.opacity(0.72))
     }
 
     private var buildingState: some View {
         VStack(spacing: 18) {
-            Button { dismiss() } label: { Image(systemName: "chevron.left").foregroundColor(.white) }.frame(maxWidth: .infinity, alignment: .leading).padding()
+            Button { dismiss() } label: { Image(systemName: "chevron.left").foregroundColor(SalomTheme.Colors.textPrimary) }.frame(maxWidth: .infinity, alignment: .leading).padding()
             Spacer()
             ZStack {
                 RoundedRectangle(cornerRadius: 26).fill(LinearGradient(colors: [Color(hex: "#2563EB"), Color(hex: "#4F46E5")], startPoint: .topLeading, endPoint: .bottomTrailing)).frame(width: 90, height: 90)
-                Image(systemName: "text.book.closed.fill").font(.system(size: 32)).foregroundColor(.white)
+                Image(systemName: "text.book.closed.fill").font(.system(size: 32)).foregroundColor(SalomTheme.Colors.onMedia)
             }
-            ProgressView().tint(.white)
-            Text(L.building).font(.subheadline).foregroundColor(.white.opacity(0.6)).multilineTextAlignment(.center).padding(.horizontal, 40)
+            ProgressView().tint(SalomTheme.Colors.accentPrimary)
+            Text(L.building).font(.subheadline).foregroundColor(SalomTheme.Colors.textSecondary).multilineTextAlignment(.center).padding(.horizontal, 40)
             Spacer()
         }
     }
@@ -194,7 +195,7 @@ struct ReferatEditorView: View {
     private var failedState: some View {
         VStack(spacing: 16) {
             Image(systemName: "exclamationmark.triangle").font(.system(size: 34)).foregroundColor(.red)
-            Text(referat?.error ?? L.failed).foregroundColor(.white.opacity(0.7)).multilineTextAlignment(.center).padding(.horizontal, 30)
+            Text(referat?.error ?? L.failed).foregroundColor(SalomTheme.Colors.textSecondary).multilineTextAlignment(.center).padding(.horizontal, 30)
             Button(L.back) { dismiss() }.foregroundColor(.cyan)
         }
     }

@@ -5,19 +5,114 @@
 
     },
     "-%lld%% CHEGIRMA" : {
-
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "-%lld%% OFF"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "СКИДКА -%lld%%"
+          }
+        },
+        "uz-Cyrl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "-%lld%% CҲЕГИРМА"
+          }
+        }
+      }
     },
     "— %@" : {
-
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "— %@"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "— %@"
+          }
+        },
+        "uz-Cyrl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "— %@"
+          }
+        }
+      }
     },
     "·" : {
-
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "·"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "·"
+          }
+        },
+        "uz-Cyrl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "·"
+          }
+        }
+      }
     },
     "“" : {
-
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "“"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "«"
+          }
+        },
+        "uz-Cyrl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "“"
+          }
+        }
+      }
     },
     "*" : {
-
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "*"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "*"
+          }
+        },
+        "uz-Cyrl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "*"
+          }
+        }
+      }
     },
     "/ kun" : {
       "localizations" : {
@@ -64,50 +159,186 @@
         }
       }
     },
+    "%@  →" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@  →"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@  →"
+          }
+        },
+        "uz-Cyrl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@  →"
+          }
+        }
+      }
+    },
     "%@ · %@" : {
       "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@ · %@"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@ · %@"
+          }
+        },
         "uz" : {
           "stringUnit" : {
             "state" : "new",
             "value" : "%1$@ · %2$@"
+          }
+        },
+        "uz-Cyrl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@ · %@"
           }
         }
       }
     },
     "%@ / %@" : {
       "localizations" : {
-        "uz" : {
-          "stringUnit" : {
-            "state" : "new",
-            "value" : "%1$@ / %2$@"
-          }
-        }
-      }
-    },
-    "%@ / kun" : {
-
-    },
-    "%@ imkoniyatlari" : {
-
-    },
-    "%@ kartasini o'chirmoqchimisiz? Avtomatik yangilanish o'chiriladi." : {
-
-    },
-    "%@ so'm" : {
-
-    },
-    "%@ so'm/oy" : {
-      "localizations" : {
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "%@ UZS/mo"
+            "value" : "%@ / %@"
           }
         },
         "ru" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "%@ сум/мес"
+            "value" : "%@ / %@"
+          }
+        },
+        "uz" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "%1$@ / %2$@"
+          }
+        },
+        "uz-Cyrl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@ / %@"
+          }
+        }
+      }
+    },
+    "%@ / kun" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@ / day"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@ / день"
+          }
+        },
+        "uz-Cyrl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@ / кун"
+          }
+        }
+      }
+    },
+    "%@ imkoniyatlari" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@ features"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Возможности %@"
+          }
+        },
+        "uz-Cyrl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@ имкониятлари"
+          }
+        }
+      }
+    },
+    "%@ kartasini o'chirmoqchimisiz? Avtomatik yangilanish o'chiriladi." : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Delete the %@ card? Auto-renewal will be turned off."
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Удалить карту %@? Автопродление будет отключено."
+          }
+        },
+        "uz-Cyrl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@ картасини ўчирмоқчимисиз? Автоматик янгиланиш ўчирилади."
+          }
+        }
+      }
+    },
+    "%@ so'm" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@ UZS"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@ сум"
+          }
+        },
+        "uz-Cyrl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@ сўм"
+          }
+        }
+      }
+    },
+    "%@ so'm/oy" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@ UZS/month"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@ UZS/месяц"
           }
         },
         "uz-Cyrl" : {
@@ -143,62 +374,288 @@
     },
     "%@ UZS / %@" : {
       "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@ UZS / %@"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@ сум / %@"
+          }
+        },
         "uz" : {
           "stringUnit" : {
             "state" : "new",
             "value" : "%1$@ UZS / %2$@"
+          }
+        },
+        "uz-Cyrl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@ УЗС / %@"
+          }
+        }
+      }
+    },
+    "%@: %lld qoldi. Pro rejaga o'ting." : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@: %lld remaining. Upgrade to Pro."
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@: осталось %lld. Перейдите на Pro."
+          }
+        },
+        "uz-Cyrl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@: %lld қолди. Pro режага ўтинг."
           }
         }
       }
     },
     "%@: %lld/%lld" : {
       "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@: %lld/%lld"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@: %lld/%lld"
+          }
+        },
         "uz" : {
           "stringUnit" : {
             "state" : "new",
             "value" : "%1$@: %2$lld/%3$lld"
           }
+        },
+        "uz-Cyrl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@: %lld/%lld"
+          }
+        }
+      }
+    },
+    "%@: limit tugadi. Pro rejaga o'tib davom eting." : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@: limit reached. Upgrade to Pro to continue."
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@: лимит исчерпан. Перейдите на Pro, чтобы продолжить."
+          }
+        },
+        "uz-Cyrl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@: лимит тугади. Pro режага ўтиб давом этинг."
+          }
         }
       }
     },
     "%lld" : {
-
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%lld"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%lld"
+          }
+        },
+        "uz-Cyrl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%lld"
+          }
+        }
+      }
     },
     "%lld / %lld" : {
       "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%lld / %lld"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%lld / %lld"
+          }
+        },
         "uz" : {
           "stringUnit" : {
             "state" : "new",
             "value" : "%1$lld / %2$lld"
+          }
+        },
+        "uz-Cyrl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%lld / %lld"
           }
         }
       }
     },
     "%lld / %lld · %@" : {
       "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%lld / %lld · %@"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%lld / %lld · %@"
+          }
+        },
         "uz" : {
           "stringUnit" : {
             "state" : "new",
             "value" : "%1$lld / %2$lld · %3$@"
+          }
+        },
+        "uz-Cyrl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%lld / %lld · %@"
           }
         }
       }
     },
     "%lld %@" : {
       "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%lld %@"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%lld %@"
+          }
+        },
         "uz" : {
           "stringUnit" : {
             "state" : "new",
             "value" : "%1$lld %2$@"
           }
+        },
+        "uz-Cyrl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%lld %@"
+          }
+        }
+      }
+    },
+    "%lld %@%@" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%lld %@%@"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%lld %@%@"
+          }
+        },
+        "uz" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "%1$lld %2$@%3$@"
+          }
+        },
+        "uz-Cyrl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%lld %@%@"
+          }
+        }
+      }
+    },
+    "%lld kun" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%lld days"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%lld дней"
+          }
+        },
+        "uz-Cyrl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%lld кун"
+          }
         }
       }
     },
     "%lld ta o'qilmagan" : {
-
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%lld unread"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%lld непрочитанных"
+          }
+        },
+        "uz-Cyrl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%lld та ўқилмаган"
+          }
+        }
+      }
     },
     "%lld xabar" : {
       "comment" : "Status subtitle showing the number of messages in the current conversation.",
+      "extractionState" : "stale",
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -215,20 +672,57 @@
         "uz-Cyrl" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "%ллд хабар"
+            "value" : "%lld хабар"
           }
         }
       }
     },
     "%lld." : {
-
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%lld."
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%lld."
+          }
+        },
+        "uz-Cyrl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%lld."
+          }
+        }
+      }
     },
     "%lld. %@" : {
       "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%lld. %@"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%lld. %@"
+          }
+        },
         "uz" : {
           "stringUnit" : {
             "state" : "new",
             "value" : "%1$lld. %2$@"
+          }
+        },
+        "uz-Cyrl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%lld. %@"
           }
         }
       }
@@ -262,43 +756,472 @@
       }
     },
     "%lld%%" : {
-
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%lld%%"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%lld%%"
+          }
+        },
+        "uz-Cyrl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%lld%%"
+          }
+        }
+      }
     },
     "•" : {
-
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "•"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "•"
+          }
+        },
+        "uz-Cyrl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "•"
+          }
+        }
+      }
+    },
+    "• • • • • •" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "• • • • • •"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "• • • • • •"
+          }
+        },
+        "uz-Cyrl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "• • • • • •"
+          }
+        }
+      }
     },
     "+1 xabar qo'shildi" : {
-
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "+1 message added"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "+1 сообщение добавлено"
+          }
+        },
+        "uz-Cyrl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "+1 хабар қўшилди"
+          }
+        }
+      }
+    },
+    "+998 90 123 45 67" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "+998 90 123 45 67"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "+998 90 123 45 67"
+          }
+        },
+        "uz-Cyrl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "+998 90 123 45 67"
+          }
+        }
+      }
     },
     "−%lld%%" : {
-
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "−%lld%%"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "−%lld%%"
+          }
+        },
+        "uz-Cyrl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "−%lld%%"
+          }
+        }
+      }
     },
     "−%lld%% tejang" : {
-
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Save −%lld%%"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Экономия −%lld%%"
+          }
+        },
+        "uz-Cyrl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "−%lld%% тежанг"
+          }
+        }
+      }
     },
     "🇬🇧" : {
-
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "🇬🇧"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "🇬🇧"
+          }
+        },
+        "uz-Cyrl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "🇬🇧"
+          }
+        }
+      }
     },
     "🇬🇧 English" : {
-
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "🇬🇧 English"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "🇬🇧 English"
+          }
+        },
+        "uz-Cyrl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "🇬🇧 English"
+          }
+        }
+      }
     },
     "🇷🇺" : {
-
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "🇷🇺"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "🇷🇺"
+          }
+        },
+        "uz-Cyrl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "🇷🇺"
+          }
+        }
+      }
     },
     "🇷🇺 Русский" : {
-
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "🇷🇺 Русский"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "🇷🇺 Русский"
+          }
+        },
+        "uz-Cyrl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "🇷🇺 Русский"
+          }
+        }
+      }
     },
     "🇺🇿" : {
-
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "🇺🇿"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "🇺🇿"
+          }
+        },
+        "uz-Cyrl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "🇺🇿"
+          }
+        }
+      }
     },
     "🇺🇿 Oʻzbekcha" : {
-
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "🇺🇿 O‘zbek"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "🇺🇿 O‘zbekcha"
+          }
+        },
+        "uz-Cyrl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "🇺🇿 Оʻзбекча"
+          }
+        }
+      }
     },
     "🇺🇿 Кириллча" : {
-
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "🇺🇿 Кириллча"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "🇺🇿 Кириллча"
+          }
+        },
+        "uz-Cyrl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "🇺🇿 Кириллча"
+          }
+        }
+      }
+    },
+    "🎨 Rasm yaratish va ovozli rejim" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "🎨 Image generation and voice mode"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "🎨 Генерация изображений и голосовой режим"
+          }
+        },
+        "uz-Cyrl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "🎨 Расм яратиш ва овозли режим"
+          }
+        }
+      }
+    },
+    "👑 Hamma imkoniyat — cheklovsiz" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "👑 Every feature — unlimited"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "👑 Все возможности — без ограничений"
+          }
+        },
+        "uz-Cyrl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "👑 Ҳамма имконият — чекловсиз"
+          }
+        }
+      }
+    },
+    "📊 Taqdimot, referat va DTM" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "📊 Presentations, reports and DTM"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "📊 Презентации, рефераты и DTM"
+          }
+        },
+        "uz-Cyrl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "📊 Тақдимот, реферат ва DTM"
+          }
+        }
+      }
+    },
+    "🧠 Eng kuchli AI — Super Aqlli" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "🧠 Most capable AI — Super Smart"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "🧠 Самый мощный AI — Super Aqlli"
+          }
+        },
+        "uz-Cyrl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "🧠 Энг кучли AI — Супер Ақлли"
+          }
+        }
+      }
+    },
+    "🚀 Yuqori limitlar — ko‘proq rasm va ovoz" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "🚀 Higher limits — more images and voice"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "🚀 Высокие лимиты — больше изображений и голоса"
+          }
+        },
+        "uz-Cyrl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "🚀 Юқори лимитлар — кўпроқ расм ва овоз"
+          }
+        }
+      }
     },
     "000000" : {
-
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "000000"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "000000"
+          }
+        },
+        "uz-Cyrl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "000000"
+          }
+        }
+      }
+    },
+    "3 oy" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "3 months"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "3 мес."
+          }
+        },
+        "uz-Cyrl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "3 ой"
+          }
+        }
+      }
     },
     "3 oylik" : {
       "extractionState" : "stale",
@@ -370,10 +1293,48 @@
       }
     },
     "99+" : {
-
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "99+"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "99+"
+          }
+        },
+        "uz-Cyrl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "99+"
+          }
+        }
+      }
     },
     "8600 1234 5678 9012" : {
-
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "8600 1234 5678 9012"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "8600 1234 5678 9012"
+          }
+        },
+        "uz-Cyrl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "8600 1234 5678 9012"
+          }
+        }
+      }
     },
     "Agar ilovadan foydalanish sizga yoqsa, iltimos, uni baholash uchun bir oz vaqt ajrating. Bu bizga uni yaxshilashga yordam beradi!" : {
       "extractionState" : "manual",
@@ -399,13 +1360,115 @@
       }
     },
     "Agar to'lagan bo'lsangiz, biroz vaqt olishi mumkin" : {
-
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "If you have paid, confirmation may take a moment"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Если вы оплатили, подтверждение может занять некоторое время"
+          }
+        },
+        "uz-Cyrl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Агар тўлаган бўлсангиз, бироз вақт олиши мумкин"
+          }
+        }
+      }
     },
     "AI presentatsiya yaratish" : {
-
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Create an AI presentation"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Создать AI-презентацию"
+          }
+        },
+        "uz-Cyrl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "АИ пресентатсия яратиш"
+          }
+        }
+      }
+    },
+    "AI presentatsiyalar — PPTX va PDF" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "AI presentations — PPTX and PDF"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "AI-презентации — PPTX и PDF"
+          }
+        },
+        "uz-Cyrl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "AI тақдимотлар — PPTX ва PDF"
+          }
+        }
+      }
+    },
+    "AI referat va insho" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "AI report and essay"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "AI-реферат и эссе"
+          }
+        },
+        "uz-Cyrl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "АИ реферат ва иншо"
+          }
+        }
+      }
     },
     "AMAL QILISH MUDDATI" : {
-
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "EXPIRY DATE"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "СРОК ДЕЙСТВИЯ"
+          }
+        },
+        "uz-Cyrl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "АМАЛ ҚИЛИСҲ МУДДАТИ"
+          }
+        }
+      }
     },
     "Amal qilish muddati: %@" : {
       "localizations" : {
@@ -429,8 +1492,255 @@
         }
       }
     },
+    "Apple credential olinmadi." : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Could not get Apple credentials."
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Не удалось получить данные Apple."
+          }
+        },
+        "uz-Cyrl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Apple маълумотлари олинмади."
+          }
+        }
+      }
+    },
+    "Apple orqali kirish" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Continue with Apple"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Войти через Apple"
+          }
+        },
+        "uz-Cyrl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Apple орқали кириш"
+          }
+        }
+      }
+    },
+    "Apple token decode qilishda xatolik." : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Could not decode the Apple token."
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Не удалось расшифровать токен Apple."
+          }
+        },
+        "uz-Cyrl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Apple токенни декодлашда хатолик."
+          }
+        }
+      }
+    },
+    "Apple token olinmadi." : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Could not get the Apple token."
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Не удалось получить токен Apple."
+          }
+        },
+        "uz-Cyrl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Apple токен олинмади."
+          }
+        }
+      }
+    },
+    "Aqlli" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Smart"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Умный"
+          }
+        },
+        "uz-Cyrl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ақлли"
+          }
+        }
+      }
+    },
+    "Aqlli chat" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Smart chat"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Умный чат"
+          }
+        },
+        "uz-Cyrl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ақлли чат"
+          }
+        }
+      }
+    },
+    "Aqlli Modellar" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Smart models"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Умные модели"
+          }
+        },
+        "uz-Cyrl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ақлли моделлар"
+          }
+        }
+      }
+    },
     "Aqlli suhbatdosh" : {
-
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Smart assistant"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Умный собеседник"
+          }
+        },
+        "uz-Cyrl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ақлли суҳбатдош"
+          }
+        }
+      }
+    },
+    "Aqlli xabarlar" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Smart messages"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Умные сообщения"
+          }
+        },
+        "uz-Cyrl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ақлли хабарлар"
+          }
+        }
+      }
+    },
+    "Avto" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Auto"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Авто"
+          }
+        },
+        "uz-Cyrl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Авто"
+          }
+        }
+      }
+    },
+    "Avto qurilmangiz sozlamasiga moslashadi" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Auto follows your device settings"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Авто следует настройкам устройства"
+          }
+        },
+        "uz-Cyrl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Авто қурилмангиз созламасига мослашади"
+          }
+        }
+      }
     },
     "Avtomatik" : {
       "extractionState" : "stale",
@@ -456,16 +1766,93 @@
       }
     },
     "Avtomatik yangilanish" : {
-
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Auto-renew"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Автопродление"
+          }
+        },
+        "uz-Cyrl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Автоматик янгиланиш"
+          }
+        }
+      }
     },
     "Barcha ma'lumotlar shifrlangan" : {
-
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "All data is encrypted"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Все данные зашифрованы"
+          }
+        },
+        "uz-Cyrl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Барча ма'лумотлар шифрланган"
+          }
+        }
+      }
     },
-    "Batafsil" : {
-
+    "Barcha vositalar — bir joyda" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "All tools in one place"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Все инструменты в одном месте"
+          }
+        },
+        "uz-Cyrl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Барча воситалар — бир жойда"
+          }
+        }
+      }
     },
     "Bekor qilinmoqda…" : {
-
+      "extractionState" : "stale",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Cancelling…"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Отмена…"
+          }
+        },
+        "uz-Cyrl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Бекор қилинмоқда…"
+          }
+        }
+      }
     },
     "Bekor qilish" : {
       "comment" : "Cancel button in delete account confirmation dialog.",
@@ -491,7 +1878,27 @@
       }
     },
     "Bekor qilishni tasdiqlash" : {
-
+      "extractionState" : "stale",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Confirm cancellation"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Подтвердить отмену"
+          }
+        },
+        "uz-Cyrl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Бекор қилишни тасдиқлаш"
+          }
+        }
+      }
     },
     "Bepul" : {
       "localizations" : {
@@ -516,7 +1923,27 @@
       }
     },
     "Bepul tarif" : {
-
+      "extractionState" : "stale",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Free plan"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Бесплатный тариф"
+          }
+        },
+        "uz-Cyrl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Бепул тариф"
+          }
+        }
+      }
     },
     "Beta" : {
       "localizations" : {
@@ -541,7 +1968,26 @@
       }
     },
     "Bilasizmi?" : {
-
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Did you know?"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Знаете ли вы?"
+          }
+        },
+        "uz-Cyrl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Биласизми?"
+          }
+        }
+      }
     },
     "Bildirishnomalar" : {
       "localizations" : {
@@ -566,7 +2012,26 @@
       }
     },
     "Bildirishnomalar yo'q" : {
-
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "No notifications"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Нет уведомлений"
+          }
+        },
+        "uz-Cyrl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Билдиришномалар йўқ"
+          }
+        }
+      }
     },
     "Bir martalik" : {
       "extractionState" : "stale",
@@ -615,10 +2080,48 @@
       }
     },
     "Bir necha so'z bilan istalgan rasm — afisha, dizayn, illyustratsiya — yarating. Bir necha soniyada tayyor." : {
-
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Create any image—poster, design or illustration—from a few words. Ready in seconds."
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Создайте любое изображение — афишу, дизайн или иллюстрацию — по нескольким словам. Готово за секунды."
+          }
+        },
+        "uz-Cyrl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Бир неча сўз билан исталган расм — афиша, дизайн, иллюстратсия — яратинг. Бир неча сонияда тайёр."
+          }
+        }
+      }
     },
     "Bitta qisqa reklama ko'rib, yana 1 ta xabar yuboring." : {
-
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Watch one short ad to send 1 more message."
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Посмотрите короткую рекламу и отправьте ещё 1 сообщение."
+          }
+        },
+        "uz-Cyrl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Битта қисқа реклама кўриб, яна 1 та хабар юборинг."
+          }
+        }
+      }
     },
     "Boshlash" : {
       "localizations" : {
@@ -643,7 +2146,72 @@
       }
     },
     "Boshlashga tayyormiz" : {
-
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ready to get started"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Готовы начать"
+          }
+        },
+        "uz-Cyrl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Бошлашга тайёрмиз"
+          }
+        }
+      }
+    },
+    "Boshqa" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Other"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Другое"
+          }
+        },
+        "uz-Cyrl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Бошқа"
+          }
+        }
+      }
+    },
+    "Boshqa sabab" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Other reason"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Другая причина"
+          }
+        },
+        "uz-Cyrl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Бошқа сабаб"
+          }
+        }
+      }
     },
     "Bosib turing" : {
       "localizations" : {
@@ -667,11 +2235,186 @@
         }
       }
     },
-    "Bu shunchaki chat emas — o‘quv va ish yordamchisi 👇" : {
-
+    "Botdan olgan kodni kiriting." : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Enter the code from the bot."
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Введите код из бота."
+          }
+        },
+        "uz-Cyrl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ботдан олган кодни киритинг."
+          }
+        }
+      }
+    },
+    "Botni ochish" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Open bot"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Открыть бота"
+          }
+        },
+        "uz-Cyrl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ботни очиш"
+          }
+        }
+      }
+    },
+    "Bright, upbeat" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Bright, upbeat"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Яркий, бодрый"
+          }
+        },
+        "uz-Cyrl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ёрқин, кўтаринки"
+          }
+        }
+      }
+    },
+    "Bu shunchaki chat emas — o‘quv va ish yordamchisi" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "More than a chat — your study and work assistant"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Больше, чем чат — помощник в учёбе и работе"
+          }
+        },
+        "uz-Cyrl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Бу шунчаки чат емас — ўқув ва иш ёрдамчиси"
+          }
+        }
+      }
+    },
+    "Calm, thoughtful" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Calm, thoughtful"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Спокойный, вдумчивый"
+          }
+        },
+        "uz-Cyrl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Хотиржам, мулоҳазали"
+          }
+        }
+      }
     },
     "Chat" : {
-
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Chat"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Чат"
+          }
+        },
+        "uz-Cyrl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Чат"
+          }
+        }
+      }
+    },
+    "Chatda “rasm chiz …” deb yozing — Salom AI rasm yaratadi." : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Write “draw an image …” in chat — Salom AI will create it."
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Напишите в чате «нарисуй …» — Salom AI создаст изображение."
+          }
+        },
+        "uz-Cyrl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Чатда «расм чиз …» деб ёзинг — Salom AI расм яратади."
+          }
+        }
+      }
+    },
+    "Chatda so‘rang — tayyor hujjat" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ask in chat — get a ready document"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Спросите в чате — получите готовый документ"
+          }
+        },
+        "uz-Cyrl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Чатда сўранг — тайёр ҳужжат"
+          }
+        }
+      }
     },
     "ChatGPT-like suhbat" : {
       "extractionState" : "stale",
@@ -697,7 +2440,26 @@
       }
     },
     "Chegirmani olish" : {
-
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Get discount"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Получить скидку"
+          }
+        },
+        "uz-Cyrl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Чегирмани олиш"
+          }
+        }
+      }
     },
     "Cheklovsiz imkoniyatlar" : {
       "localizations" : {
@@ -836,7 +2598,26 @@
       }
     },
     "Cheksiz xabarlar uchun Pro rejaga o'ting." : {
-
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Upgrade to Pro for unlimited messages."
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Перейдите на Pro для безлимитных сообщений."
+          }
+        },
+        "uz-Cyrl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Чексиз хабарлар учун Про режага ўтинг."
+          }
+        }
+      }
     },
     "Chiqish" : {
       "comment" : "A button label that translates to \"Logout\" in English.",
@@ -858,6 +2639,43 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Чиқиш"
+          }
+        }
+      }
+    },
+    "click" : {
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "click" } },
+        "ru" : { "stringUnit" : { "state" : "translated", "value" : "нажмите" } },
+        "uz-Cyrl" : { "stringUnit" : { "state" : "translated", "value" : "босинг" } }
+      }
+    },
+    "Click" : {
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Click" } },
+        "ru" : { "stringUnit" : { "state" : "translated", "value" : "Click" } },
+        "uz-Cyrl" : { "stringUnit" : { "state" : "translated", "value" : "Click" } }
+      }
+    },
+    "Click (bir martalik)" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Click (one-time)"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Click (разовый платёж)"
+          }
+        },
+        "uz-Cyrl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Click (бир марталик)"
           }
         }
       }
@@ -1003,7 +2821,26 @@
       }
     },
     "Davom etish" : {
-
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Continue"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Продолжить"
+          }
+        },
+        "uz-Cyrl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Давом этиш"
+          }
+        }
+      }
     },
     "Disclaimer" : {
       "extractionState" : "stale",
@@ -1051,10 +2888,117 @@
       }
     },
     "DTM" : {
-
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "DTM"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "DTM"
+          }
+        },
+        "uz-Cyrl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "DTM"
+          }
+        }
+      }
+    },
+    "DTM tayyorgarlik" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "DTM preparation"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Подготовка к DTM"
+          }
+        },
+        "uz-Cyrl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "DTM тайёргарлик"
+          }
+        }
+      }
     },
     "DTM testlar" : {
-
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "DTM tests"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Тесты DTM"
+          }
+        },
+        "uz-Cyrl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ДТМ тестлар"
+          }
+        }
+      }
+    },
+    "DTM’ga tayyorlaning — fanlar bo‘yicha testlar menyuda." : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Prepare for DTM — subject tests are in the menu."
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Готовьтесь к DTM — тесты по предметам доступны в меню."
+          }
+        },
+        "uz-Cyrl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "DTM’га тайёрланинг — фанлар бўйича тестлар менюда."
+          }
+        }
+      }
+    },
+    "Energetic, expressive" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Energetic, expressive"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Энергичный, выразительный"
+          }
+        },
+        "uz-Cyrl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ғайратли, ифодали"
+          }
+        }
+      }
     },
     "Eng aqlli javoblar" : {
       "extractionState" : "stale",
@@ -1080,7 +3024,26 @@
       }
     },
     "English" : {
-
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "English"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "English"
+          }
+        },
+        "uz-Cyrl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "English"
+          }
+        }
+      }
     },
     "Eshitmoqdaman..." : {
       "comment" : "Listening",
@@ -1106,7 +3069,72 @@
       }
     },
     "Excel" : {
-
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Excel"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Excel"
+          }
+        },
+        "uz-Cyrl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Excel"
+          }
+        }
+      }
+    },
+    "Excel jadval" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Excel spreadsheet"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Таблица Excel"
+          }
+        },
+        "uz-Cyrl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Excel жадвал"
+          }
+        }
+      }
+    },
+    "Fanlar bo‘yicha testlar va tahlil" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Subject tests and analysis"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Тесты по предметам и анализ"
+          }
+        },
+        "uz-Cyrl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Фанлар бўйича тестлар ва таҳлил"
+          }
+        }
+      }
     },
     "Faol" : {
       "localizations" : {
@@ -1131,10 +3159,49 @@
       }
     },
     "Faol obuna" : {
-
+      "extractionState" : "stale",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Active subscription"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Активная подписка"
+          }
+        },
+        "uz-Cyrl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Фаол обуна"
+          }
+        }
+      }
     },
     "Fayl tahlili" : {
-
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "File analysis"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Анализ файлов"
+          }
+        },
+        "uz-Cyrl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Файл таҳлили"
+          }
+        }
+      }
     },
     "Fayl yuklash" : {
       "localizations" : {
@@ -1158,8 +3225,50 @@
         }
       }
     },
+    "Fayl yuklashda xatolik: " : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "File upload failed: "
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ошибка загрузки файла: "
+          }
+        },
+        "uz-Cyrl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Файл юклашда хатолик: "
+          }
+        }
+      }
+    },
     "Faylni saqlang yoki ulashing" : {
-
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Save or share the file"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Сохраните файл или поделитесь им"
+          }
+        },
+        "uz-Cyrl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Файлни сақланг ёки улашинг"
+          }
+        }
+      }
     },
     "Fikr-mulohaza yuborish" : {
       "localizations" : {
@@ -1183,11 +3292,142 @@
         }
       }
     },
+    "Fikr-mulohazangiz uchun rahmat!" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Thanks for your feedback!"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Спасибо за отзыв!"
+          }
+        },
+        "uz-Cyrl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Фикр-мулоҳазангиз учун раҳмат!"
+          }
+        }
+      }
+    },
     "Foydalanish shartlari" : {
-
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Terms of use"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Условия использования"
+          }
+        },
+        "uz-Cyrl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Фойдаланиш шартлари"
+          }
+        }
+      }
     },
     "Foydalanuvchi" : {
-
+      "extractionState" : "stale",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "User"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Пользователь"
+          }
+        },
+        "uz-Cyrl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Фойдаланувчи"
+          }
+        }
+      }
+    },
+    "Galereyaga saqlandi ✅" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Saved to Photos ✅"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Сохранено в Фото ✅"
+          }
+        },
+        "uz-Cyrl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Галереяга сақланди ✅"
+          }
+        }
+      }
+    },
+    "Galereyaga saqlash uchun ruxsat kerak." : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Photo Library access is required to save."
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Для сохранения нужен доступ к медиатеке."
+          }
+        },
+        "uz-Cyrl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Галереяга сақлаш учун рухсат керак."
+          }
+        }
+      }
+    },
+    "Gapiring — javobni eshiting" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Speak — hear the answer"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Говорите — слушайте ответ"
+          }
+        },
+        "uz-Cyrl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Гапиринг — жавобни эшитинг"
+          }
+        }
+      }
     },
     "Gapiring..." : {
       "localizations" : {
@@ -1234,17 +3474,116 @@
         }
       }
     },
-    "Google orqali kirish" : {
-
+    "Google ID token olinmadi." : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Could not get the Google ID token."
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Не удалось получить токен Google ID."
+          }
+        },
+        "uz-Cyrl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Google ID токен олинмади."
+          }
+        }
+      }
     },
-    "Google yoki Apple orqali tezda kiring." : {
-
+    "Google orqali kirish" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Sign in with Google"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Войти через Google"
+          }
+        },
+        "uz-Cyrl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Гоогле орқали кириш"
+          }
+        }
+      }
+    },
+    "Google, Apple yoki Telegram orqali tezda kiring." : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Sign in quickly with Google, Apple or Telegram."
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Быстро войдите через Google, Apple или Telegram."
+          }
+        },
+        "uz-Cyrl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Гоогле, Аппле ёки Телеграм орқали тезда киринг."
+          }
+        }
+      }
     },
     "Hamma narsa tayyor. Salom AI bilan birinchi suhbatingizni boshlang — yangi imkoniyatlar olamiga xush kelibsiz." : {
-
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Everything is ready. Start your first conversation with Salom AI—welcome to a world of new possibilities."
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Всё готово. Начните первый разговор с Salom AI — добро пожаловать в мир новых возможностей."
+          }
+        },
+        "uz-Cyrl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ҳамма нарса тайёр. Салом АИ билан биринчи суҳбатингизни бошланг — янги имкониятлар оламига хуш келибсиз."
+          }
+        }
+      }
     },
     "Hammasini o'qish" : {
-
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Mark all as read"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Прочитать все"
+          }
+        },
+        "uz-Cyrl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ҳаммасини ўқиш"
+          }
+        }
+      }
     },
     "Hech narsa topilmadi" : {
       "comment" : "A message displayed when a search query returns no results.",
@@ -1317,6 +3656,7 @@
     },
     "Hisobni o'chirish" : {
       "comment" : "Delete account button and alert title.",
+      "extractionState" : "stale",
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -1339,7 +3679,27 @@
       }
     },
     "Hisobni o'chirishda xatolik yuz berdi: " : {
-
+      "extractionState" : "stale",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Failed to delete account: "
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Не удалось удалить аккаунт: "
+          }
+        },
+        "uz-Cyrl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ҳисобни ўчиришда хатолик юз берди: "
+          }
+        }
+      }
     },
     "Hozir emas" : {
       "extractionState" : "manual",
@@ -1389,10 +3749,48 @@
       }
     },
     "Hujjat" : {
-
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Document"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Документ"
+          }
+        },
+        "uz-Cyrl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ҳужжат"
+          }
+        }
+      }
     },
     "Hujjat va rasmlarni tahlil qilish" : {
-
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Analyze documents and images"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Анализ документов и изображений"
+          }
+        },
+        "uz-Cyrl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ҳужжат ва расмларни таҳлил қилиш"
+          }
+        }
+      }
     },
     "Hujjatlar" : {
       "localizations" : {
@@ -1412,6 +3810,29 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Ҳужжатлар"
+          }
+        }
+      }
+    },
+    "Hujjatni yaratib boʻlmadi" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Could not create the document"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Не удалось создать документ"
+          }
+        },
+        "uz-Cyrl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ҳужжатни яратиб бўлмади"
           }
         }
       }
@@ -1463,11 +3884,117 @@
         }
       }
     },
+    "Ilovalar" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Apps"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Приложения"
+          }
+        },
+        "uz-Cyrl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Иловалар"
+          }
+        }
+      }
+    },
+    "Ilovani qayta ishga tushiring (controller topilmadi)." : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Restart the app (controller not found)."
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Перезапустите приложение (контроллер не найден)."
+          }
+        },
+        "uz-Cyrl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Иловани қайта ишга туширинг (контроллер топилмади)."
+          }
+        }
+      }
+    },
     "Iltimos, biroz kuting" : {
-
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Please wait a moment"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Пожалуйста, подождите"
+          }
+        },
+        "uz-Cyrl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Илтимос, бироз кутинг"
+          }
+        }
+      }
+    },
+    "Iltimos, qaytadan boshlang." : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Please start again."
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Пожалуйста, начните заново."
+          }
+        },
+        "uz-Cyrl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Илтимос, қайтадан бошланг."
+          }
+        }
+      }
     },
     "Iltimos, qaytadan urinib ko'ring" : {
-
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Please try again"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Пожалуйста, попробуйте снова"
+          }
+        },
+        "uz-Cyrl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Илтимос, қайтадан уриниб кўринг"
+          }
+        }
+      }
     },
     "Imtiyozlar mavjud emas" : {
       "extractionState" : "stale",
@@ -1523,11 +4050,72 @@
         }
       }
     },
+    "Internet aloqasi bilan muammo. Qayta urinib ko'ring." : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "There is a problem with the internet connection. Try again."
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Проблема с подключением к интернету. Попробуйте снова."
+          }
+        },
+        "uz-Cyrl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Интернет алоқаси билан муаммо. Қайта уриниб кўринг."
+          }
+        }
+      }
+    },
     "Internetdan qidirilmoqda…" : {
-
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Searching the web…"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Поиск в интернете…"
+          }
+        },
+        "uz-Cyrl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Интернетдан қидирилмоқда…"
+          }
+        }
+      }
     },
     "Ish — hujjatlar" : {
-
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Work — documents"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Работа — документы"
+          }
+        },
+        "uz-Cyrl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Иш — ҳужжатлар"
+          }
+        }
+      }
     },
     "Istalgan vaqt bekor" : {
       "extractionState" : "stale",
@@ -1598,10 +4186,48 @@
       }
     },
     "Javobingiz xizmatni yaxshilashga yordam beradi." : {
-
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Your answer helps us improve the service."
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ваш ответ поможет улучшить сервис."
+          }
+        },
+        "uz-Cyrl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Жавобингиз хизматни яхшилашга ёрдам беради."
+          }
+        }
+      }
     },
     "Jonli qo'llab-quvvatlash — bir tap" : {
-
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Live support — one tap"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Поддержка в Telegram — в одно касание"
+          }
+        },
+        "uz-Cyrl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Жонли қўллаб-қувватлаш — бир тап"
+          }
+        }
+      }
     },
     "Jonli suhbatlar" : {
       "extractionState" : "stale",
@@ -1648,6 +4274,29 @@
         }
       }
     },
+    "Karta (avto-yangilanish)" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Card (auto-renewal)"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Карта (автопродление)"
+          }
+        },
+        "uz-Cyrl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Карта (авто-янгиланиш)"
+          }
+        }
+      }
+    },
     "Karta Click tomonidan xavfsiz tokenlashtiriladi. Istalgan vaqt o'chirib yuborishingiz mumkin." : {
       "extractionState" : "stale",
       "localizations" : {
@@ -1672,10 +4321,48 @@
       }
     },
     "Karta ma'lumotlari" : {
-
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Card details"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Данные карты"
+          }
+        },
+        "uz-Cyrl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Карта маълумотлари"
+          }
+        }
+      }
     },
     "KARTA RAQAMI" : {
-
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "CARD NUMBER"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "НОМЕР КАРТЫ"
+          }
+        },
+        "uz-Cyrl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "КАРТА РАҚАМИ"
+          }
+        }
+      }
     },
     "Karta saqlamasdan faqat bir marta to'lamoqchi bo'lsangiz — shu variant." : {
       "extractionState" : "stale",
@@ -1746,14 +4433,117 @@
         }
       }
     },
+    "Kartam/balansim yo‘q" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "I don’t have a card/balance"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Нет карты или средств"
+          }
+        },
+        "uz-Cyrl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Картам/балансим йўқ"
+          }
+        }
+      }
+    },
+    "Kartam/balansim yo‘q edi" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "I didn't have a card or balance"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Не было карты или средств"
+          }
+        },
+        "uz-Cyrl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Картам/балансим йўқ эди"
+          }
+        }
+      }
+    },
     "Kartani o'chirish" : {
-
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Delete card"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Удалить карту"
+          }
+        },
+        "uz-Cyrl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Картани ўчириш"
+          }
+        }
+      }
     },
     "Kartani o'zgartirish" : {
-
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Change card"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Сменить карту"
+          }
+        },
+        "uz-Cyrl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Картани ўзгартириш"
+          }
+        }
+      }
     },
     "Kasbiy hujjatlarni tayyorlang" : {
-
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Prepare professional documents"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Создавайте профессиональные документы"
+          }
+        },
+        "uz-Cyrl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Касбий ҳужжатларни тайёрланг"
+          }
+        }
+      }
     },
     "Keling, kirib olamiz" : {
       "comment" : "A welcome message in the login screen.",
@@ -1780,7 +4570,49 @@
       }
     },
     "Ketishdan oldin — nega to‘lamadingiz?" : {
-
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Before you go — why didn’t you subscribe?"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Прежде чем уйти — почему вы не оформили подписку?"
+          }
+        },
+        "uz-Cyrl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Кетишдан олдин — нега тўламадингиз?"
+          }
+        }
+      }
+    },
+    "Keyingi" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Next"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Далее"
+          }
+        },
+        "uz-Cyrl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Кейинги"
+          }
+        }
+      }
     },
     "Keyingi avlod modellari" : {
       "extractionState" : "stale",
@@ -1824,6 +4656,52 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Кейинроқ"
+          }
+        }
+      }
+    },
+    "Keyinroq qilaman" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "I’ll do it later"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Оформлю позже"
+          }
+        },
+        "uz-Cyrl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Кейинроқ қиламан"
+          }
+        }
+      }
+    },
+    "Keyinroq qilmoqchiman" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "I'll do it later"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Сделаю позже"
+          }
+        },
+        "uz-Cyrl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Кейинроқ қилмоқчиман"
           }
         }
       }
@@ -1877,21 +4755,191 @@
         }
       }
     },
+    "Kirish talab qilinadi" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Sign in required"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Требуется вход"
+          }
+        },
+        "uz-Cyrl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Кириш талаб қилинади"
+          }
+        }
+      }
+    },
+    "Kirish xatosi: " : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Sign-in error: "
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ошибка входа: "
+          }
+        },
+        "uz-Cyrl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Кириш хатоси: "
+          }
+        }
+      }
+    },
+    "Ko‘rinish" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Appearance"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Оформление"
+          }
+        },
+        "uz-Cyrl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Кўриниш"
+          }
+        }
+      }
+    },
     "Kod %@ raqamiga yuborildi" : {
-
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Code sent to %@"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Код отправлен на %@"
+          }
+        },
+        "uz-Cyrl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Код %@ рақамига юборилди"
+          }
+        }
+      }
     },
     "Kod amal qilish muddati: %lld:%@" : {
       "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Code expires in: %lld:%@"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Код действует: %lld:%@"
+          }
+        },
         "uz" : {
           "stringUnit" : {
             "state" : "new",
             "value" : "Kod amal qilish muddati: %1$lld:%2$@"
           }
+        },
+        "uz-Cyrl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Код амал қилиш муддати: %lld:%@"
+          }
         }
       }
     },
     "Kod muddati tugadi" : {
-
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Code expired"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Срок действия кода истёк"
+          }
+        },
+        "uz-Cyrl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Код муддати тугади"
+          }
+        }
+      }
+    },
+    "Kod noto‘g‘ri yoki muddati tugagan. Qayta urinib ko‘ring." : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "The code is invalid or expired. Try again."
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Код неверен или истёк. Попробуйте снова."
+          }
+        },
+        "uz-Cyrl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Код нотўғри ёки муддати тугаган. Қайта уриниб кўринг."
+          }
+        }
+      }
+    },
+    "Kuchliroq modellar va yuqori limitlar" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Smarter models and higher limits"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Более мощные модели и высокие лимиты"
+          }
+        },
+        "uz-Cyrl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Кучлироқ моделлар ва юқори лимитлар"
+          }
+        }
+      }
     },
     "Kuting..." : {
       "localizations" : {
@@ -1939,16 +4987,116 @@
       }
     },
     "Limit tugadi" : {
-
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Limit reached"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Лимит исчерпан"
+          }
+        },
+        "uz-Cyrl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Лимит тугади"
+          }
+        }
+      }
     },
     "Ma'lumot yo'q" : {
-
+      "extractionState" : "stale",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "No information"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Нет данных"
+          }
+        },
+        "uz-Cyrl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ма'лумот йўқ"
+          }
+        }
+      }
     },
     "Matematika, dasturlash, kunlik reja, sayohat marshruti — eng kerakli vazifalarni yo'lda hal qiling." : {
-
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Solve everyday tasks on the go—from math and coding to daily plans and travel routes."
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Решайте повседневные задачи на ходу: математика, программирование, планы и маршруты."
+          }
+        },
+        "uz-Cyrl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Математика, дастурлаш, кунлик режа, саёҳат маршрути — енг керакли вазифаларни йўлда ҳал қилинг."
+          }
+        }
+      }
+    },
+    "Matndan chiroyli rasm" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Beautiful images from text"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Красивые изображения из текста"
+          }
+        },
+        "uz-Cyrl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Матндан чиройли расм"
+          }
+        }
+      }
     },
     "Matnga aylantirilmoqda…" : {
-
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Transcribing…"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Распознавание…"
+          }
+        },
+        "uz-Cyrl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Матнга айлантирилмоқда…"
+          }
+        }
+      }
     },
     "Maxfiy" : {
       "extractionState" : "stale",
@@ -1974,16 +5122,115 @@
       }
     },
     "Maxsus narx faqat siz uchun, cheklangan vaqtda." : {
-
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "A special price just for you, for a limited time."
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Специальная цена только для вас — на ограниченное время."
+          }
+        },
+        "uz-Cyrl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Махсус нарх фақат сиз учун, чекланган вақтда."
+          }
+        }
+      }
+    },
+    "Mikrofon ruxsati berilmagan" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Microphone access is not allowed"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Нет доступа к микрофону"
+          }
+        },
+        "uz-Cyrl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Микрофон рухсати берилмаган"
+          }
+        }
+      }
     },
     "Mikrofonni bosing va gapiring. Salom AI sizni eshitadi, tushunadi va o'z ovozi bilan javob beradi." : {
-
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Tap the microphone and speak. Salom AI listens, understands and replies with its own voice."
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Нажмите на микрофон и говорите. Salom AI услышит, поймёт и ответит голосом."
+          }
+        },
+        "uz-Cyrl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Микрофонни босинг ва гапиринг. Салом АИ сизни ешитади, тушунади ва ўз овози билан жавоб беради."
+          }
+        }
+      }
     },
     "MM/YY" : {
-
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "MM/YY"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "MM/YY"
+          }
+        },
+        "uz-Cyrl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "MM/YY"
+          }
+        }
+      }
     },
     "Moslashuvchan test tayyorgarlik" : {
-
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Adaptive test preparation"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Адаптивная подготовка к тестам"
+          }
+        },
+        "uz-Cyrl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Мослашувчан тест тайёргарлик"
+          }
+        }
+      }
     },
     "Murosasiz muloqot" : {
       "extractionState" : "stale",
@@ -2009,7 +5256,26 @@
       }
     },
     "Muvaffaqiyatli!" : {
-
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Success!"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Успешно!"
+          }
+        },
+        "uz-Cyrl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Муваффақиятли!"
+          }
+        }
+      }
     },
     "Namuna eshitish (Preview)" : {
       "extractionState" : "stale",
@@ -2058,10 +5324,71 @@
       }
     },
     "Nega obunani bekor qilmoqchisiz?" : {
-
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Why do you want to cancel?"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Почему вы хотите отменить подписку?"
+          }
+        },
+        "uz-Cyrl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Нега обунани бекор қилмоқчисиз?"
+          }
+        }
+      }
+    },
+    "Neutral, balanced" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Neutral, balanced"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Нейтральный, сбалансированный"
+          }
+        },
+        "uz-Cyrl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Нейтрал, мувозанатли"
+          }
+        }
+      }
     },
     "Nimalar qila olaman?" : {
-
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "What can I do?"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Что я умею?"
+          }
+        },
+        "uz-Cyrl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Нималар қила оламан?"
+          }
+        }
+      }
     },
     "No notifications yet" : {
       "extractionState" : "stale",
@@ -2092,11 +5419,72 @@
         }
       }
     },
+    "Noto'g'ri kod formati" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Invalid code format"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Неверный формат кода"
+          }
+        },
+        "uz-Cyrl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Нотўғри код формати"
+          }
+        }
+      }
+    },
     "Nusxa" : {
-
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Copy"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Копировать"
+          }
+        },
+        "uz-Cyrl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Нусха"
+          }
+        }
+      }
     },
     "Nusxalandi" : {
-
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Copied"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Скопировано"
+          }
+        },
+        "uz-Cyrl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Нусхаланди"
+          }
+        }
+      }
     },
     "Nusxalash" : {
       "localizations" : {
@@ -2122,6 +5510,7 @@
     },
     "O'chirilmoqda..." : {
       "comment" : "Loading state text while account is being deleted.",
+      "extractionState" : "stale",
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -2215,7 +5604,26 @@
       }
     },
     "O‘tkazib yuborish" : {
-
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Skip"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Пропустить"
+          }
+        },
+        "uz-Cyrl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ўтказиб юбориш"
+          }
+        }
+      }
     },
     "O'ylayapman..." : {
       "comment" : "Thinking",
@@ -2288,7 +5696,26 @@
       }
     },
     "O'zbekcha" : {
-
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "O‘zbek"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "O‘zbekcha"
+          }
+        },
+        "uz-Cyrl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "O'zbekcha"
+          }
+        }
+      }
     },
     "O'zbekcha AI yordamchi" : {
       "comment" : "A subtitle for the \"Salom AI\" section in the side menu.",
@@ -2316,6 +5743,7 @@
     },
     "O'zbekcha suniy intellekt" : {
       "comment" : "Status subtitle shown when there are no messages yet.",
+      "extractionState" : "stale",
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -2383,13 +5811,70 @@
       }
     },
     "Obuna avtomatik yangilanadi · to'lovlar qaytarilmaydi" : {
-
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Subscription renews automatically · payments are non-refundable"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Подписка продлевается автоматически · платежи не возвращаются"
+          }
+        },
+        "uz-Cyrl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Обуна автоматик янгиланади · тўловлар қайтарилмайди"
+          }
+        }
+      }
     },
     "Obuna faollashtirildi va karta saqlandi" : {
-
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Subscription activated and card saved"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Подписка активирована, карта сохранена"
+          }
+        },
+        "uz-Cyrl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Обуна фаоллаштирилди ва карта сақланди"
+          }
+        }
+      }
     },
     "Obuna faollashtirildi!" : {
-
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Subscription activated!"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Подписка активирована!"
+          }
+        },
+        "uz-Cyrl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Обуна фаоллаштирилди!"
+          }
+        }
+      }
     },
     "Obuna ma'lumotlari" : {
       "localizations" : {
@@ -2436,16 +5921,115 @@
       }
     },
     "Obunamni saqlab qolaman" : {
-
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Keep my subscription"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Сохранить подписку"
+          }
+        },
+        "uz-Cyrl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Обунамни сақлаб қоламан"
+          }
+        }
+      }
     },
     "Obunangiz %@ da tugaydi" : {
-
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Your subscription ends on %@"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ваша подписка закончится %@"
+          }
+        },
+        "uz-Cyrl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Обунангиз %@ да тугайди"
+          }
+        }
+      }
+    },
+    "Obunangiz vaqtincha to'xtatildi. Kartangizni to'ldiring va qayta urinib ko'ring." : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Your subscription is paused. Top up your card and try again."
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Подписка приостановлена. Пополните карту и попробуйте снова."
+          }
+        },
+        "uz-Cyrl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Обунангиз вақтинча тўхтатилди. Картангизни тўлдиринг ва қайта уриниб кўринг."
+          }
+        }
+      }
     },
     "Obunani bekor qilish" : {
-
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Cancel subscription"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Отменить подписку"
+          }
+        },
+        "uz-Cyrl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Обунани бекор қилиш"
+          }
+        }
+      }
     },
     "Ochish" : {
-
+      "extractionState" : "stale",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Open"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Открыть"
+          }
+        },
+        "uz-Cyrl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Очиш"
+          }
+        }
+      }
     },
     "Ohang (Tone)" : {
       "extractionState" : "stale",
@@ -2553,6 +6137,13 @@
         }
       }
     },
+    "Ovoz" : {
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Voice" } },
+        "ru" : { "stringUnit" : { "state" : "translated", "value" : "Голос" } },
+        "uz-Cyrl" : { "stringUnit" : { "state" : "translated", "value" : "Овоз" } }
+      }
+    },
     "Ovoz (Voice)" : {
       "extractionState" : "stale",
       "localizations" : {
@@ -2577,7 +6168,96 @@
       }
     },
     "Ovoz / Voice" : {
-
+      "extractionState" : "stale",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Voice"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Голос"
+          }
+        },
+        "uz-Cyrl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Овоз / Воиcе"
+          }
+        }
+      }
+    },
+    "Ovoz aniqlanmadi, qayta urinib ko‘ring" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "No speech detected. Try again."
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Речь не распознана. Попробуйте снова."
+          }
+        },
+        "uz-Cyrl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Овоз аниқланмади, қайта уриниб кўринг"
+          }
+        }
+      }
+    },
+    "Ovoz namunasida xatolik: " : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Voice preview error: "
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ошибка предпрослушивания голоса: "
+          }
+        },
+        "uz-Cyrl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Овоз намунасида хатолик: "
+          }
+        }
+      }
+    },
+    "Ovoz namunasini yuklab bo‘lmadi (HTTP %lld)" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Voice preview failed (HTTP %lld)"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Не удалось загрузить образец голоса (HTTP %lld)"
+          }
+        },
+        "uz-Cyrl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Овоз намунасини юклаб бўлмади (HTTP %lld)"
+          }
+        }
+      }
     },
     "Ovoz o'chirish" : {
       "localizations" : {
@@ -2649,7 +6329,49 @@
       }
     },
     "Ovoz yozilmoqda…" : {
-
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Recording…"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Запись…"
+          }
+        },
+        "uz-Cyrl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Овоз ёзилмоқда…"
+          }
+        }
+      }
+    },
+    "Ovozli daqiqalar" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Voice minutes"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Голосовые минуты"
+          }
+        },
+        "uz-Cyrl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Овозли дақиқалар"
+          }
+        }
+      }
     },
     "Ovozli rejim" : {
       "localizations" : {
@@ -2698,13 +6420,93 @@
       }
     },
     "Ovozli rejim mavjud emas" : {
-
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Voice mode unavailable"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Голосовой режим недоступен"
+          }
+        },
+        "uz-Cyrl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Овозли режим мавжуд эмас"
+          }
+        }
+      }
     },
     "Ovozli suhbat" : {
-
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Realtime Voice"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Голос"
+          }
+        },
+        "uz-Cyrl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Жонли суҳбат"
+          }
+        }
+      }
+    },
+    "Ovozli suhbat — gapiring, javobni eshiting. Menyuda mavjud." : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Voice chat — speak and hear the answer. Available in the menu."
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Голосовой чат — говорите и слушайте ответ. Доступен в меню."
+          }
+        },
+        "uz-Cyrl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Овозли суҳбат — гапиринг, жавобни эшитинг. Менюда мавжуд."
+          }
+        }
+      }
     },
     "Ovozli suhbat, real vaqtda" : {
-
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Real-time voice chat"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Голосовой чат в реальном времени"
+          }
+        },
+        "uz-Cyrl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Овозли суҳбат, реал вақтда"
+          }
+        }
+      }
     },
     "Ovozli suhbat, xuddi do'stingizdek" : {
       "comment" : "Onboarding slide title about voice chat.",
@@ -2726,6 +6528,52 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Овозли суҳбат, худди дўстингиздек"
+          }
+        }
+      }
+    },
+    "Ovozni aniqlab bo‘lmadi, qayta urinib ko‘ring" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Could not recognize the audio. Try again."
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Не удалось распознать аудио. Попробуйте снова."
+          }
+        },
+        "uz-Cyrl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Овозни аниқлаб бўлмади, қайта уриниб кўринг"
+          }
+        }
+      }
+    },
+    "oy" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "month"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "мес."
+          }
+        },
+        "uz-Cyrl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ой"
           }
         }
       }
@@ -2775,14 +6623,186 @@
         }
       }
     },
+    "Payme (bir martalik)" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Payme (one-time)"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Payme (разовый платёж)"
+          }
+        },
+        "uz-Cyrl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Payme (бир марталик)"
+          }
+        }
+      }
+    },
+    "Payme sahifasiga o'tasiz" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "You’ll continue on Payme"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Вы перейдёте на страницу Payme"
+          }
+        },
+        "uz-Cyrl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Payme саҳифасига ўтасиз"
+          }
+        }
+      }
+    },
+    "PCI DSS" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "PCI DSS"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "PCI DSS"
+          }
+        },
+        "uz-Cyrl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "PCI DSS"
+          }
+        }
+      }
+    },
     "PDF (.pdf)" : {
-
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "PDF (.pdf)"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "PDF (.pdf)"
+          }
+        },
+        "uz-Cyrl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "PDF (.pdf)"
+          }
+        }
+      }
+    },
+    "PDF hujjat" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "PDF document"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "PDF-документ"
+          }
+        },
+        "uz-Cyrl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "PDF ҳужжат"
+          }
+        }
+      }
     },
     "PDF, rasm, kvitansiya, kontrakt — fayl yuboring, AI o'qiydi, tarjima qiladi va xulosa beradi." : {
-
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Send a PDF, image, receipt or contract. AI will read, translate and summarize it."
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Отправьте PDF, изображение, чек или договор. AI прочитает, переведёт и сделает выводы."
+          }
+        },
+        "uz-Cyrl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ПДФ, расм, квитансия, контракт — файл юборинг, АИ ўқийди, таржима қилади ва хулоса беради."
+          }
+        }
+      }
     },
     "PowerPoint (.pptx)" : {
-
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "PowerPoint (.pptx)"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "PowerPoint (.pptx)"
+          }
+        },
+        "uz-Cyrl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "PowerPoint (.pptx)"
+          }
+        }
+      }
+    },
+    "PPTX / PDF — bir necha soniyada" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "PPTX / PDF — in seconds"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "PPTX / PDF — за несколько секунд"
+          }
+        },
+        "uz-Cyrl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "PPTX / PDF — бир неча сонияда"
+          }
+        }
+      }
     },
     "Premium" : {
       "comment" : "Onboarding slide tag indicating premium features.",
@@ -2830,7 +6850,26 @@
       }
     },
     "Presentatsiyalar" : {
-
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Presentations"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Презентации"
+          }
+        },
+        "uz-Cyrl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Пресентатсиялар"
+          }
+        }
+      }
     },
     "Pro" : {
       "localizations" : {
@@ -2900,19 +6939,136 @@
       }
     },
     "Pro imkoniyatlarni ko‘rish" : {
-
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "See Pro features"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Посмотреть возможности Pro"
+          }
+        },
+        "uz-Cyrl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Про имкониятларни кўриш"
+          }
+        }
+      }
     },
     "Pro obunani maxsus, bir martalik chegirma bilan oching." : {
-
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Unlock Pro with a special one-time discount."
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Откройте Pro со специальной разовой скидкой."
+          }
+        },
+        "uz-Cyrl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Про обунани махсус, бир марталик чегирма билан очинг."
+          }
+        }
+      }
     },
     "Pro rejaga o'tish" : {
-
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Upgrade to Pro"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Перейти на Pro"
+          }
+        },
+        "uz-Cyrl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Про режага ўтиш"
+          }
+        }
+      }
     },
     "Pro rejimi faol" : {
-
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Pro is active"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Режим Pro активен"
+          }
+        },
+        "uz-Cyrl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Про режими фаол"
+          }
+        }
+      }
+    },
+    "Qayta urinib ko'rish" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Try again"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Попробовать снова"
+          }
+        },
+        "uz-Cyrl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Қайта уриниб кўриш"
+          }
+        }
+      }
     },
     "Qayta urinish" : {
-
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Retry"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Повторить"
+          }
+        },
+        "uz-Cyrl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Қайта уриниш"
+          }
+        }
+      }
     },
     "Qidiruv natijalari" : {
       "comment" : "A label for the search results section in the chat side menu.",
@@ -2934,6 +7090,29 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Қидирув натижалари"
+          }
+        }
+      }
+    },
+    "Qimmat tuyuldi" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "It felt expensive"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Показалось дорого"
+          }
+        },
+        "uz-Cyrl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Қиммат туюлди"
           }
         }
       }
@@ -2983,13 +7162,139 @@
       }
     },
     "Rasm yaratilmoqda…" : {
-
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Generating image…"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Генерация изображения…"
+          }
+        },
+        "uz-Cyrl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Расм яратилмоқда…"
+          }
+        }
+      }
     },
     "Rasm yaratish" : {
-
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Image generation"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Создание изображений"
+          }
+        },
+        "uz-Cyrl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Расм яратиш"
+          }
+        }
+      }
+    },
+    "Rasm yaratishlar" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Image generations"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Создания изображений"
+          }
+        },
+        "uz-Cyrl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Расм яратишлар"
+          }
+        }
+      }
+    },
+    "Rasm yuklashda xatolik: " : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Image upload failed: "
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ошибка загрузки изображения: "
+          }
+        },
+        "uz-Cyrl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Расм юклашда хатолик: "
+          }
+        }
+      }
+    },
+    "Rasmni ochib bo'lmadi." : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Could not open the image."
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Не удалось открыть изображение."
+          }
+        },
+        "uz-Cyrl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Расмни очиб бўлмади."
+          }
+        }
+      }
     },
     "Real vaqt ovozli AI" : {
-
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Real-time voice AI"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Голосовой AI в реальном времени"
+          }
+        },
+        "uz-Cyrl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Реал вақт овозли АИ"
+          }
+        }
+      }
     },
     "Real-time Voice" : {
       "extractionState" : "stale",
@@ -3014,26 +7319,206 @@
         }
       }
     },
+    "Referat / Insho" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Report / Essay"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Реферат / Эссе"
+          }
+        },
+        "uz-Cyrl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Реферат / Иншо"
+          }
+        }
+      }
+    },
+    "Referat va insho" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Reports and essays"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Рефераты и эссе"
+          }
+        },
+        "uz-Cyrl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Реферат ва иншо"
+          }
+        }
+      }
+    },
+    "Referat yoki insho kerakmi? Chatda so‘rang — tayyor hujjat oling." : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Need a report or essay? Ask in chat and get a ready document."
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Нужен реферат или эссе? Спросите в чате и получите готовый документ."
+          }
+        },
+        "uz-Cyrl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Реферат ёки иншо керакми? Чатда сўранг — тайёр ҳужжат олинг."
+          }
+        }
+      }
+    },
     "Reja va hisob" : {
-
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Planning and calculations"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Планы и расчёты"
+          }
+        },
+        "uz-Cyrl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Режа ва ҳисоб"
+          }
+        }
+      }
     },
     "Reja, hisob va muammolar yechimi" : {
-
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Planning, calculations and problem solving"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Планы, расчёты и решение задач"
+          }
+        },
+        "uz-Cyrl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Режа, ҳисоб ва муаммолар йечими"
+          }
+        }
+      }
     },
     "Rejani ko'rish →" : {
-
+      "extractionState" : "stale",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "View plan →"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Посмотреть план →"
+          }
+        },
+        "uz-Cyrl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Режани кўриш →"
+          }
+        }
+      }
     },
     "Rejani yangilash" : {
-
-    },
-    "Reklama" : {
-
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Upgrade plan"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Улучшить план"
+          }
+        },
+        "uz-Cyrl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Режани янгилаш"
+          }
+        }
+      }
     },
     "Reklama ko'rib +1 xabar" : {
-
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Watch an ad for +1 message"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Посмотреть рекламу: +1 сообщение"
+          }
+        },
+        "uz-Cyrl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Реклама кўриб +1 хабар"
+          }
+        }
+      }
     },
     "Reklama uchun rahmat! Endi xabaringizni qayta yuborishingiz mumkin." : {
-
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Thanks for watching! You can now send your message again."
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Спасибо за просмотр! Теперь можно снова отправить сообщение."
+          }
+        },
+        "uz-Cyrl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Реклама учун раҳмат! Енди хабарингизни қайта юборишингиз мумкин."
+          }
+        }
+      }
     },
     "Ruscha" : {
       "comment" : "A language option in the settings menu.",
@@ -3116,13 +7601,92 @@
       }
     },
     "Salom AI bilan nimalar qila olasiz?" : {
-
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "What can you do with Salom AI?"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Что можно делать с Salom AI?"
+          }
+        },
+        "uz-Cyrl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Салом АИ билан нималар қила оласиз?"
+          }
+        }
+      }
+    },
+    "Salom AI botini oching, «Start» ni bosing va bot bergan 6 xonali kodni kiriting." : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Open the Salom AI bot, tap “Start,” and enter the 6-digit code it gives you."
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Откройте бота Salom AI, нажмите «Start» и введите выданный 6-значный код."
+          }
+        },
+        "uz-Cyrl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Салом АИ ботини очинг, «Старт» ни босинг ва бот берган 6 хонали кодни киритинг."
+          }
+        }
+      }
     },
     "Salom AI imkoniyatlari" : {
-
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Salom AI features"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Возможности Salom AI"
+          }
+        },
+        "uz-Cyrl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Салом АИ имкониятлари"
+          }
+        }
+      }
     },
     "Salom AI Pro" : {
-
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Salom AI Pro"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Salom AI Pro"
+          }
+        },
+        "uz-Cyrl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Салом АИ Про"
+          }
+        }
+      }
     },
     "Salom AI Pro orqali sun'iy intellektning to'liq kuchidan foydalaning." : {
       "extractionState" : "stale",
@@ -3147,11 +7711,72 @@
         }
       }
     },
+    "Salom AI to‘liq taqdimot (PPTX/PDF) yasaydi — menyudan Presentatsiyalar." : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Salom AI creates complete presentations (PPTX/PDF) — open Presentations from the menu."
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Salom AI создаёт готовые презентации (PPTX/PDF) — откройте «Презентации» в меню."
+          }
+        },
+        "uz-Cyrl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Salom AI тўлиқ тақдимот (PPTX/PDF) ясайди — менюдан Тақдимотлар."
+          }
+        }
+      }
+    },
     "Saqlangan kartalar" : {
-
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Saved cards"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Сохранённые карты"
+          }
+        },
+        "uz-Cyrl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Сақланган карталар"
+          }
+        }
+      }
     },
     "Saqlangan kartalar yo'q" : {
-
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "No saved cards"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Нет сохранённых карт"
+          }
+        },
+        "uz-Cyrl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Сақланган карталар йўқ"
+          }
+        }
+      }
     },
     "Saqlash" : {
       "localizations" : {
@@ -3171,6 +7796,29 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Сақлаш"
+          }
+        }
+      }
+    },
+    "Saqlashda xatolik" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Save failed"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ошибка сохранения"
+          }
+        },
+        "uz-Cyrl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Сақлашда хатолик"
           }
         }
       }
@@ -3195,6 +7843,29 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Савол беринг ёки гапиринг..."
+          }
+        }
+      }
+    },
+    "Savol bering, yozing, tarjima qiling" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ask, write, and translate"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Задавайте вопросы, пишите и переводите"
+          }
+        },
+        "uz-Cyrl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Савол беринг, ёзинг, таржима қилинг"
           }
         }
       }
@@ -3224,6 +7895,29 @@
         }
       }
     },
+    "Sessiya muddati tugagan. Qaytadan kiring." : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Your session has expired. Please sign in again."
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Сессия истекла. Войдите снова."
+          }
+        },
+        "uz-Cyrl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Сессия муддати тугаган. Қайтадан киринг."
+          }
+        }
+      }
+    },
     "Shohruhmirzo Alijonov" : {
       "extractionState" : "stale",
       "localizations" : {
@@ -3248,10 +7942,48 @@
       }
     },
     "Sinov rejimi — xatolar bo'lishi mumkin" : {
-
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Beta mode — errors may occur"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Тестовый режим — возможны ошибки"
+          }
+        },
+        "uz-Cyrl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Синов режими — хатолар бўлиши мумкин"
+          }
+        }
+      }
     },
     "Sizga qulay usulni tanlang." : {
-
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Choose what works for you."
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Выберите удобный способ."
+          }
+        },
+        "uz-Cyrl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Сизга қулай усулни танланг."
+          }
+        }
+      }
     },
     "Sizga Salom AI yoqyaptimi?" : {
       "extractionState" : "manual",
@@ -3283,10 +8015,71 @@
       }
     },
     "Sizni qaytarib olmoqchimiz! 🎁" : {
-
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "We’d love to have you back! 🎁"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Мы хотим вас вернуть! 🎁"
+          }
+        },
+        "uz-Cyrl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Сизни қайтариб олмоқчимиз! 🎁"
+          }
+        }
+      }
+    },
+    "Sizning obuna limitingiz tugagan. Iltimos, obunangizni yangilang." : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Your subscription limit has been reached. Please upgrade your plan."
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Лимит вашей подписки исчерпан. Обновите тариф."
+          }
+        },
+        "uz-Cyrl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Обуна лимитингиз тугаган. Илтимос, обунангизни янгиланг."
+          }
+        }
+      }
     },
     "Sizning tilingizda, sizning madaniyatingizda. Salom AI bilan kundalik vazifalarni osonlashtiring." : {
-
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "In your language, rooted in your culture. Make everyday tasks easier with Salom AI."
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "На вашем языке, с учётом вашей культуры. Решайте повседневные задачи проще с Salom AI."
+          }
+        },
+        "uz-Cyrl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Сизнинг тилингизда, сизнинг маданиятингизда. Салом АИ билан кундалик вазифаларни осонлаштиринг."
+          }
+        }
+      }
     },
     "Sizning tilingizda, sizning madaniyatingizda. Salom AI bilan muloqot qiling va kundalik vazifalaringizni osonlashtiring." : {
       "comment" : "Onboarding slide subtitle about cultural and language alignment.",
@@ -3312,8 +8105,73 @@
         }
       }
     },
+    "Smooth, melodic" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Smooth, melodic"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Плавный, мелодичный"
+          }
+        },
+        "uz-Cyrl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Равон, оҳангдор"
+          }
+        }
+      }
+    },
+    "SMS kod noto'g'ri yoki muddati o'tgan" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "The SMS code is invalid or expired"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "SMS-код неверен или истёк"
+          }
+        },
+        "uz-Cyrl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "SMS код нотўғри ёки муддати ўтган"
+          }
+        }
+      }
+    },
     "SMS kodni kiriting" : {
-
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Enter SMS code"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Введите SMS-код"
+          }
+        },
+        "uz-Cyrl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "SMS кодни киритинг"
+          }
+        }
+      }
     },
     "Sodda" : {
       "extractionState" : "stale",
@@ -3334,6 +8192,29 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Содда"
+          }
+        }
+      }
+    },
+    "Soft, clear" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Soft, clear"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Мягкий, чёткий"
+          }
+        },
+        "uz-Cyrl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Мулойим, аниқ"
           }
         }
       }
@@ -3363,10 +8244,94 @@
       }
     },
     "SSL" : {
-
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "SSL"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "SSL"
+          }
+        },
+        "uz-Cyrl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "SSL"
+          }
+        }
+      }
     },
     "SSL bilan himoyalangan xavfsiz to'lov" : {
-
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Secure SSL-protected payment"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Безопасная оплата с защитой SSL"
+          }
+        },
+        "uz-Cyrl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ССЛ билан ҳимояланган хавфсиз тўлов"
+          }
+        }
+      }
+    },
+    "SSL himoya" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "SSL protection"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Защита SSL"
+          }
+        },
+        "uz-Cyrl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "SSL ҳимоя"
+          }
+        }
+      }
+    },
+    "Standard" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Standard"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Стандарт"
+          }
+        },
+        "uz-Cyrl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Стандарт"
+          }
+        }
+      }
     },
     "Suhbat" : {
       "comment" : "A placeholder text that could represent the last message time in a chat.",
@@ -3393,10 +8358,116 @@
       }
     },
     "Suhbat boshlanganidan keyin ovoz keyingi sessiyada qo'llaniladi." : {
-
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "After a conversation starts, the voice change applies to the next session."
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "После начала разговора новый голос будет применён в следующей сессии."
+          }
+        },
+        "uz-Cyrl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Суҳбат бошланганидан кейин овоз кейинги сессияда қўлланилади."
+          }
+        }
+      }
+    },
+    "Super Aqlli" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Super Smart"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Сверхумный"
+          }
+        },
+        "uz-Cyrl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Супер Ақлли"
+          }
+        }
+      }
+    },
+    "Super Aqlli Modellar" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Super-smart models"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Сверхумные модели"
+          }
+        },
+        "uz-Cyrl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Супер ақлли моделлар"
+          }
+        }
+      }
+    },
+    "Tahrirlash" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Edit"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Изменить"
+          }
+        },
+        "uz-Cyrl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Таҳрирлаш"
+          }
+        }
+      }
     },
     "Taklif va shikoyatlar" : {
-
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Feedback and complaints"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Предложения и жалобы"
+          }
+        },
+        "uz-Cyrl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Таклиф ва шикоятлар"
+          }
+        }
+      }
     },
     "Taklif va shikoyatlaringizni yozib qoldiring. Biz har bir fikrni o'qib chiqamiz." : {
       "localizations" : {
@@ -3421,7 +8492,26 @@
       }
     },
     "Tanlash" : {
-
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Select"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Выбрать"
+          }
+        },
+        "uz-Cyrl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Танлаш"
+          }
+        }
+      }
     },
     "Tanlash (Click)" : {
       "extractionState" : "stale",
@@ -3446,11 +8536,95 @@
         }
       }
     },
+    "Taqdimotlar" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Presentations"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Презентации"
+          }
+        },
+        "uz-Cyrl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Тақдимотлар"
+          }
+        }
+      }
+    },
     "Tasavvuringizni chizamiz" : {
-
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Bring your ideas to life"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Воплотите идеи в изображении"
+          }
+        },
+        "uz-Cyrl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Тасаввурингизни чизамиз"
+          }
+        }
+      }
     },
     "Tasdiqlash" : {
-
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Verify"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Подтвердить"
+          }
+        },
+        "uz-Cyrl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Тасдиқлаш"
+          }
+        }
+      }
+    },
+    "Tasdiqlash amalga oshmadi" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Verification failed"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Не удалось подтвердить"
+          }
+        },
+        "uz-Cyrl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Тасдиқлаш амалга ошмади"
+          }
+        }
+      }
     },
     "Tavsiya" : {
       "localizations" : {
@@ -3475,13 +8649,71 @@
       }
     },
     "Tayyor" : {
-
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Done"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Готово"
+          }
+        },
+        "uz-Cyrl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Тайёр"
+          }
+        }
+      }
     },
     "Tayyorlanmoqda…" : {
-
+      "extractionState" : "stale",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Preparing…"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Подготовка…"
+          }
+        },
+        "uz-Cyrl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Тайёрланмоқда…"
+          }
+        }
+      }
     },
     "Tekshirilmoqda..." : {
-
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Checking…"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Проверка…"
+          }
+        },
+        "uz-Cyrl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Текширилмоқда..."
+          }
+        }
+      }
     },
     "Telefon raqam aniqlanmagan" : {
       "comment" : "A description of a user's phone number if it is not set.",
@@ -3531,8 +8763,140 @@
         }
       }
     },
+    "Telefon raqamingizni kiriting." : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Enter your phone number."
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Введите номер телефона."
+          }
+        },
+        "uz-Cyrl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Телефон рақамингизни киритинг."
+          }
+        }
+      }
+    },
+    "Telegram orqali kirish" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Sign in with Telegram"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Войти через Telegram"
+          }
+        },
+        "uz-Cyrl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Телеграм орқали кириш"
+          }
+        }
+      }
+    },
     "Telegram orqali yordam" : {
-
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Support on Telegram"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Поддержка в Telegram"
+          }
+        },
+        "uz-Cyrl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Телеграм орқали ёрдам"
+          }
+        }
+      }
+    },
+    "Telegram raqamingizni kiriting. So‘ng botni ochib «Start» ni bosasiz." : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Enter your Telegram number. Then open the bot and tap “Start.”"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Введите номер Telegram. Затем откройте бота и нажмите «Start»."
+          }
+        },
+        "uz-Cyrl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Телеграм рақамингизни киритинг. Сўнг ботни очиб «Старт» ни босасиз."
+          }
+        }
+      }
+    },
+    "Texnik muammo" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Technical issue"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Техническая проблема"
+          }
+        },
+        "uz-Cyrl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Техник муаммо"
+          }
+        }
+      }
+    },
+    "Tezkor" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Fast"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Быстрый"
+          }
+        },
+        "uz-Cyrl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Тезкор"
+          }
+        }
+      }
     },
     "Tezkor javoblar" : {
       "extractionState" : "stale",
@@ -3557,8 +8921,73 @@
         }
       }
     },
+    "Tezkor Modellar" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Fast models"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Быстрые модели"
+          }
+        },
+        "uz-Cyrl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Тезкор моделлар"
+          }
+        }
+      }
+    },
+    "Tezkor xabarlar" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Fast messages"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Быстрые сообщения"
+          }
+        },
+        "uz-Cyrl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Тезкор хабарлар"
+          }
+        }
+      }
+    },
     "Tijorat taklifi, shartnoma, hisobot…" : {
-
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Proposals, contracts, reports…"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Коммерческие предложения, договоры, отчёты…"
+          }
+        },
+        "uz-Cyrl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Тижорат таклифи, шартнома, ҳисобот…"
+          }
+        }
+      }
     },
     "Til" : {
       "comment" : "A label displayed above the language picker.",
@@ -3608,7 +9037,27 @@
       }
     },
     "Til / Язык / Language" : {
-
+      "extractionState" : "stale",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Language"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Язык"
+          }
+        },
+        "uz-Cyrl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Тил / Язык / Лангуаге"
+          }
+        }
+      }
     },
     "To'lov" : {
       "localizations" : {
@@ -3633,16 +9082,92 @@
       }
     },
     "To'lov amalga oshmadi" : {
-
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Payment failed"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Платёж не прошёл"
+          }
+        },
+        "uz-Cyrl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Тўлов амалга ошмади"
+          }
+        }
+      }
     },
     "To'lov bekor qilindi" : {
-
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Payment cancelled"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Платёж отменён"
+          }
+        },
+        "uz-Cyrl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Тўлов бекор қилинди"
+          }
+        }
+      }
     },
     "To'lov hali tasdiqlanmadi" : {
-
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Payment not confirmed yet"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Платёж ещё не подтверждён"
+          }
+        },
+        "uz-Cyrl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Тўлов ҳали тасдиқланмади"
+          }
+        }
+      }
     },
     "To'lov havolasi bekor qilindi" : {
-
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Payment link was cancelled"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Платёжная ссылка отменена"
+          }
+        },
+        "uz-Cyrl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Тўлов ҳаволаси бекор қилинди"
+          }
+        }
+      }
     },
     "To'lov havolasini olib bo'lmadi." : {
       "extractionState" : "stale",
@@ -3650,13 +9175,13 @@
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Could not get a payment link."
+            "value" : "Could not get the payment link."
           }
         },
         "ru" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Не удалось получить ссылку на оплату."
+            "value" : "Не удалось получить платёжную ссылку."
           }
         },
         "uz-Cyrl" : {
@@ -3691,7 +9216,26 @@
       }
     },
     "To'lov tekshirilmoqda…" : {
-
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Checking payment…"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Проверяем платёж…"
+          }
+        },
+        "uz-Cyrl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Тўлов текширилмоқда…"
+          }
+        }
+      }
     },
     "To'lov turi" : {
       "extractionState" : "stale",
@@ -3739,7 +9283,49 @@
       }
     },
     "To'lov xavfsiz Click tizimi orqali amalga oshiriladi" : {
-
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Payment is securely processed by Click"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Платёж безопасно проводится через Click"
+          }
+        },
+        "uz-Cyrl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Тўлов хавфсиз Cлиcк тизими орқали амалга оширилади"
+          }
+        }
+      }
+    },
+    "Tokenizatsiya amalga oshmadi. Qayta urinib ko'ring." : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Card verification failed. Try again."
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Не удалось проверить карту. Попробуйте снова."
+          }
+        },
+        "uz-Cyrl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Токенизация амалга ошмади. Қайта уриниб кўринг."
+          }
+        }
+      }
     },
     "Tone" : {
       "extractionState" : "stale",
@@ -3782,6 +9368,28 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Тугатиш"
+          }
+        }
+      }
+    },
+    "Tungi" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Dark"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Тёмная"
+          }
+        },
+        "uz-Cyrl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Тунги"
           }
         }
       }
@@ -3877,6 +9485,28 @@
         }
       }
     },
+    "Versiya 1.2.5 • Salom AI" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Version 1.2.5 • Salom AI"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Версия 1.2.5 • Salom AI"
+          }
+        },
+        "uz-Cyrl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Версия 1.2.5 • Salom AI"
+          }
+        }
+      }
+    },
     "Voice" : {
       "extractionState" : "stale",
       "localizations" : {
@@ -3900,8 +9530,118 @@
         }
       }
     },
+    "Warm, friendly female" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Warm, friendly female"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Тёплый, дружелюбный женский голос"
+          }
+        },
+        "uz-Cyrl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Илиқ, дўстона аёл овози"
+          }
+        }
+      }
+    },
+    "Warm, grounded male" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Warm, grounded male"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Тёплый, уверенный мужской голос"
+          }
+        },
+        "uz-Cyrl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Илиқ, хотиржам эркак овози"
+          }
+        }
+      }
+    },
     "Word" : {
-
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Word"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Word"
+          }
+        },
+        "uz-Cyrl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Word"
+          }
+        }
+      }
+    },
+    "Word (.docx)" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Word (.docx)"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Word (.docx)"
+          }
+        },
+        "uz-Cyrl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Word (.docx)"
+          }
+        }
+      }
+    },
+    "Word hujjat" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Word document"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Документ Word"
+          }
+        },
+        "uz-Cyrl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Word ҳужжат"
+          }
+        }
+      }
     },
     "Xabar" : {
       "localizations" : {
@@ -3948,7 +9688,27 @@
       }
     },
     "Xabarlarni qidirish" : {
-
+      "extractionState" : "stale",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Search messages"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Поиск сообщений"
+          }
+        },
+        "uz-Cyrl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Хабарларни қидириш"
+          }
+        }
+      }
     },
     "Xatolik" : {
       "comment" : "An alert title.",
@@ -3975,7 +9735,95 @@
       }
     },
     "Xatolik yuz berdi" : {
-
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Something went wrong"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Произошла ошибка"
+          }
+        },
+        "uz-Cyrl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Хатолик юз берди"
+          }
+        }
+      }
+    },
+    "Xatolik yuz berdi: " : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Something went wrong: "
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Произошла ошибка: "
+          }
+        },
+        "uz-Cyrl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Хатолик юз берди: "
+          }
+        }
+      }
+    },
+    "Xatolik: " : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Error: "
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ошибка: "
+          }
+        },
+        "uz-Cyrl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Хатолик: "
+          }
+        }
+      }
+    },
+    "Xatolik. Raqamni tekshirib, qayta urinib ko‘ring." : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Something went wrong. Check the number and try again."
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Произошла ошибка. Проверьте номер и попробуйте снова."
+          }
+        },
+        "uz-Cyrl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Хатолик. Рақамни текшириб, қайта уриниб кўринг."
+          }
+        }
+      }
     },
     "Xavfsiz" : {
       "extractionState" : "stale",
@@ -4024,15 +9872,95 @@
       }
     },
     "Xush kelibsiz" : {
-
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Welcome"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Добро пожаловать"
+          }
+        },
+        "uz-Cyrl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Хуш келибсиз"
+          }
+        }
+      }
     },
     "Yangi chat" : {
-
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "New session"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Новый диалог"
+          }
+        },
+        "uz-Cyrl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Янги чат"
+          }
+        }
+      }
+    },
+    "Yangi variant" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "New version"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Новый вариант"
+          }
+        },
+        "uz-Cyrl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Янги вариант"
+          }
+        }
+      }
     },
     "Yangi xabarlar bu yerda ko'rinadi" : {
-
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "New messages will appear here"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Новые сообщения появятся здесь"
+          }
+        },
+        "uz-Cyrl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Янги хабарлар бу йерда кўринади"
+          }
+        }
+      }
     },
     "Yangilanadi: %@" : {
+      "extractionState" : "stale",
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -4074,6 +10002,29 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Яқинда суҳбатлар"
+          }
+        }
+      }
+    },
+    "yil" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "year"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "год"
+          }
+        },
+        "uz-Cyrl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "йил"
           }
         }
       }
@@ -4146,7 +10097,26 @@
       }
     },
     "Yoqmadimi? Chatda tahrirlashni yozing" : {
-
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Not quite right? Ask for an edit in chat"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Не понравилось? Попросите изменить в чате"
+          }
+        },
+        "uz-Cyrl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ёқмадими? Чатда таҳрирлашни ёзинг"
+          }
+        }
+      }
     },
     "Yordam" : {
       "localizations" : {
@@ -4170,8 +10140,49 @@
         }
       }
     },
+    "Yorug‘" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Light"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Светлая"
+          }
+        },
+        "uz-Cyrl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ёруғ"
+          }
+        }
+      }
+    },
     "Yozing, savol bering, fikrlashing. AI sizning matnlaringizga aniq va tabiiy javob beradi — o'zbek, rus va ingliz tillarida." : {
-
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Write, ask and explore ideas. AI responds clearly and naturally in Uzbek, Russian and English."
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Пишите, задавайте вопросы и развивайте идеи. AI отвечает ясно и естественно на узбекском, русском и английском."
+          }
+        },
+        "uz-Cyrl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ёзинг, савол беринг, фикрлашинг. АИ сизнинг матнларингизга аниқ ва табиий жавоб беради — ўзбек, рус ва инглиз тилларида."
+          }
+        }
+      }
     },
     "Yozish shart emas. Shunchaki gapiring va tabiiy ovozda javob oling. Haqiqiy suhbatdosh kabi." : {
       "comment" : "Onboarding slide subtitle about speaking instead of typing.",
@@ -4221,6 +10232,7 @@
     },
     "Yuklanmoqda..." : {
       "comment" : "Status subtitle shown while messages are loading.",
+      "extractionState" : "stale",
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -4243,10 +10255,48 @@
       }
     },
     "Кириллча" : {
-
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Кириллча"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Кириллча"
+          }
+        },
+        "uz-Cyrl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Кириллча"
+          }
+        }
+      }
     },
     "Русский" : {
-
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Русский"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Русский"
+          }
+        },
+        "uz-Cyrl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Русский"
+          }
+        }
+      }
     }
   },
   "version" : "1.1"

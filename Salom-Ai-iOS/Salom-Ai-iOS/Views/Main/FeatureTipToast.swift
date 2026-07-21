@@ -52,14 +52,14 @@ struct FeatureTipToast: ViewModifier {
                 Image(systemName: tip.icon).font(.system(size: 16, weight: .semibold)).foregroundColor(tip.tint)
             }
             VStack(alignment: .leading, spacing: 1) {
-                Text("Bilasizmi?").font(.system(size: 11, weight: .semibold)).foregroundColor(.white.opacity(0.5))
-                Text(tip.text).font(.system(size: 12.5, weight: .medium)).foregroundColor(.white).lineLimit(2)
+                Text("Bilasizmi?").font(.system(size: 11, weight: .semibold)).foregroundColor(SalomTheme.Colors.textSecondary)
+                Text(String.appLocalized(tip.text)).font(.system(size: 12.5, weight: .medium)).foregroundColor(SalomTheme.Colors.textPrimary).lineLimit(2)
             }
             Spacer(minLength: 4)
         }
         .padding(.horizontal, 12).padding(.vertical, 10)
         .background(.ultraThinMaterial, in: RoundedRectangle(cornerRadius: 16, style: .continuous))
-        .overlay(RoundedRectangle(cornerRadius: 16, style: .continuous).strokeBorder(Color.white.opacity(0.1)))
+        .overlay(RoundedRectangle(cornerRadius: 16, style: .continuous).strokeBorder(SalomTheme.Colors.border))
         .shadow(color: .black.opacity(0.3), radius: 14, y: 8)
         .onTapGesture {
             dismiss()

@@ -23,7 +23,7 @@ struct CachedImage: View {
             KFImage(url)
                 .placeholder {
                     Rectangle()
-                        .fill(Color.white.opacity(0.1))
+                        .fill(SalomTheme.Colors.surfaceMuted)
                         .shimmering(active: true)
                 }
                 .onFailure { error in
@@ -36,9 +36,9 @@ struct CachedImage: View {
                 .aspectRatio(contentMode: contentMode)
         } else {
             ZStack {
-                Color.white.opacity(0.05)
+                SalomTheme.Colors.surfaceMuted
                 Image(systemName: "photo.badge.exclamationmark")
-                    .foregroundColor(.white.opacity(0.3))
+                    .foregroundColor(SalomTheme.Colors.textTertiary)
                     .font(.system(size: 24))
             }
         }

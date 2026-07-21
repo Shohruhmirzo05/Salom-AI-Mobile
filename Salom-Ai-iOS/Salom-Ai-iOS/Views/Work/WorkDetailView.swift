@@ -49,14 +49,16 @@ struct WorkDetailView: View {
         }
         .onDisappear { pollTask?.cancel() }
         .sheet(item: $shareItem) { item in ShareSheet(items: [item.url]) }
-        .fullScreenCover(isPresented: $showPaywall) { PaywallSheet() }
+        .fullScreenCover(isPresented: $showPaywall) {
+            PaywallSheet(context: .forWorkTask(taskDef?.id), source: "ios_work_task")
+        }
     }
 
     private var topBar: some View {
         HStack {
             Button { dismiss() } label: {
                 HStack(spacing: 4) { Image(systemName: "chevron.left"); Text(L.back) }
-                    .font(.system(size: 15)).foregroundColor(.white.opacity(0.7))
+                    .font(.system(size: 15)).foregroundColor(SalomTheme.Colors.textSecondary)
             }
             Spacer()
         }
@@ -67,13 +69,13 @@ struct WorkDetailView: View {
     @ViewBuilder private func formView(_ task: WorkTask) -> some View {
         ScrollView {
             VStack(alignment: .leading, spacing: 16) {
-                Text(task.title.pick(languageCode)).font(.system(size: 22, weight: .bold)).foregroundColor(.white)
-                Text(task.subtitle.pick(languageCode)).font(.system(size: 14)).foregroundColor(.white.opacity(0.55))
+                Text(task.title.pick(languageCode)).font(.system(size: 22, weight: .bold)).foregroundColor(SalomTheme.Colors.textPrimary)
+                Text(task.subtitle.pick(languageCode)).font(.system(size: 14)).foregroundColor(SalomTheme.Colors.textSecondary)
 
                 ForEach(task.inputs, id: \.key) { f in
                     VStack(alignment: .leading, spacing: 6) {
                         HStack(spacing: 2) {
-                            Text(f.label.pick(languageCode)).font(.system(size: 14, weight: .medium)).foregroundColor(.white.opacity(0.75))
+                            Text(f.label.pick(languageCode)).font(.system(size: 14, weight: .medium)).foregroundColor(SalomTheme.Colors.textSecondary)
                             if f.required { Text("*").foregroundColor(.red) }
                         }
                         field(f)
@@ -88,10 +90,10 @@ struct WorkDetailView: View {
 
                 Button { Task { await generate(task) } } label: {
                     HStack {
-                        if busy { ProgressView().tint(.white); Text(L.creating) }
+                        if busy { ProgressView().tint(SalomTheme.Colors.onAccent); Text(L.creating) }
                         else { Image(systemName: "sparkles"); Text(L.create) }
                     }
-                    .font(.system(size: 16, weight: .semibold)).foregroundColor(.white)
+                    .font(.system(size: 16, weight: .semibold)).foregroundColor(SalomTheme.Colors.onAccent)
                     .frame(maxWidth: .infinity).padding(.vertical, 15)
                     .background(LinearGradient(colors: [Color(SalomTheme.Colors.accentPrimary), Color(SalomTheme.Colors.accentSecondary)], startPoint: .leading, endPoint: .trailing))
                     .clipShape(RoundedRectangle(cornerRadius: 16))
@@ -108,7 +110,7 @@ struct WorkDetailView: View {
         case "textarea":
             TextField(f.placeholder?.pick(languageCode) ?? "", text: binding, axis: .vertical)
                 .lineLimit(3...6).textFieldStyle(.plain).padding(11)
-                .background(fieldBG).foregroundColor(.white)
+                .background(fieldBG).foregroundColor(SalomTheme.Colors.textPrimary)
         case "select":
             Menu {
                 ForEach(f.options ?? [], id: \.uz) { opt in
@@ -118,19 +120,19 @@ struct WorkDetailView: View {
             } label: {
                 HStack {
                     Text(values[f.key]?.isEmpty == false ? values[f.key]! : L.select)
-                        .foregroundColor(values[f.key]?.isEmpty == false ? .white : .white.opacity(0.4))
-                    Spacer(); Image(systemName: "chevron.down").foregroundColor(.white.opacity(0.4))
+                        .foregroundColor(values[f.key]?.isEmpty == false ? SalomTheme.Colors.textPrimary : SalomTheme.Colors.textTertiary)
+                    Spacer(); Image(systemName: "chevron.down").foregroundColor(SalomTheme.Colors.textTertiary)
                 }.padding(11).background(fieldBG)
             }
         default:
             TextField(f.placeholder?.pick(languageCode) ?? "", text: binding)
-                .textFieldStyle(.plain).padding(11).background(fieldBG).foregroundColor(.white)
+                .textFieldStyle(.plain).padding(11).background(fieldBG).foregroundColor(SalomTheme.Colors.textPrimary)
         }
     }
 
     private var fieldBG: some View {
-        RoundedRectangle(cornerRadius: 12).fill(Color.white.opacity(0.05))
-            .overlay(RoundedRectangle(cornerRadius: 12).strokeBorder(Color.white.opacity(0.1)))
+        RoundedRectangle(cornerRadius: 12).fill(SalomTheme.Colors.controlFill)
+            .overlay(RoundedRectangle(cornerRadius: 12).strokeBorder(SalomTheme.Colors.border))
     }
 
     // MARK: - Document view
@@ -148,15 +150,15 @@ struct WorkDetailView: View {
             VStack(spacing: 10) {
                 Spacer()
                 Image(systemName: "exclamationmark.triangle").font(.system(size: 30)).foregroundColor(.orange)
-                Text(L.failed).foregroundColor(.white)
-                if let e = d.error { Text(e).font(.system(size: 12)).foregroundColor(.white.opacity(0.5)).multilineTextAlignment(.center).padding(.horizontal, 30) }
+                Text(L.failed).foregroundColor(SalomTheme.Colors.textPrimary)
+                if let e = d.error { Text(e).font(.system(size: 12)).foregroundColor(SalomTheme.Colors.textSecondary).multilineTextAlignment(.center).padding(.horizontal, 30) }
                 Spacer()
             }
         } else {
             VStack(spacing: 12) {
                 Spacer()
-                ProgressView().tint(.white.opacity(0.7))
-                Text(L.docGenerating).foregroundColor(.white.opacity(0.6)).font(.system(size: 14))
+                ProgressView().tint(SalomTheme.Colors.accentPrimary)
+                Text(L.docGenerating).foregroundColor(SalomTheme.Colors.textSecondary).font(.system(size: 14))
                 Spacer()
             }
             .task { await poll() }
@@ -166,25 +168,26 @@ struct WorkDetailView: View {
     private func exportBar(_ d: WorkDoc) -> some View {
         let fmts = d.outputFormat == "xlsx" ? ["xlsx", "pdf"] : ["docx", "pdf"]
         return HStack(spacing: 8) {
-            Text(d.title).font(.system(size: 15, weight: .semibold)).foregroundColor(.white).lineLimit(1)
+            Text(d.title).font(.system(size: 15, weight: .semibold)).foregroundColor(SalomTheme.Colors.textPrimary).lineLimit(1)
             Spacer()
             if d.canExport == true {
                 ForEach(fmts, id: \.self) { fmt in
                     Button { Task { await runExport(fmt) } } label: {
                         HStack(spacing: 4) {
-                            if exporting == fmt { ProgressView().tint(.white).scaleEffect(0.7) }
+                            if exporting == fmt { ProgressView().tint(SalomTheme.Colors.accentPrimary).scaleEffect(0.7) }
                             else { Image(systemName: "arrow.down.circle") }
                             Text(fmt.uppercased())
                         }
-                        .font(.system(size: 13, weight: .medium)).foregroundColor(.white)
+                        .font(.system(size: 13, weight: .medium)).foregroundColor(SalomTheme.Colors.textPrimary)
                         .padding(.horizontal, 12).padding(.vertical, 7)
-                        .background(Capsule().fill(Color.white.opacity(0.1)))
+                        .background(Capsule().fill(SalomTheme.Colors.controlFill))
+                        .overlay(Capsule().stroke(SalomTheme.Colors.border))
                     }.disabled(exporting != nil)
                 }
             } else {
                 Button { showPaywall = true } label: {
                     HStack(spacing: 4) { Image(systemName: "lock.fill"); Text("Pro") }
-                        .font(.system(size: 13, weight: .semibold)).foregroundColor(.black)
+                        .font(.system(size: 13, weight: .semibold)).foregroundColor(SalomTheme.Colors.onAccent)
                         .padding(.horizontal, 12).padding(.vertical, 7)
                         .background(Capsule().fill(LinearGradient(colors: [Color(SalomTheme.Colors.accentSecondary), Color(SalomTheme.Colors.accentPrimary)], startPoint: .leading, endPoint: .trailing)))
                 }
@@ -196,9 +199,9 @@ struct WorkDetailView: View {
     private var editBar: some View {
         HStack(spacing: 8) {
             TextField(L.chatPlaceholder, text: $instruction)
-                .textFieldStyle(.plain).padding(11).background(fieldBG).foregroundColor(.white)
+                .textFieldStyle(.plain).padding(11).background(fieldBG).foregroundColor(SalomTheme.Colors.textPrimary)
             Button { Task { await runEdit() } } label: {
-                if editing { ProgressView().tint(.white).scaleEffect(0.8) }
+                if editing { ProgressView().tint(SalomTheme.Colors.accentPrimary).scaleEffect(0.8) }
                 else { Image(systemName: "arrow.up.circle.fill").font(.system(size: 26)).foregroundColor(Color(SalomTheme.Colors.accentSecondary)) }
             }.disabled(editing || instruction.trimmingCharacters(in: .whitespaces).isEmpty)
         }

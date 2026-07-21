@@ -106,6 +106,7 @@ struct ReferatL {
         switch lang {
         case "ru": return "ru"
         case "en": return "en"
+        case "kr", "uz-Cyrl": return "kr"
         default: return "uz"
         }
     }
@@ -114,6 +115,7 @@ struct ReferatL {
         switch lang {
         case "ru": return ru
         case "en": return en
+        case "kr", "uz-Cyrl": return UzCyrillic.toCyrillic(uz)
         default: return uz
         }
     }

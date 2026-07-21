@@ -7,6 +7,28 @@
 
 import SwiftUI
 
+/// Adaptive Click wordmark. The bundled full logo has white lettering for dark
+/// surfaces, so it disappears in light mode; keep the official mark and render
+/// the name with the app's semantic foreground instead.
+struct ClickBrandMark: View {
+    var iconSize: CGFloat = 26
+    var fontSize: CGFloat = 22
+
+    var body: some View {
+        HStack(spacing: 7) {
+            Image("click-icon")
+                .resizable()
+                .scaledToFit()
+                .frame(width: iconSize, height: iconSize)
+            Text("click")
+                .font(.system(size: fontSize, weight: .bold, design: .rounded))
+                .foregroundColor(SalomTheme.Colors.textPrimary)
+        }
+        .accessibilityElement(children: .ignore)
+        .accessibilityLabel("Click")
+    }
+}
+
 struct PaymentMethodSheet: View {
     let planCode: String
     let onChooseAutoRenew: () -> Void
@@ -24,7 +46,7 @@ struct PaymentMethodSheet: View {
 
     var body: some View {
         ZStack(alignment: .bottom) {
-            Color.black.ignoresSafeArea()
+            SalomTheme.Colors.bgMain.ignoresSafeArea()
 
             ScrollView(showsIndicators: false) {
                 VStack(alignment: .leading, spacing: 22) {
@@ -47,7 +69,7 @@ struct PaymentMethodSheet: View {
             ToolbarItem(placement: .principal) {
                 Text("To'lov")
                     .font(.system(size: 15, weight: .semibold))
-                    .foregroundColor(.white)
+                    .foregroundColor(SalomTheme.Colors.textPrimary)
             }
         }
         .toolbarBackground(.hidden, for: .navigationBar)
@@ -77,7 +99,7 @@ struct PaymentMethodSheet: View {
                 .frame(width: 28, height: 28)
             Image(systemName: "arrow.right")
                 .font(.system(size: 11, weight: .semibold))
-                .foregroundColor(.white.opacity(0.25))
+                .foregroundColor(SalomTheme.Colors.textTertiary)
             // Both payment partners we work with.
             HStack(spacing: 7) {
                 ProviderChip(logo: "click-icon", size: 30)
@@ -91,10 +113,10 @@ struct PaymentMethodSheet: View {
                     .font(.system(size: 10, weight: .semibold))
                     .tracking(0.5)
             }
-            .foregroundColor(.white.opacity(0.35))
+            .foregroundColor(SalomTheme.Colors.textTertiary)
             .padding(.horizontal, 8)
             .padding(.vertical, 4)
-            .background(Capsule().fill(Color.white.opacity(0.04)))
+            .background(Capsule().fill(SalomTheme.Colors.surfaceMuted))
         }
     }
 
@@ -102,11 +124,11 @@ struct PaymentMethodSheet: View {
         VStack(alignment: .leading, spacing: 6) {
             Text("To'lov turini tanlang")
                 .font(.system(size: 28, weight: .semibold))
-                .foregroundColor(.white)
+                .foregroundColor(SalomTheme.Colors.textPrimary)
                 .tracking(-0.6)
             Text("Sizga qulay usulni tanlang.")
                 .font(.system(size: 14))
-                .foregroundColor(.white.opacity(0.45))
+                .foregroundColor(SalomTheme.Colors.textSecondary)
         }
     }
 
@@ -165,19 +187,19 @@ struct PaymentMethodSheet: View {
             } label: {
                 HStack(spacing: 8) {
                     if isLoading {
-                        ProgressView().tint(.black)
+                        ProgressView().tint(SalomTheme.Colors.onAccent)
                     } else {
                         Text("Davom etish")
                             .font(.system(size: 16, weight: .semibold))
-                            .foregroundColor(.black)
+                            .foregroundColor(SalomTheme.Colors.onAccent)
                         Image(systemName: "arrow.right")
                             .font(.system(size: 13, weight: .semibold))
-                            .foregroundColor(.black.opacity(0.7))
+                            .foregroundColor(SalomTheme.Colors.onAccent.opacity(0.8))
                     }
                 }
                 .frame(maxWidth: .infinity)
                 .frame(height: 54)
-                .background(Color.white)
+                .background(SalomTheme.Colors.accentSecondary)
                 .clipShape(RoundedRectangle(cornerRadius: 14, style: .continuous))
                 .opacity(isLoading ? 0.7 : 1)
             }
@@ -190,13 +212,13 @@ struct PaymentMethodSheet: View {
                 Text("SSL bilan himoyalangan xavfsiz to'lov")
                     .font(.system(size: 11))
             }
-            .foregroundColor(.white.opacity(0.32))
+            .foregroundColor(SalomTheme.Colors.textTertiary)
         }
         .padding(.horizontal, 22)
         .padding(.bottom, 14)
         .background(
             LinearGradient(
-                colors: [Color.black.opacity(0), Color.black],
+                colors: [SalomTheme.Colors.bgMain.opacity(0), SalomTheme.Colors.bgMain],
                 startPoint: .top, endPoint: .bottom
             )
             .frame(height: 130)
@@ -236,7 +258,7 @@ struct PaymentMethodSheet: View {
             guard let urlString = await subscriptionManager.subscribeOneTime(planCode: planCode),
                   let url = URL(string: urlString)
             else {
-                errorMessage = "To'lov havolasini olib bo'lmadi."
+                errorMessage = String.appLocalized("To'lov havolasini olib bo'lmadi.")
                 return
             }
             await UIApplication.shared.open(url)
@@ -248,7 +270,7 @@ struct PaymentMethodSheet: View {
             guard let urlString = await subscriptionManager.subscribeCheckout(planCode: planCode, provider: "payme"),
                   let url = URL(string: urlString)
             else {
-                errorMessage = "To'lov havolasini olib bo'lmadi."
+                errorMessage = String.appLocalized("To'lov havolasini olib bo'lmadi.")
                 return
             }
             await UIApplication.shared.open(url)
@@ -273,7 +295,7 @@ private struct MethodRow: View {
                 // Radio
                 Circle()
                     .strokeBorder(
-                        active ? Color.white : Color.white.opacity(0.2),
+                        active ? SalomTheme.Colors.accentPrimary : SalomTheme.Colors.border,
                         lineWidth: active ? 5 : 1
                     )
                     .frame(width: 18, height: 18)
@@ -283,12 +305,12 @@ private struct MethodRow: View {
                 ProviderChip(logo: logo, size: 40, badge: badge)
 
                 VStack(alignment: .leading, spacing: 3) {
-                    Text(title)
+                    Text(String.appLocalized(title))
                         .font(.system(size: 15.5, weight: .semibold))
-                        .foregroundColor(.white)
-                    Text(subtitle)
+                        .foregroundColor(SalomTheme.Colors.textPrimary)
+                    Text(String.appLocalized(subtitle))
                         .font(.system(size: 12.5))
-                        .foregroundColor(.white.opacity(0.42))
+                        .foregroundColor(SalomTheme.Colors.textSecondary)
                 }
 
                 Spacer()
@@ -297,12 +319,12 @@ private struct MethodRow: View {
             .padding(.vertical, 16)
             .background(
                 RoundedRectangle(cornerRadius: 16, style: .continuous)
-                    .fill(Color.white.opacity(active ? 0.06 : 0.025))
+                    .fill(active ? SalomTheme.Colors.surfaceMuted : SalomTheme.Colors.surface)
             )
             .overlay(
                 RoundedRectangle(cornerRadius: 16, style: .continuous)
                     .strokeBorder(
-                        active ? Color.white.opacity(0.9) : Color.white.opacity(0.06),
+                        active ? SalomTheme.Colors.accentPrimary : SalomTheme.Colors.border,
                         lineWidth: active ? 1 : 0.5
                     )
             )
@@ -318,10 +340,10 @@ private struct TrustItem: View {
         HStack(spacing: 5) {
             Image(systemName: icon)
                 .font(.system(size: 10, weight: .semibold))
-            Text(label)
+            Text(String.appLocalized(label))
                 .font(.system(size: 11, weight: .medium))
         }
-        .foregroundColor(.white.opacity(0.45))
+        .foregroundColor(SalomTheme.Colors.textSecondary)
     }
 }
 

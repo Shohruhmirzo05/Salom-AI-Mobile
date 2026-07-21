@@ -62,10 +62,7 @@ struct SMSVerifySheet: View {
         .onDisappear { timer?.invalidate() }
         .toolbar {
             ToolbarItem(placement: .principal) {
-                Image("click-logo")
-                    .resizable()
-                    .aspectRatio(contentMode: .fit)
-                    .frame(height: 50)
+                ClickBrandMark(iconSize: 34, fontSize: 27)
             }
         }
     }
@@ -106,7 +103,7 @@ struct SMSVerifySheet: View {
 
                     Text("SMS kodni kiriting")
                         .font(.title2.weight(.bold))
-                        .foregroundColor(.white)
+                        .foregroundColor(SalomTheme.Colors.textPrimary)
 
                     if !phoneHint.isEmpty {
                         Text("Kod \(phoneHint) raqamiga yuborildi")
@@ -120,15 +117,15 @@ struct SMSVerifySheet: View {
                     .keyboardType(.numberPad)
                     .multilineTextAlignment(.center)
                     .font(.system(size: 32, weight: .bold, design: .monospaced))
-                    .foregroundColor(.white)
+                    .foregroundColor(SalomTheme.Colors.textPrimary)
                     .focused($isCodeFocused)
                     .padding(20)
-                    .background(Color.white.opacity(0.05))
+                    .background(SalomTheme.Colors.surface)
                     .cornerRadius(16)
                     .overlay(
                         RoundedRectangle(cornerRadius: 16)
                             .stroke(
-                                isCodeFocused ? clickBlue.opacity(0.5) : Color.white.opacity(0.08),
+                                isCodeFocused ? clickBlue.opacity(0.5) : SalomTheme.Colors.border,
                                 lineWidth: 1
                             )
                     )
@@ -167,7 +164,7 @@ struct SMSVerifySheet: View {
                             ? LinearGradient(colors: [clickBlue, Color(hex: "0050DD")], startPoint: .leading, endPoint: .trailing)
                             : LinearGradient(colors: [Color.gray.opacity(0.3), Color.gray.opacity(0.3)], startPoint: .leading, endPoint: .trailing)
                     )
-                    .foregroundColor(smsCode.count >= 4 && !isLoading ? .white : .gray)
+                    .foregroundColor(smsCode.count >= 4 && !isLoading ? SalomTheme.Colors.onAccent : .gray)
                     .cornerRadius(16)
                 }
                 .disabled(smsCode.count < 4 || isLoading)
@@ -179,7 +176,7 @@ struct SMSVerifySheet: View {
                     Text("Barcha ma'lumotlar shifrlangan")
                         .font(.caption2)
                 }
-                .foregroundColor(.white.opacity(0.3))
+                .foregroundColor(SalomTheme.Colors.textTertiary)
                 .padding(.bottom, 20)
             }
         }
@@ -255,7 +252,7 @@ struct SMSVerifySheet: View {
                                 Text("Kartani o'zgartirish")
                             }
                             .font(.subheadline.weight(.medium))
-                            .foregroundColor(.white.opacity(0.6))
+                            .foregroundColor(SalomTheme.Colors.textSecondary)
                         }
                     }
                 }
@@ -273,13 +270,13 @@ struct SMSVerifySheet: View {
 
             ZStack {
                 Circle()
-                    .fill(Color.green.opacity(0.15))
+                    .fill(SalomTheme.Colors.signal.opacity(0.15))
                     .frame(width: 120, height: 120)
                     .scaleEffect(successScale)
 
                 Image(systemName: "checkmark.circle.fill")
                     .font(.system(size: 64))
-                    .foregroundColor(.green)
+                    .foregroundColor(SalomTheme.Colors.signal)
                     .scaleEffect(successScale)
             }
             .onAppear {
@@ -291,7 +288,7 @@ struct SMSVerifySheet: View {
             VStack(spacing: 8) {
                 Text("Muvaffaqiyatli!")
                     .font(.title.weight(.bold))
-                    .foregroundColor(.white)
+                    .foregroundColor(SalomTheme.Colors.textPrimary)
 
                 Text("Obuna faollashtirildi va karta saqlandi")
                     .font(.body)
@@ -313,9 +310,9 @@ struct SMSVerifySheet: View {
                 .frame(maxWidth: .infinity)
                 .padding(.vertical, 16)
                 .background(
-                    LinearGradient(colors: [.green, .green.opacity(0.8)], startPoint: .leading, endPoint: .trailing)
+                    SalomTheme.Gradients.accent
                 )
-                .foregroundColor(.white)
+                .foregroundColor(SalomTheme.Colors.onAccent)
                 .cornerRadius(16)
             }
             .padding(.horizontal, 24)
@@ -333,7 +330,7 @@ struct SMSVerifySheet: View {
 
         guard let code = Int(smsCode) else {
             HapticManager.shared.fire(.error)
-            withAnimation { errorMessage = "Noto'g'ri kod formati" }
+            withAnimation { errorMessage = String.appLocalized("Noto'g'ri kod formati") }
             isLoading = false
             timerActive = true
             return
@@ -347,13 +344,13 @@ struct SMSVerifySheet: View {
                 withAnimation(.easeInOut(duration: 0.4)) { showSuccess = true }
             } else {
                 HapticManager.shared.fire(.error)
-                withAnimation { errorMessage = "Tasdiqlash amalga oshmadi" }
+                withAnimation { errorMessage = String.appLocalized("Tasdiqlash amalga oshmadi") }
                 timerActive = true
             }
         } else {
             HapticManager.shared.fire(.error)
             withAnimation {
-                errorMessage = subscriptionManager.lastError ?? "SMS kod noto'g'ri yoki muddati o'tgan"
+                errorMessage = subscriptionManager.lastError ?? String.appLocalized("SMS kod noto'g'ri yoki muddati o'tgan")
             }
             timerActive = true
         }

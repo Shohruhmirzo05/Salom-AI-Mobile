@@ -90,7 +90,7 @@ final class VoiceViewModel: ObservableObject {
             } else {
                 print("❌ [VoiceViewModel] Microphone permission denied")
                 await MainActor.run {
-                    errorMessage = "Mikrofon ruxsati berilmagan"
+                    errorMessage = String.appLocalized("Mikrofon ruxsati berilmagan")
                 }
             }
         }
@@ -221,7 +221,7 @@ final class VoiceViewModel: ObservableObject {
             } catch {
                 print("❌ [VoiceViewModel] Error: \(error.localizedDescription)")
                 await MainActor.run {
-                    self.errorMessage = "Xatolik: \(error.localizedDescription)"
+                    self.errorMessage = String.appLocalized("Xatolik: ") + error.localizedDescription
                 }
             }
             
@@ -283,7 +283,7 @@ struct VoiceView: View {
                 .overlay(
                     RadialGradient(
                         colors: [
-                            Color(hex: "#1B1E39").opacity(0.45),
+                            SalomTheme.Colors.surfaceMuted.opacity(0.45),
                             Color.clear
                         ],
                         center: .topTrailing,
@@ -316,10 +316,10 @@ struct VoiceView: View {
                             if viewModel.isProcessing {
                                 HStack {
                                     ProgressView()
-                                        .tint(.white)
+                                        .tint(SalomTheme.Colors.accentPrimary)
                                     Text("Javob tayyorlanmoqda...")
                                         .font(.caption)
-                                        .foregroundColor(.white.opacity(0.7))
+                                        .foregroundColor(SalomTheme.Colors.textSecondary)
                                 }
                                 .padding()
                                 .frame(maxWidth: .infinity, alignment: .leading)
@@ -353,7 +353,7 @@ struct VoiceView: View {
                     
                     Text(viewModel.isRecording ? "Gapiring..." : (viewModel.isProcessing ? "Kuting..." : "Bosib turing"))
                         .font(.subheadline)
-                        .foregroundColor(.white.opacity(0.7))
+                        .foregroundColor(SalomTheme.Colors.textSecondary)
                 }
                 .padding(.bottom, 12)
             }
@@ -392,7 +392,7 @@ struct VoiceView: View {
                     )
                     .overlay(
                         Circle()
-                            .stroke(Color.white.opacity(0.2), lineWidth: 2)
+                            .stroke(SalomTheme.Colors.border, lineWidth: 2)
                     )
                     .shadow(
                         color: (viewModel.isRecording ? Color.red : SalomTheme.Colors.accentPrimary).opacity(0.4),
@@ -403,7 +403,7 @@ struct VoiceView: View {
                 
                 Image(systemName: viewModel.isRecording ? "stop.fill" : "mic.fill")
                     .font(.system(size: 40, weight: .semibold))
-                    .foregroundColor(.white)
+                    .foregroundColor(SalomTheme.Colors.onAccent)
             }
             .frame(width: 120, height: 120)
             .scaleEffect(viewModel.isRecording ? 1.1 : 1.0)
@@ -453,14 +453,15 @@ struct MessageBubble: View {
                 Text(message.text)
                     .padding()
                     .background(Color.blue)
-                    .foregroundColor(.white)
+                    .foregroundColor(SalomTheme.Colors.onMedia)
                     .cornerRadius(16)
                     .frame(maxWidth: UIScreen.main.bounds.width * 0.7, alignment: .trailing)
             } else {
                 Text(message.text)
                     .padding()
-                    .background(Color.white.opacity(0.1))
-                    .foregroundColor(.white)
+                    .background(SalomTheme.Colors.surface)
+                    .foregroundColor(SalomTheme.Colors.textPrimary)
+                    .overlay(RoundedRectangle(cornerRadius: 16).stroke(SalomTheme.Colors.border))
                     .cornerRadius(16)
                     .frame(maxWidth: UIScreen.main.bounds.width * 0.7, alignment: .leading)
                 Spacer()

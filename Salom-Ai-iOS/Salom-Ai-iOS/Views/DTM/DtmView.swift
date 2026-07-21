@@ -69,9 +69,9 @@ struct DtmView: View {
     private var subjectsRoot: some View {
         ScrollView {
             VStack(alignment: .leading, spacing: 16) {
-                Text(L.subtitle).font(.subheadline).foregroundColor(.white.opacity(0.6)).padding(.horizontal, 16)
+                Text(L.subtitle).font(.subheadline).foregroundColor(SalomTheme.Colors.textSecondary).padding(.horizontal, 16)
                 if loading {
-                    ProgressView().tint(.white).frame(maxWidth: .infinity).padding(.top, 60)
+                    ProgressView().tint(SalomTheme.Colors.accentPrimary).frame(maxWidth: .infinity).padding(.top, 60)
                 } else if subjects.isEmpty {
                     errorRetry
                 } else {
@@ -91,9 +91,9 @@ struct DtmView: View {
         VStack(alignment: .leading, spacing: 10) {
             Icon3DView(slug: DTM_3D[s.key] ?? "grad", size: 44)
             Spacer(minLength: 0)
-            Text(s.label).font(.system(size: 15, weight: .semibold)).foregroundColor(.white).lineLimit(2)
+            Text(s.label).font(.system(size: 15, weight: .semibold)).foregroundColor(SalomTheme.Colors.textPrimary).lineLimit(2)
             Text(s.questionCount > 0 ? "\(s.questionCount) \(L.questions)" : L.comingSoon)
-                .font(.caption).foregroundColor(.white.opacity(0.45))
+                .font(.caption).foregroundColor(SalomTheme.Colors.textTertiary)
         }
         .frame(maxWidth: .infinity, minHeight: 130, alignment: .topLeading)
         .padding(14)
@@ -102,8 +102,8 @@ struct DtmView: View {
 
     private var errorRetry: some View {
         VStack(spacing: 14) {
-            Image(systemName: "wifi.exclamationmark").font(.system(size: 34)).foregroundColor(.white.opacity(0.4))
-            Text(L.loadError).font(.subheadline).foregroundColor(.white.opacity(0.7)).multilineTextAlignment(.center).padding(.horizontal, 32)
+            Image(systemName: "wifi.exclamationmark").font(.system(size: 34)).foregroundColor(SalomTheme.Colors.textTertiary)
+            Text(L.loadError).font(.subheadline).foregroundColor(SalomTheme.Colors.textSecondary).multilineTextAlignment(.center).padding(.horizontal, 32)
             Button { Task { await loadSubjects() } } label: {
                 Label(L.retry, systemImage: "arrow.clockwise").fontWeight(.semibold)
                     .padding(.horizontal, 20).padding(.vertical, 12)

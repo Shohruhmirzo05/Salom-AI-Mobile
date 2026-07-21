@@ -34,7 +34,7 @@ struct DtmQuizView: View {
         ZStack {
             SalomTheme.Gradients.background.ignoresSafeArea()
             if loading {
-                ProgressView().tint(.white)
+                ProgressView().tint(SalomTheme.Colors.accentPrimary)
             } else if comingSoon {
                 infoState(L.comingSoon)
             } else if showResult {
@@ -49,13 +49,13 @@ struct DtmQuizView: View {
         .toolbar {
             ToolbarItem(placement: .principal) {
                 if !levelLabel.isEmpty && !showResult {
-                    Text("\(idx + 1) / \(questions.count) · \(levelLabel)").font(.caption).foregroundColor(.white.opacity(0.7))
+                    Text("\(idx + 1) / \(questions.count) · \(levelLabel)").font(.caption).foregroundColor(SalomTheme.Colors.textSecondary)
                 }
             }
         }
         .task { await loadQuiz() }
         .fullScreenCover(isPresented: $showPaywall, onDismiss: { if path.count > 0 { path.removeLast() } }) {
-            PaywallSheet()
+            PaywallSheet(context: .dtmDailyLimit, source: "ios_dtm_limit")
         }
     }
 
@@ -68,24 +68,24 @@ struct DtmQuizView: View {
                     if let t = q.topic, !t.isEmpty {
                         Text(L.tr(t).uppercased()).font(.system(size: 11, weight: .semibold)).foregroundColor(cyan.opacity(0.8))
                     }
-                    Text(L.tr(q.questionText)).font(.system(size: 18, weight: .semibold)).foregroundColor(.white)
+                    Text(L.tr(q.questionText)).font(.system(size: 18, weight: .semibold)).foregroundColor(SalomTheme.Colors.textPrimary)
                     VStack(spacing: 10) { ForEach(q.options, id: \.key) { o in optionRow(q, o) } }
                     if let fb = feedback {
                         VStack(alignment: .leading, spacing: 6) {
                             Text(fb.isCorrect ? L.correct : L.wrong).font(.subheadline.weight(.bold)).foregroundColor(fb.isCorrect ? .green : .red)
-                            if let ex = fb.explanation, !ex.isEmpty { Text(L.tr(ex)).font(.footnote).foregroundColor(.white.opacity(0.85)) }
+                            if let ex = fb.explanation, !ex.isEmpty { Text(L.tr(ex)).font(.footnote).foregroundColor(SalomTheme.Colors.textSecondary) }
                         }.padding(14).frame(maxWidth: .infinity, alignment: .leading).salomGlassCard(16)
                     }
                 }.padding(16)
             }
             Button { Task { feedback == nil ? await check() : next() } } label: {
                 Group {
-                    if checking { ProgressView().tint(.white) }
+                    if checking { ProgressView().tint(SalomTheme.Colors.onMedia) }
                     else { Text(feedback == nil ? L.check : (idx + 1 >= questions.count ? L.finish : L.next)).fontWeight(.semibold) }
                 }
                 .frame(maxWidth: .infinity).padding(.vertical, 16)
                 .background(LinearGradient(colors: [cyan, .purple], startPoint: .leading, endPoint: .trailing))
-                .foregroundColor(.white).clipShape(RoundedRectangle(cornerRadius: 16))
+                .foregroundColor(SalomTheme.Colors.onMedia).clipShape(RoundedRectangle(cornerRadius: 16))
             }
             .disabled((feedback == nil && chosen == nil) || checking)
             .opacity((feedback == nil && chosen == nil) ? 0.5 : 1)
@@ -100,17 +100,17 @@ struct DtmQuizView: View {
         return Button { if feedback == nil { chosen = o.key } } label: {
             HStack(spacing: 12) {
                 ZStack {
-                    Circle().fill(isCorrect ? Color.green : isWrong ? Color.red : Color.white.opacity(0.1)).frame(width: 28, height: 28)
-                    if isCorrect { Image(systemName: "checkmark").font(.system(size: 13, weight: .bold)).foregroundColor(.white) }
-                    else if isWrong { Image(systemName: "xmark").font(.system(size: 13, weight: .bold)).foregroundColor(.white) }
-                    else { Text(o.key).font(.system(size: 13, weight: .bold)).foregroundColor(.white.opacity(0.7)) }
+                    Circle().fill(isCorrect ? Color.green : isWrong ? Color.red : SalomTheme.Colors.surfaceMuted).frame(width: 28, height: 28)
+                    if isCorrect { Image(systemName: "checkmark").font(.system(size: 13, weight: .bold)).foregroundColor(SalomTheme.Colors.onMedia) }
+                    else if isWrong { Image(systemName: "xmark").font(.system(size: 13, weight: .bold)).foregroundColor(SalomTheme.Colors.onMedia) }
+                    else { Text(o.key).font(.system(size: 13, weight: .bold)).foregroundColor(SalomTheme.Colors.textSecondary) }
                 }
-                Text(L.tr(o.text)).font(.system(size: 15)).foregroundColor(.white).multilineTextAlignment(.leading)
+                Text(L.tr(o.text)).font(.system(size: 15)).foregroundColor(SalomTheme.Colors.textPrimary).multilineTextAlignment(.leading)
                 Spacer(minLength: 0)
             }
             .padding(14)
-            .background(RoundedRectangle(cornerRadius: 16).fill(Color.white.opacity(isChosen && feedback == nil ? 0.10 : 0.04)))
-            .overlay(RoundedRectangle(cornerRadius: 16).stroke(isCorrect ? Color.green.opacity(0.6) : isWrong ? Color.red.opacity(0.6) : isChosen ? cyan.opacity(0.6) : Color.white.opacity(0.08), lineWidth: 1.5))
+            .background(RoundedRectangle(cornerRadius: 16).fill(isChosen && feedback == nil ? SalomTheme.Colors.controlFillActive : SalomTheme.Colors.surface))
+            .overlay(RoundedRectangle(cornerRadius: 16).stroke(isCorrect ? Color.green.opacity(0.6) : isWrong ? Color.red.opacity(0.6) : isChosen ? cyan.opacity(0.6) : SalomTheme.Colors.border, lineWidth: 1.5))
         }.buttonStyle(.plain).disabled(feedback != nil)
     }
 
@@ -121,17 +121,17 @@ struct DtmQuizView: View {
             Spacer()
             ZStack {
                 Circle().fill(LinearGradient(colors: [cyan.opacity(0.2), Color.purple.opacity(0.2)], startPoint: .top, endPoint: .bottom)).frame(width: 120, height: 120)
-                Text("\(pct)%").font(.system(size: 32, weight: .heavy)).foregroundColor(.white)
+                Text("\(pct)%").font(.system(size: 32, weight: .heavy)).foregroundColor(SalomTheme.Colors.textPrimary)
             }
-            Text(L.result).font(.title3.weight(.bold)).foregroundColor(.white)
-            Text("\(score) / \(questions.count)").foregroundColor(.white.opacity(0.6))
+            Text(L.result).font(.title3.weight(.bold)).foregroundColor(SalomTheme.Colors.textPrimary)
+            Text("\(score) / \(questions.count)").foregroundColor(SalomTheme.Colors.textSecondary)
             VStack(spacing: 10) {
                 Button { Task { await loadQuiz() } } label: {
                     Label(L.again, systemImage: "arrow.clockwise").fontWeight(.semibold).frame(maxWidth: .infinity).padding(.vertical, 14)
-                        .background(LinearGradient(colors: [cyan, .purple], startPoint: .leading, endPoint: .trailing)).foregroundColor(.white).clipShape(RoundedRectangle(cornerRadius: 16))
+                        .background(LinearGradient(colors: [cyan, .purple], startPoint: .leading, endPoint: .trailing)).foregroundColor(SalomTheme.Colors.onMedia).clipShape(RoundedRectangle(cornerRadius: 16))
                 }
                 Button { if path.count > 0 { path.removeLast() } } label: {
-                    Text(L.chooseLevel).fontWeight(.medium).frame(maxWidth: .infinity).padding(.vertical, 14).foregroundColor(.white)
+                    Text(L.chooseLevel).fontWeight(.medium).frame(maxWidth: .infinity).padding(.vertical, 14).foregroundColor(SalomTheme.Colors.textPrimary)
                         .salomGlassCard(16, interactive: true)
                 }.buttonStyle(.plain)
             }.padding(.horizontal, 24)
@@ -141,8 +141,8 @@ struct DtmQuizView: View {
 
     private func infoState(_ text: String) -> some View {
         VStack(spacing: 14) {
-            Image(systemName: "hourglass").font(.system(size: 34)).foregroundColor(.white.opacity(0.4))
-            Text(text).font(.subheadline).foregroundColor(.white.opacity(0.7)).multilineTextAlignment(.center).padding(.horizontal, 32)
+            Image(systemName: "hourglass").font(.system(size: 34)).foregroundColor(SalomTheme.Colors.textTertiary)
+            Text(text).font(.subheadline).foregroundColor(SalomTheme.Colors.textSecondary).multilineTextAlignment(.center).padding(.horizontal, 32)
         }
     }
 

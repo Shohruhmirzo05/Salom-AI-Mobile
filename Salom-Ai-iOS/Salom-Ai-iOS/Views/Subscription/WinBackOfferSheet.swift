@@ -18,7 +18,7 @@ struct WinBackOfferSheet: View {
 
     var body: some View {
         ZStack {
-            Color.black.ignoresSafeArea()
+            SalomTheme.Colors.bgMain.ignoresSafeArea()
 
             // "Winning" celebration burst when the offer opens.
             ConfettiBurst()
@@ -35,7 +35,7 @@ struct WinBackOfferSheet: View {
                     ctaButton
                     Text("Maxsus narx faqat siz uchun, cheklangan vaqtda.")
                         .font(.system(size: 11))
-                        .foregroundColor(.white.opacity(0.4))
+                        .foregroundColor(SalomTheme.Colors.textTertiary)
                         .multilineTextAlignment(.center)
                 }
                 .padding(.horizontal, 22)
@@ -62,9 +62,9 @@ struct WinBackOfferSheet: View {
             Button { dismiss() } label: {
                 Image(systemName: "xmark")
                     .font(.system(size: 13, weight: .semibold))
-                    .foregroundColor(.white.opacity(0.5))
+                    .foregroundColor(SalomTheme.Colors.textSecondary)
                     .frame(width: 32, height: 32)
-                    .background(Color.white.opacity(0.06))
+                    .background(SalomTheme.Colors.surfaceMuted)
                     .clipShape(Circle())
             }
         }
@@ -74,7 +74,7 @@ struct WinBackOfferSheet: View {
         Text("-\(offer.discountPct)% CHEGIRMA")
             .font(.system(size: 13, weight: .heavy))
             .tracking(1)
-            .foregroundColor(.white)
+            .foregroundColor(SalomTheme.Colors.onAccent)
             .padding(.horizontal, 16)
             .padding(.vertical, 8)
             .background(
@@ -89,11 +89,11 @@ struct WinBackOfferSheet: View {
         VStack(spacing: 8) {
             Text("Sizni qaytarib olmoqchimiz! 🎁")
                 .font(.system(size: 22, weight: .bold))
-                .foregroundColor(.white)
+                .foregroundColor(SalomTheme.Colors.textPrimary)
                 .multilineTextAlignment(.center)
             Text("Pro obunani maxsus, bir martalik chegirma bilan oching.")
                 .font(.system(size: 14))
-                .foregroundColor(.white.opacity(0.55))
+                .foregroundColor(SalomTheme.Colors.textSecondary)
                 .multilineTextAlignment(.center)
         }
     }
@@ -102,22 +102,22 @@ struct WinBackOfferSheet: View {
         VStack(spacing: 6) {
             Text(offer.baseName)
                 .font(.system(size: 13, weight: .semibold))
-                .foregroundColor(.white.opacity(0.6))
+                .foregroundColor(SalomTheme.Colors.textSecondary)
             HStack(alignment: .firstTextBaseline, spacing: 10) {
                 Text(formatPrice(offer.promoPrice))
                     .font(.system(size: 30, weight: .heavy))
-                    .foregroundColor(.white)
+                    .foregroundColor(SalomTheme.Colors.textPrimary)
                 Text(formatPrice(offer.basePrice))
                     .font(.system(size: 17, weight: .medium))
-                    .foregroundColor(.white.opacity(0.4))
-                    .strikethrough(true, color: .white.opacity(0.4))
+                    .foregroundColor(SalomTheme.Colors.textTertiary)
+                    .strikethrough(true, color: SalomTheme.Colors.textTertiary)
             }
         }
         .frame(maxWidth: .infinity)
         .padding(.vertical, 20)
         .background(
             RoundedRectangle(cornerRadius: 18, style: .continuous)
-                .fill(Color.white.opacity(0.05))
+                .fill(SalomTheme.Colors.surface)
         )
         .overlay(
             RoundedRectangle(cornerRadius: 18, style: .continuous)
@@ -136,7 +136,7 @@ struct WinBackOfferSheet: View {
                                 .foregroundColor(SalomTheme.Colors.accentPrimary)
                             Text(line)
                                 .font(.system(size: 14))
-                                .foregroundColor(.white.opacity(0.8))
+                                .foregroundColor(SalomTheme.Colors.textPrimary)
                             Spacer()
                         }
                     }
@@ -154,10 +154,10 @@ struct WinBackOfferSheet: View {
         } label: {
             Text("Chegirmani olish")
                 .font(.system(size: 16, weight: .semibold))
-                .foregroundColor(.black)
+                .foregroundColor(SalomTheme.Colors.onAccent)
                 .frame(maxWidth: .infinity)
                 .frame(height: 54)
-                .background(Color.white)
+                .background(SalomTheme.Colors.accentSecondary)
                 .clipShape(RoundedRectangle(cornerRadius: 14, style: .continuous))
         }
         .buttonStyle(.plain)
@@ -193,7 +193,7 @@ private struct ConfettiBurst: View {
         self.count = count
         let palette: [Color] = [
             Color(hex: "#1ED6FF"), Color(hex: "#7C3AED"), Color(hex: "#FF7A00"),
-            Color(hex: "#FF2D78"), Color(hex: "#FFD23F"), Color(hex: "#22C55E"),
+            Color(hex: "#FF2D78"), Color(hex: "#FFD23F"), SalomTheme.Colors.accentPrimary,
         ]
         pieces = (0..<count).map { i in
             Piece(

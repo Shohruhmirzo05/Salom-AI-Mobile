@@ -36,13 +36,13 @@ struct LoadingMessageRow: View {
             
             VStack(alignment: .leading, spacing: 6) {
                 RoundedRectangle(cornerRadius: 6, style: .continuous)
-                    .fill(Color.white.opacity(0.18))
+                    .fill(isUser ? SalomTheme.Colors.onAccent.opacity(0.30) : SalomTheme.Colors.textTertiary.opacity(0.32))
                     .frame(height: 10)
                     .frame(maxWidth: UIScreen.main.bounds.width * (maxWidthMultiplier * 0.8))
                     .shimmering()
                 
                 RoundedRectangle(cornerRadius: 6, style: .continuous)
-                    .fill(Color.white.opacity(0.14))
+                    .fill(isUser ? SalomTheme.Colors.onAccent.opacity(0.22) : SalomTheme.Colors.textTertiary.opacity(0.22))
                     .frame(height: 10)
                     .frame(maxWidth: UIScreen.main.bounds.width * (maxWidthMultiplier * 0.5))
                     .shimmering()
@@ -63,8 +63,8 @@ struct LoadingMessageRow: View {
                         )
                         : LinearGradient(
                             colors: [
-                                Color.white.opacity(0.07),
-                                Color.white.opacity(0.04)
+                                SalomTheme.Colors.surfaceElevated,
+                                SalomTheme.Colors.surface
                             ],
                             startPoint: .topLeading,
                             endPoint: .bottomTrailing
@@ -72,7 +72,7 @@ struct LoadingMessageRow: View {
                     )
                     .overlay(
                         RoundedRectangle(cornerRadius: 20, style: .continuous)
-                            .stroke(Color.white.opacity(isUser ? 0.14 : 0.06))
+                            .stroke(isUser ? SalomTheme.Colors.onAccent.opacity(0.14) : SalomTheme.Colors.border)
                     )
             )
             .frame(

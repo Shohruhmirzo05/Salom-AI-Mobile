@@ -140,7 +140,8 @@ struct PresoL {
         switch lang {
         case "ru": return "ru"
         case "en": return "en"
-        default: return "uz"   // uz, uz-Cyrl → uz
+        case "kr", "uz-Cyrl": return "kr"
+        default: return "uz"
         }
     }
 
@@ -148,6 +149,7 @@ struct PresoL {
         switch lang {
         case "ru": return ru
         case "en": return en
+        case "kr", "uz-Cyrl": return UzCyrillic.toCyrillic(uz)
         default: return uz
         }
     }

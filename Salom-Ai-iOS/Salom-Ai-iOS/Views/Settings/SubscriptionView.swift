@@ -27,7 +27,7 @@ struct SubscriptionView: View {
                     
                     if subscriptionManager.isLoading && subscriptionManager.plans.isEmpty {
                         ProgressView()
-                            .tint(.white)
+                            .tint(SalomTheme.Colors.accentPrimary)
                             .padding(.top, 40)
                     } else {
                         RecoverySection()
@@ -45,7 +45,7 @@ struct SubscriptionView: View {
             ToolbarItem(placement: .principal) {
                 Text("Obunalar")
                     .font(.headline)
-                    .foregroundColor(.white)
+                    .foregroundColor(SalomTheme.Colors.textPrimary)
             }
         }
         .task {
@@ -80,7 +80,7 @@ struct SubscriptionView: View {
         VStack(spacing: 8) {
             Text("Pro imkoniyatlar")
                 .font(.title2.weight(.bold))
-                .foregroundColor(.white)
+                .foregroundColor(SalomTheme.Colors.textPrimary)
             
             Text("Cheklovsiz muloqot va ko'proq imkoniyatlar")
                 .font(.subheadline)
@@ -95,10 +95,10 @@ struct SubscriptionView: View {
             VStack(alignment: .leading, spacing: 12) {
                 HStack(spacing: 10) {
                     Image(systemName: "exclamationmark.triangle.fill").foregroundColor(.orange)
-                    Text("To'lov amalga oshmadi").font(.headline).foregroundColor(.white)
+                    Text("To'lov amalga oshmadi").font(.headline).foregroundColor(SalomTheme.Colors.textPrimary)
                 }
                 Text("Obunangiz vaqtincha to'xtatildi. Kartangizni to'ldiring va qayta urinib ko'ring.")
-                    .font(.subheadline).foregroundColor(.white.opacity(0.7))
+                    .font(.subheadline).foregroundColor(SalomTheme.Colors.textSecondary)
                 if let err = retryError {
                     Text(err).font(.caption).foregroundColor(.red)
                 }
@@ -111,12 +111,12 @@ struct SubscriptionView: View {
                     }
                 } label: {
                     HStack(spacing: 8) {
-                        if isRetrying { ProgressView().tint(.white) }
+                        if isRetrying { ProgressView().tint(SalomTheme.Colors.onMedia) }
                         else { Image(systemName: "creditcard.fill"); Text("Qayta urinib ko'rish").fontWeight(.semibold) }
                     }
                     .frame(maxWidth: .infinity).padding(.vertical, 14)
                     .background(LinearGradient(colors: [Color(hex: "#33E1ED"), .purple], startPoint: .leading, endPoint: .trailing))
-                    .foregroundColor(.white).clipShape(RoundedRectangle(cornerRadius: 14))
+                    .foregroundColor(SalomTheme.Colors.onMedia).clipShape(RoundedRectangle(cornerRadius: 14))
                 }
                 .disabled(isRetrying)
             }
@@ -138,7 +138,7 @@ struct SubscriptionView: View {
                     VStack(alignment: .leading, spacing: 4) {
                         Text(current.plan?.capitalized ?? "Noma'lum")
                             .font(.headline)
-                            .foregroundColor(.white)
+                            .foregroundColor(SalomTheme.Colors.textPrimary)
                         
                         if let expires = current.expiresAt {
                             Text("Amal qilish muddati: \(expires.formatted(date: .abbreviated, time: .omitted))")
@@ -156,7 +156,7 @@ struct SubscriptionView: View {
                 .padding(16)
                 .background(
                     RoundedRectangle(cornerRadius: 16)
-                        .fill(Color.white.opacity(0.05))
+                        .fill(SalomTheme.Colors.surface)
                         .overlay(
                             RoundedRectangle(cornerRadius: 16)
                                 .stroke(SalomTheme.Colors.accentPrimary.opacity(0.3), lineWidth: 1)
@@ -175,7 +175,7 @@ struct SubscriptionView: View {
                     VStack(alignment: .leading, spacing: 3) {
                         Text("Avtomatik yangilanish")
                             .font(.subheadline.weight(.medium))
-                            .foregroundColor(.white)
+                            .foregroundColor(SalomTheme.Colors.textPrimary)
                         
                         if let card = current.savedCard {
                             Text(card.maskedNumber)
@@ -187,7 +187,7 @@ struct SubscriptionView: View {
                     Spacer()
                     
                     if isTogglingAutoRenew {
-                        ProgressView().tint(.white)
+                        ProgressView().tint(SalomTheme.Colors.accentPrimary)
                     } else {
                         Toggle("", isOn: Binding(
                             get: { current.autoRenew ?? false },
@@ -207,7 +207,7 @@ struct SubscriptionView: View {
                 .padding(16)
                 .background(
                     RoundedRectangle(cornerRadius: 16)
-                        .fill(Color.white.opacity(0.05))
+                        .fill(SalomTheme.Colors.surface)
                 )
                 
                 // Saved cards link
@@ -219,7 +219,7 @@ struct SubscriptionView: View {
                             .foregroundColor(SalomTheme.Colors.accentPrimary)
                         Text("Saqlangan kartalar")
                             .font(.subheadline)
-                            .foregroundColor(.white)
+                            .foregroundColor(SalomTheme.Colors.textPrimary)
                         Spacer()
                         Text("\(subscriptionManager.savedCards.count)")
                             .font(.caption)
@@ -231,7 +231,7 @@ struct SubscriptionView: View {
                     .padding(16)
                     .background(
                         RoundedRectangle(cornerRadius: 16)
-                            .fill(Color.white.opacity(0.05))
+                            .fill(SalomTheme.Colors.surface)
                     )
                 }
                 
@@ -251,7 +251,7 @@ struct SubscriptionView: View {
                         .padding(16)
                         .background(
                             RoundedRectangle(cornerRadius: 16)
-                                .fill(Color.white.opacity(0.05))
+                                .fill(SalomTheme.Colors.surface)
                         )
                     }
                 } else if let expires = current.expiresAt {
@@ -292,23 +292,24 @@ struct SubscriptionView: View {
                             withAnimation(.easeOut(duration: 0.18)) { billingPeriod = p }
                         } label: {
                             HStack(spacing: 5) {
-                                Text(p == .yearly ? "Yillik" : "Oylik").font(.system(size: 13.5, weight: .semibold))
+                                Text(String.appLocalized(p == .yearly ? "Yillik" : "Oylik"))
+                                    .font(.system(size: 13.5, weight: .semibold))
                                 if p == .yearly, maxSave > 0 {
-                                    Text("−\(maxSave)%").font(.system(size: 10, weight: .bold)).foregroundColor(.white)
+                                    Text("−\(maxSave)%").font(.system(size: 10, weight: .bold)).foregroundColor(SalomTheme.Colors.onAccent)
                                         .padding(.horizontal, 5).padding(.vertical, 1)
-                                        .background(Capsule().fill(Color.green))
+                                        .background(Capsule().fill(SalomTheme.Colors.signal))
                                 }
                             }
-                            .foregroundColor(billingPeriod == p ? .black : .white.opacity(0.6))
+                            .foregroundColor(billingPeriod == p ? SalomTheme.Colors.textPrimary : SalomTheme.Colors.textSecondary)
                             .frame(maxWidth: .infinity).padding(.vertical, 10)
-                            .background(RoundedRectangle(cornerRadius: 10, style: .continuous).fill(billingPeriod == p ? Color.white : Color.clear))
+                            .background(RoundedRectangle(cornerRadius: 10, style: .continuous).fill(billingPeriod == p ? SalomTheme.Colors.surface : Color.clear))
                             .contentShape(Rectangle())   // whole segment tappable, not just the text
                         }
                         .buttonStyle(.plain)
                     }
                 }
                 .padding(4)
-                .background(RoundedRectangle(cornerRadius: 13, style: .continuous).fill(Color.white.opacity(0.06)))
+                .background(RoundedRectangle(cornerRadius: 13, style: .continuous).fill(SalomTheme.Colors.surfaceMuted))
             }
             ForEach(displayed) { plan in
                 PlanCard(plan: plan, savingsPct: PlanPeriodHelper.savingsPct(plan, in: paid))
@@ -322,9 +323,9 @@ struct SubscriptionView: View {
         
         VStack(alignment: .leading, spacing: 16) {
             HStack {
-                Text(plan.name)
+                Text(subscriptionPlanDisplayName(plan))
                     .font(.title3.weight(.bold))
-                    .foregroundColor(.white)
+                    .foregroundColor(SalomTheme.Colors.textPrimary)
                 
                 Spacer()
                 
@@ -340,7 +341,7 @@ struct SubscriptionView: View {
                 HStack(alignment: .firstTextBaseline, spacing: 6) {
                     Text("\(perDay.formatted()) so'm")
                         .font(.title.weight(.bold))
-                        .foregroundColor(.white)
+                        .foregroundColor(SalomTheme.Colors.textPrimary)
                     Text("/ kun")
                         .font(.caption)
                         .foregroundColor(SalomTheme.Colors.textSecondary)
@@ -352,7 +353,7 @@ struct SubscriptionView: View {
                     if let s = savingsPct, s > 0 {
                         Text("−\(s)% tejang")
                             .font(.caption.weight(.bold))
-                            .foregroundColor(.green)
+                            .foregroundColor(SalomTheme.Colors.signal)
                     }
                 }
             }
@@ -365,13 +366,13 @@ struct SubscriptionView: View {
                     HStack(alignment: .top, spacing: 8) {
                         Image(systemName: included ? "checkmark" : "xmark")
                             .font(.caption.weight(.bold))
-                            .foregroundColor(included ? (isPro ? .yellow : SalomTheme.Colors.accentPrimary) : .white.opacity(0.3))
+                            .foregroundColor(included ? (isPro ? .yellow : SalomTheme.Colors.accentPrimary) : SalomTheme.Colors.textTertiary)
                             .padding(.top, 2)
 
-                        Text(f.label)
+                        Text(String.appLocalized(f.label))
                             .font(.subheadline)
-                            .foregroundColor(included ? SalomTheme.Colors.textSecondary : .white.opacity(0.3))
-                            .strikethrough(!included, color: .white.opacity(0.3))
+                            .foregroundColor(included ? SalomTheme.Colors.textSecondary : SalomTheme.Colors.textTertiary)
+                            .strikethrough(!included, color: SalomTheme.Colors.textTertiary)
                             .fixedSize(horizontal: false, vertical: true)
                     }
                 }
@@ -388,33 +389,42 @@ struct SubscriptionView: View {
                     if isCurrent {
                         Text("Faol")
                             .fontWeight(.semibold)
-                            .foregroundStyle(.white)
+                            .foregroundStyle(SalomTheme.Colors.textSecondary)
                     } else if plan.priceUzs == 0 {
                         Text("Bepul")
                             .fontWeight(.semibold)
-                            .foregroundStyle(.white)
+                            .foregroundStyle(SalomTheme.Colors.textSecondary)
                     } else {
                         Text("Tanlash")
                             .fontWeight(.semibold)
-                            .foregroundStyle(.white)
+                            .foregroundStyle(SalomTheme.Colors.onAccent)
                     }
                 }
                 .frame(maxWidth: .infinity)
                 .padding(.vertical, 12)
                 .background(
                     RoundedRectangle(cornerRadius: 12)
-                        .fill(isCurrent || plan.priceUzs == 0 ? Color.white.opacity(0.2) : SalomTheme.Colors.accentPrimary)
+                        .fill(isCurrent || plan.priceUzs == 0 ? SalomTheme.Colors.surfaceMuted : SalomTheme.Colors.accentPrimary)
                 )
-                .foregroundColor((isCurrent || plan.priceUzs == 0) ? .white : .black)
+                .foregroundColor((isCurrent || plan.priceUzs == 0) ? SalomTheme.Colors.textSecondary : SalomTheme.Colors.onAccent)
             }
             .disabled(isCurrent || plan.priceUzs == 0)
         }
         .padding(20)
         .background(
             RoundedRectangle(cornerRadius: 24)
-                .fill(Color.white.opacity(0.05))
+                .fill(SalomTheme.Colors.surface)
+                .overlay(RoundedRectangle(cornerRadius: 24).stroke(SalomTheme.Colors.border, lineWidth: 1))
         )
     }
+}
+
+private func subscriptionPlanDisplayName(_ plan: SubscriptionPlan) -> String {
+    let code = plan.code.lowercased()
+    if code.contains("pro") { return String.appLocalized("Pro") }
+    if code.contains("standard") { return String.appLocalized("Standard") }
+    if code.contains("free") || code.contains("lite") { return String.appLocalized("Bepul") }
+    return plan.name
 }
 
 struct IdentifiablePlanCode: Identifiable {

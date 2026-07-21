@@ -15,12 +15,13 @@ struct LocStr: Decodable, Hashable {
     let ru: String?
     let en: String?
 
-    /// Pick by app language code. uz / uz-Cyrl (kr) both fall back to uz Latin
-    /// (no client-side transliterator); ru/en use their own.
+    /// Pick by app language code. Backend copy currently ships as uz/ru/en, so
+    /// Cyrillic Uzbek is derived from the canonical Uzbek copy on-device.
     func pick(_ code: String) -> String {
         switch code {
         case "ru": return ru ?? uz
         case "en": return en ?? uz
+        case "kr", "uz-Cyrl": return UzCyrillic.toCyrillic(uz)
         default: return uz
         }
     }
@@ -136,6 +137,7 @@ struct IshL {
         switch lang {
         case "ru": return ru
         case "en": return en
+        case "kr", "uz-Cyrl": return UzCyrillic.toCyrillic(uz)
         default: return uz
         }
     }

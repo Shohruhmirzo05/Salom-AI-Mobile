@@ -40,7 +40,7 @@ struct ReferatsListView: View {
         ScrollView {
             VStack(alignment: .leading, spacing: 22) {
                 if loading {
-                    ProgressView().tint(.white).frame(maxWidth: .infinity).padding(.top, 60)
+                    ProgressView().tint(SalomTheme.Colors.accentPrimary).frame(maxWidth: .infinity).padding(.top, 60)
                 } else if isPremiumLocked {
                     premiumUpsell
                 } else {
@@ -56,7 +56,7 @@ struct ReferatsListView: View {
         .fullScreenCover(item: $openRef, onDismiss: { Task { await refreshList() } }) { ref in
             ReferatEditorView(referatId: ref.id)
         }
-        .fullScreenCover(isPresented: $showPaywall) { PaywallSheet() }
+        .fullScreenCover(isPresented: $showPaywall) { PaywallSheet(context: .referatExport, source: "ios_referats") }
     }
 
     // MARK: create
@@ -66,13 +66,13 @@ struct ReferatsListView: View {
             TextField(L.topicPlaceholder, text: $topic, axis: .vertical)
                 .lineLimit(2...5)
                 .padding(14)
-                .background(RoundedRectangle(cornerRadius: 16).fill(Color.white.opacity(0.06)))
-                .foregroundColor(.white)
+                .background(RoundedRectangle(cornerRadius: 16).fill(SalomTheme.Colors.surfaceMuted))
+                .foregroundColor(SalomTheme.Colors.textPrimary)
 
             TextField(L.audience, text: $audience)
                 .padding(12)
-                .background(RoundedRectangle(cornerRadius: 14).fill(Color.white.opacity(0.06)))
-                .foregroundColor(.white)
+                .background(RoundedRectangle(cornerRadius: 14).fill(SalomTheme.Colors.surfaceMuted))
+                .foregroundColor(SalomTheme.Colors.textPrimary)
 
             HStack(spacing: 10) {
                 Menu {
@@ -93,18 +93,18 @@ struct ReferatsListView: View {
             }
 
             HStack {
-                Text(config?.limit == -1 ? L.unlimited : (remaining.map { "\($0) \(L.remaining)" } ?? "")).font(.caption).foregroundColor(.white.opacity(0.4))
+                Text(config?.limit == -1 ? L.unlimited : (remaining.map { "\($0) \(L.remaining)" } ?? "")).font(.caption).foregroundColor(SalomTheme.Colors.textTertiary)
                 Spacer()
                 Button {
                     Task { await create() }
                 } label: {
                     HStack(spacing: 8) {
-                        if creating { ProgressView().tint(.white).scaleEffect(0.8) } else { Image(systemName: "wand.and.stars") }
+                        if creating { ProgressView().tint(SalomTheme.Colors.onMedia).scaleEffect(0.8) } else { Image(systemName: "wand.and.stars") }
                         Text(creating ? L.creating : L.create).fontWeight(.semibold)
                     }
                     .padding(.horizontal, 22).padding(.vertical, 14)
                     .background(LinearGradient(colors: [.cyan, .purple], startPoint: .leading, endPoint: .trailing))
-                    .foregroundColor(.white).clipShape(Capsule())
+                    .foregroundColor(SalomTheme.Colors.onMedia).clipShape(Capsule())
                 }
                 .disabled(creating || topic.trimmingCharacters(in: .whitespaces).isEmpty || freeDailyReached)
                 .opacity(creating || topic.trimmingCharacters(in: .whitespaces).isEmpty || freeDailyReached ? 0.5 : 1)
@@ -112,7 +112,7 @@ struct ReferatsListView: View {
 
             if freeDailyReached {
                 HStack {
-                    Text(L.freeDailyDone).font(.caption).foregroundColor(.white.opacity(0.8))
+                    Text(L.freeDailyDone).font(.caption).foregroundColor(SalomTheme.Colors.textSecondary)
                     Spacer()
                     Button(L.upgrade) { showPaywall = true }.font(.caption.weight(.semibold)).foregroundColor(.orange)
                 }
@@ -126,12 +126,13 @@ struct ReferatsListView: View {
 
     private func pickerLabel(_ text: String) -> some View {
         HStack {
-            Text(text).foregroundColor(.white).font(.system(size: 14))
+            Text(text).foregroundColor(SalomTheme.Colors.textPrimary).font(.system(size: 14))
             Spacer()
-            Image(systemName: "chevron.down").font(.system(size: 11)).foregroundColor(.white.opacity(0.5))
+            Image(systemName: "chevron.down").font(.system(size: 11)).foregroundColor(SalomTheme.Colors.textTertiary)
         }
         .padding(.horizontal, 12).padding(.vertical, 12)
-        .background(RoundedRectangle(cornerRadius: 12).fill(Color.white.opacity(0.06)))
+        .background(RoundedRectangle(cornerRadius: 12).fill(SalomTheme.Colors.controlFill))
+        .overlay(RoundedRectangle(cornerRadius: 12).stroke(SalomTheme.Colors.border))
         .frame(maxWidth: .infinity)
     }
 
@@ -147,8 +148,8 @@ struct ReferatsListView: View {
                 .font(.caption.weight(.bold)).foregroundColor(.orange)
                 .padding(.horizontal, 12).padding(.vertical, 6)
                 .background(Capsule().fill(Color.orange.opacity(0.18)))
-            Text(L.premiumTitle).font(.title2.weight(.bold)).foregroundColor(.white)
-            Text(L.premiumDesc).font(.subheadline).foregroundColor(.white.opacity(0.6))
+            Text(L.premiumTitle).font(.title2.weight(.bold)).foregroundColor(SalomTheme.Colors.textPrimary)
+            Text(L.premiumDesc).font(.subheadline).foregroundColor(SalomTheme.Colors.textSecondary)
             VStack(alignment: .leading, spacing: 8) {
                 featureRow("doc.fill", "Word (DOCX) + PDF")
                 featureRow("sparkles", L.editWithAI)
@@ -159,7 +160,7 @@ struct ReferatsListView: View {
                 Label(L.upgrade, systemImage: "crown.fill").fontWeight(.semibold)
                     .padding(.horizontal, 22).padding(.vertical, 14)
                     .background(LinearGradient(colors: [.orange, .pink], startPoint: .leading, endPoint: .trailing))
-                    .foregroundColor(.white).clipShape(Capsule())
+                    .foregroundColor(SalomTheme.Colors.onMedia).clipShape(Capsule())
             }
         }
         .padding(20)
@@ -171,7 +172,7 @@ struct ReferatsListView: View {
     private func featureRow(_ icon: String, _ text: String) -> some View {
         HStack(spacing: 10) {
             Image(systemName: icon).font(.system(size: 13)).foregroundColor(.cyan).frame(width: 22)
-            Text(text).font(.subheadline).foregroundColor(.white.opacity(0.75))
+            Text(text).font(.subheadline).foregroundColor(SalomTheme.Colors.textSecondary)
         }
     }
 
@@ -179,14 +180,14 @@ struct ReferatsListView: View {
 
     private var listSection: some View {
         VStack(alignment: .leading, spacing: 12) {
-            Label(L.myReferats, systemImage: "text.book.closed").font(.headline).foregroundColor(.white)
+            Label(L.myReferats, systemImage: "text.book.closed").font(.headline).foregroundColor(SalomTheme.Colors.textPrimary)
             if items.isEmpty {
                 VStack(spacing: 10) {
-                    Image(systemName: "doc.text").font(.system(size: 36)).foregroundColor(.white.opacity(0.25))
-                    Text(L.empty).foregroundColor(.white.opacity(0.4))
+                    Image(systemName: "doc.text").font(.system(size: 36)).foregroundColor(SalomTheme.Colors.textTertiary)
+                    Text(L.empty).foregroundColor(SalomTheme.Colors.textSecondary)
                 }
                 .frame(maxWidth: .infinity).padding(.vertical, 40)
-                .background(RoundedRectangle(cornerRadius: 20).strokeBorder(style: StrokeStyle(lineWidth: 1.5, dash: [6])).foregroundColor(.white.opacity(0.1)))
+                .background(RoundedRectangle(cornerRadius: 20).strokeBorder(style: StrokeStyle(lineWidth: 1.5, dash: [6])).foregroundColor(SalomTheme.Colors.border))
             } else {
                 ForEach(items) { r in row(r) }
             }
@@ -202,13 +203,13 @@ struct ReferatsListView: View {
                     else { Image(systemName: "text.book.closed.fill").foregroundColor(.white.opacity(0.9)) }
                 }
                 VStack(alignment: .leading, spacing: 4) {
-                    Text(r.title.isEmpty ? "—" : r.title).font(.system(size: 15, weight: .semibold)).foregroundColor(.white).lineLimit(1)
-                    Text(statusLabel(r)).font(.caption2).foregroundColor(.white.opacity(0.5))
+                    Text(r.title.isEmpty ? "—" : r.title).font(.system(size: 15, weight: .semibold)).foregroundColor(SalomTheme.Colors.textPrimary).lineLimit(1)
+                    Text(statusLabel(r)).font(.caption2).foregroundColor(SalomTheme.Colors.textTertiary)
                 }
                 Spacer()
                 Button {
                     Task { try? await ReferatService.delete(r.id); await refreshList() }
-                } label: { Image(systemName: "trash").font(.system(size: 13)).foregroundColor(.white.opacity(0.4)).padding(8) }
+                } label: { Image(systemName: "trash").font(.system(size: 13)).foregroundColor(SalomTheme.Colors.textTertiary).padding(8) }
             }
             .padding(10)
             .salomGlassCard(16, interactive: true)

@@ -87,7 +87,7 @@ struct TypingIndicator: View {
         HStack(spacing: 5) {
             ForEach(0..<3, id: \.self) { i in
                 Circle()
-                    .fill(Color.white.opacity(0.55))
+                    .fill(SalomTheme.Colors.textSecondary.opacity(0.75))
                     .frame(width: 7, height: 7)
                     .offset(y: animate ? -4 : 2)
                     .opacity(animate ? 1.0 : 0.35)
@@ -116,7 +116,7 @@ struct ChatLoadingSkeleton: View {
                 HStack {
                     if row.isUser { Spacer(minLength: 60) }
                     RoundedRectangle(cornerRadius: 18, style: .continuous)
-                        .fill(Color.white.opacity(0.07))
+                        .fill(SalomTheme.Colors.surfaceMuted)
                         .frame(width: row.width, height: row.height)
                     if !row.isUser { Spacer(minLength: 60) }
                 }
@@ -168,7 +168,7 @@ final class ChatViewModel: ObservableObject {
     @Published var showAttachmentPicker: Bool = false
     @Published var showPhotoPicker: Bool = false
     @Published var showDocumentPicker: Bool = false
-    @Published var selectedPhotoItem: PhotosPickerItem? = nil
+    @Published var selectedPhotoItems: [PhotosPickerItem] = []
     
     // Image Generation
     @Published var isImageMode: Bool = false
@@ -242,7 +242,7 @@ final class ChatViewModel: ObservableObject {
                     audioRecorder.startRecording()
                 } else {
                     await MainActor.run {
-                        errorMessage = "Mikrofon ruxsati berilmagan"
+                        errorMessage = String.appLocalized("Mikrofon ruxsati berilmagan")
                     }
                 }
             }
@@ -269,13 +269,13 @@ final class ChatViewModel: ObservableObject {
                         // Append to whatever's already typed, like ChatGPT dictation.
                         self.inputText = self.inputText.isEmpty ? t : self.inputText + " " + t
                     } else {
-                        self.errorMessage = "Ovoz aniqlanmadi, qayta urinib ko‘ring"
+                        self.errorMessage = String.appLocalized("Ovoz aniqlanmadi, qayta urinib ko‘ring")
                     }
                     self.isProcessingVoice = false
                 }
             } catch {
                 await MainActor.run {
-                    self.errorMessage = "Ovozni aniqlab bo‘lmadi, qayta urinib ko‘ring"
+                    self.errorMessage = String.appLocalized("Ovozni aniqlab bo‘lmadi, qayta urinib ko‘ring")
                     self.isProcessingVoice = false
                 }
             }
@@ -297,7 +297,7 @@ final class ChatViewModel: ObservableObject {
                 }
             } catch {
                 await MainActor.run {
-                    self.errorMessage = "Fayl yuklashda xatolik: \(error.localizedDescription)"
+                    self.errorMessage = String.appLocalized("Fayl yuklashda xatolik: ") + error.localizedDescription
                     self.isUploading = false
                 }
             }
@@ -308,14 +308,35 @@ final class ChatViewModel: ObservableObject {
         attachments.remove(at: index)
     }
     
-    func handlePhotoSelection(_ item: PhotosPickerItem?) {
-        guard let item = item else { return }
+    func handlePhotoSelection(_ items: [PhotosPickerItem]) {
+        guard !items.isEmpty else { return }
+        let imageModeAtSelection = isImageMode
+        let availableSlots = max(0, (imageModeAtSelection ? 4 : 6) - attachments.count)
+        let selectedItems = Array(items.prefix(availableSlots))
         Task {
-            if let data = try? await item.loadTransferable(type: Data.self) {
-                // Generate filename
-                let ext = item.supportedContentTypes.first?.preferredFilenameExtension ?? "jpg"
-                let filename = "photo_\(Date().timeIntervalSince1970).\(ext)"
-                uploadFile(data: data, filename: filename)
+            isUploading = true
+            defer {
+                isUploading = false
+                selectedPhotoItems = []
+            }
+
+            var uploaded: [String] = []
+            do {
+                for (index, item) in selectedItems.enumerated() {
+                    guard let data = try await item.loadTransferable(type: Data.self) else { continue }
+                    let type = item.supportedContentTypes.first
+                    let ext = type?.preferredFilenameExtension ?? "jpg"
+                    let contentType = type?.preferredMIMEType ?? "image/jpeg"
+                    let filename = "photo_\(Int(Date().timeIntervalSince1970))_\(index).\(ext)"
+                    let endpoint: APIClient.Endpoint = imageModeAtSelection
+                        ? .uploadReferenceImage(data: data, filename: filename, contentType: contentType)
+                        : .uploadFile(data: data, filename: filename)
+                    let response = try await client.request(endpoint, decodeTo: FileUploadResponse.self)
+                    uploaded.append(response.url)
+                }
+                attachments.append(contentsOf: uploaded)
+            } catch {
+                errorMessage = String.appLocalized("Rasm yuklashda xatolik: ") + error.localizedDescription
             }
         }
     }
@@ -536,7 +557,7 @@ final class ChatViewModel: ObservableObject {
             } catch {
                 await MainActor.run {
                     self.generatingDocId = nil
-                    self.errorMessage = "Hujjatni yaratib boʻlmadi"
+                    self.errorMessage = String.appLocalized("Hujjatni yaratib boʻlmadi")
                 }
             }
         }
@@ -647,6 +668,8 @@ final class ChatViewModel: ObservableObject {
                                 }
                             }
                         }
+                        ReviewManager.shared.considerRequestAfterCompletedTask()
+                        PushManager.recordSuccessfulTask()
                     case "error":
                         if let errorMsg = event.message {
                             await MainActor.run { self.errorMessage = errorMsg }
@@ -672,34 +695,55 @@ final class ChatViewModel: ObservableObject {
                 }
             }
 
-            await MainActor.run {
-                ReviewManager.shared.incrementActionCount()
-            }
         }
     }
     
     @MainActor
-    func generateImage() {
-        let trimmed = inputText.trimmingCharacters(in: .whitespacesAndNewlines)
+    func generateImage(
+        prompt overridePrompt: String? = nil,
+        referenceImages overrideReferences: [String]? = nil,
+        replacing assistant: ChatMessage? = nil
+    ) {
+        let trimmed = (overridePrompt ?? inputText).trimmingCharacters(in: .whitespacesAndNewlines)
         guard !trimmed.isEmpty, !isGeneratingImage else { return }
-        
-        inputText = ""
-        let userMessage = ChatMessage(
-            remoteId: nil,
-            text: trimmed,
-            role: .user,
-            createdAt: Date()
-        )
-        
-        objectWillChange.send()
-        messages.append(userMessage)
+
+        let referenceImages = (overrideReferences ?? attachments).filter { url in
+            guard let ext = URL(string: url)?.pathExtension.lowercased() else { return false }
+            return ["jpg", "jpeg", "png", "webp"].contains(ext)
+        }
+
+        let replacementIndex = assistant.flatMap { candidate in
+            messages.firstIndex(where: { $0.id == candidate.id })
+        }
+        if let replacementIndex {
+            messages.remove(at: replacementIndex)
+        } else {
+            inputText = ""
+            attachments = []
+            let userMessage = ChatMessage(
+                remoteId: nil,
+                text: trimmed,
+                role: .user,
+                createdAt: Date(),
+                fileUrls: referenceImages.isEmpty ? nil : referenceImages
+            )
+            objectWillChange.send()
+            messages.append(userMessage)
+        }
         isGeneratingImage = true
         isTyping = true
         
         Task {
             do {
                 let response = try await client.request(
-                    .generateImage(conversationId: selectedConversation?.id, prompt: trimmed, projectId: nil),
+                    .generateImage(
+                        conversationId: selectedConversation?.id,
+                        prompt: trimmed,
+                        projectId: nil,
+                        referenceImages: referenceImages.isEmpty ? nil : referenceImages,
+                        regenerate: assistant != nil,
+                        replaceImageUrl: assistant?.fileUrls?.first
+                    ),
                     decodeTo: ChatReplyResponse.self
                 )
                 
@@ -714,7 +758,11 @@ final class ChatViewModel: ObservableObject {
                         createdAt: Date(),
                         fileUrls: [response.reply] // Image URL
                     )
-                    self.messages.append(assistantMessage)
+                    if let replacementIndex {
+                        self.messages.insert(assistantMessage, at: min(replacementIndex, self.messages.count))
+                    } else {
+                        self.messages.append(assistantMessage)
+                    }
                     
                     let isNewConversation = self.selectedConversation?.id != response.conversationId
                     
@@ -734,6 +782,10 @@ final class ChatViewModel: ObservableObject {
                 await MainActor.run {
                     self.isTyping = false
                     self.errorMessage = error.localizedDescription
+                    if let assistant, let replacementIndex,
+                       !self.messages.contains(where: { $0.id == assistant.id }) {
+                        self.messages.insert(assistant, at: min(replacementIndex, self.messages.count))
+                    }
                 }
             }
             
@@ -741,6 +793,28 @@ final class ChatViewModel: ObservableObject {
                 self.isGeneratingImage = false
             }
         }
+    }
+
+    @MainActor
+    func useImageAsReference(_ assistant: ChatMessage) {
+        guard let url = assistant.fileUrls?.first(where: { value in
+            guard let ext = URL(string: value)?.pathExtension.lowercased() else { return false }
+            return ["jpg", "jpeg", "png", "webp"].contains(ext)
+        }) else { return }
+        attachments = [url]
+        isImageMode = true
+        inputText = ""
+    }
+
+    @MainActor
+    func regenerateImage(_ assistant: ChatMessage) {
+        guard let index = messages.firstIndex(where: { $0.id == assistant.id }),
+              let source = messages[..<index].last(where: { $0.isUser }) else { return }
+        let references = (source.fileUrls ?? []).filter { value in
+            guard let ext = URL(string: value)?.pathExtension.lowercased() else { return false }
+            return ["jpg", "jpeg", "png", "webp"].contains(ext)
+        }
+        generateImage(prompt: source.text, referenceImages: references, replacing: assistant)
     }
     
     func search() {
@@ -813,7 +887,7 @@ struct ChatView: View {
                 .overlay(
                     RadialGradient(
                         colors: [
-                            Color(hex: "#1B1E39").opacity(0.45),
+                            SalomTheme.Colors.surfaceMuted.opacity(0.45),
                             Color.clear
                         ],
                         center: .topTrailing,
@@ -881,7 +955,7 @@ struct ChatView: View {
             }
         }
         .sheet(isPresented: $showPaywall) {
-            PaywallSheet()
+            PaywallSheet(context: .smartModelUpgrade, source: "ios_chat_limit")
         }
         .sheet(isPresented: $showRewardSheet, onDismiss: {
             // Runs only AFTER the sheet is fully gone from the window — safe to
@@ -922,7 +996,7 @@ struct ChatView: View {
                             Button { showUsageInfo = false } label: {
                                 Image(systemName: "xmark")
                                     .font(.system(size: 13, weight: .semibold))
-                                    .foregroundColor(.white.opacity(0.6))
+                                    .foregroundColor(SalomTheme.Colors.textSecondary)
                             }
                         }
                     }
@@ -937,9 +1011,14 @@ struct ChatView: View {
             }
             Button("Bekor qilish", role: .cancel) { }
         }
-        .photosPicker(isPresented: $viewModel.showPhotoPicker, selection: $viewModel.selectedPhotoItem, matching: .images)
-        .onChange(of: viewModel.selectedPhotoItem) { _, newItem in
-            viewModel.handlePhotoSelection(newItem)
+        .photosPicker(
+            isPresented: $viewModel.showPhotoPicker,
+            selection: $viewModel.selectedPhotoItems,
+            maxSelectionCount: viewModel.isImageMode ? 4 : 6,
+            matching: .images
+        )
+        .onChange(of: viewModel.selectedPhotoItems) { _, newItems in
+            viewModel.handlePhotoSelection(newItems)
         }
         .sheet(isPresented: $viewModel.showDocumentPicker) {
             if #available(iOS 16.0, *) {
@@ -965,11 +1044,11 @@ struct ChatView: View {
 
     private func userFriendlyError(_ error: String) -> String {
         if error.contains("LIMIT_EXCEEDED") || error.contains("limitga yetdingiz") || error.contains("Quota exceeded") {
-            return "Sizning obuna limitingiz tugagan. Iltimos, obunangizni yangilang."
+            return String.appLocalized("Sizning obuna limitingiz tugagan. Iltimos, obunangizni yangilang.")
         } else if error.contains("Invalid token") || error.contains("unauthorized") {
-            return "Sessiya muddati tugagan. Qaytadan kiring."
+            return String.appLocalized("Sessiya muddati tugagan. Qaytadan kiring.")
         } else if error.contains("network") || error.contains("connection") {
-            return "Internet aloqasi bilan muammo. Qayta urinib ko'ring."
+            return String.appLocalized("Internet aloqasi bilan muammo. Qayta urinib ko'ring.")
         } else {
             return error
         }
@@ -986,14 +1065,14 @@ struct ChatView: View {
             } label: {
                 Image(systemName: "line.3.horizontal")
                     .font(.system(size: 18, weight: .medium))
-                    .foregroundColor(.white)
+                    .foregroundColor(SalomTheme.Colors.textPrimary)
                     .salomGlassCircle(40)
             }
             
             VStack(alignment: .leading, spacing: 2) {
                 Text(viewModel.selectedConversation?.title ?? "Salom AI")
                     .font(.system(size: 17, weight: .semibold))
-                    .foregroundColor(.white)
+                    .foregroundColor(SalomTheme.Colors.textPrimary)
                     .lineLimit(1)
                 HStack(spacing: 6) {
                     Image(systemName: "sparkles")
@@ -1014,7 +1093,7 @@ struct ChatView: View {
                         viewModel.selectedModel = model
                     } label: {
                         HStack {
-                            Text(model.name)
+                            Text(localizedModelName(model))
                             if viewModel.selectedModel?.id == model.id {
                                 Image(systemName: "checkmark")
                             }
@@ -1023,12 +1102,12 @@ struct ChatView: View {
                 }
             } label: {
                 HStack(spacing: 4) {
-                    Text(viewModel.selectedModel?.name ?? "Tezkor")
+                    Text(viewModel.selectedModel.map(localizedModelName) ?? String.appLocalized("Tezkor"))
                         .font(.system(size: 14, weight: .medium))
-                        .foregroundColor(.white)
+                        .foregroundColor(SalomTheme.Colors.textPrimary)
                     Image(systemName: "chevron.down")
                         .font(.caption2)
-                        .foregroundColor(.white.opacity(0.5))
+                        .foregroundColor(SalomTheme.Colors.textTertiary)
                 }
                 .padding(.horizontal, 12)
                 .padding(.vertical, 6)
@@ -1042,7 +1121,7 @@ struct ChatView: View {
             } label: {
                 Image(systemName: subs.isPro ? "crown.fill" : "crown")
                     .font(.system(size: 17, weight: .semibold))
-                    .foregroundColor(subs.isPro ? .yellow : .white.opacity(0.8))
+                    .foregroundColor(subs.isPro ? .yellow : SalomTheme.Colors.textSecondary)
             }
         }
         .padding(.horizontal, 16)
@@ -1050,18 +1129,29 @@ struct ChatView: View {
         .padding(.bottom, 8)
     }
     
-    private var statusSubtitle: LocalizedStringKey {
+    private var statusSubtitle: String {
         if viewModel.isLoadingMessages {
-            return "Yuklanmoqda..."
+            return String.appLocalized("Yuklanmoqda...")
         }
         let count = viewModel.messages.count
-        if count > 0 { return LocalizedStringKey("\(count) xabar") }
-        return "O'zbekcha suniy intellekt"
+        if count > 0 {
+            return String(format: String.appLocalized("%lld xabar"), count)
+        }
+        return String.appLocalized("O'zbekcha suniy intellekt")
+    }
+
+    private func localizedModelName(_ model: AIModel) -> String {
+        switch model.tier.lowercased() {
+        case "fast": return "⚡ \(String.appLocalized("Tezkor"))"
+        case "smart": return "🧠 \(String.appLocalized("Aqlli"))"
+        case "super_smart", "super-smart", "super": return "💎 \(String.appLocalized("Super Aqlli"))"
+        default: return model.name
+        }
     }
     
     @ViewBuilder func SeparatorLine() -> some View {
         Rectangle()
-            .fill(Color.white.opacity(0.08))
+            .fill(SalomTheme.Colors.border)
             .frame(height: 0.5)
             .padding(.bottom, 4)
     }
@@ -1139,10 +1229,10 @@ struct ChatView: View {
                     } label: {
                         Image(systemName: "chevron.down")
                             .font(.system(size: 16, weight: .bold))
-                            .foregroundColor(.white)
+                            .foregroundColor(SalomTheme.Colors.textPrimary)
                             .frame(width: 40, height: 40)
                             .background(.ultraThinMaterial, in: Circle())
-                            .overlay(Circle().stroke(Color.white.opacity(0.2), lineWidth: 0.5))
+                            .overlay(Circle().stroke(SalomTheme.Colors.border, lineWidth: 0.5))
                             .shadow(color: .black.opacity(0.38), radius: 12, x: 0, y: 6)
                     }
                     .buttonStyle(.plain)
@@ -1248,7 +1338,7 @@ struct ChatView: View {
                         if message.isUser {
                             Text(message.text)
                                 .font(.system(size: 15, weight: .medium))
-                                .foregroundColor(.white)
+                                .foregroundColor(SalomTheme.Colors.onAccent)
                         } else {
                             MarkdownText(text: message.text)   // rich formatting, like web
                         }
@@ -1263,7 +1353,7 @@ struct ChatView: View {
                         HStack(spacing: 6) {
                             Image(systemName: "globe")
                                 .font(.system(size: 11))
-                                .foregroundColor(.white.opacity(0.4))
+                                .foregroundColor(SalomTheme.Colors.textTertiary)
                             ForEach(Array(citations.enumerated()), id: \.offset) { idx, cite in
                                 if let url = URL(string: cite.url) {
                                     Link(destination: url) {
@@ -1275,7 +1365,7 @@ struct ChatView: View {
                                             .padding(.vertical, 4)
                                             .background(
                                                 RoundedRectangle(cornerRadius: 8, style: .continuous)
-                                                    .fill(Color.white.opacity(0.06))
+                                                    .fill(SalomTheme.Colors.surfaceMuted)
                                             )
                                     }
                                 }
@@ -1301,7 +1391,7 @@ struct ChatView: View {
                         )
                         : LinearGradient(
                             colors: [
-                                Color.white.opacity(0.05)
+                                SalomTheme.Colors.surface
                             ],
                             startPoint: .topLeading,
                             endPoint: .bottomTrailing
@@ -1309,7 +1399,7 @@ struct ChatView: View {
                     )
                     .overlay(
                         RoundedRectangle(cornerRadius: 20, style: .continuous)
-                            .stroke(Color.white.opacity(message.isUser ? 0.14 : 0.06))
+                            .stroke(message.isUser ? Color.white.opacity(0.14) : SalomTheme.Colors.border)
                     )
                     .shadow(color: Color.black.opacity(0.25), radius: 16, x: 0, y: 10)
             )
@@ -1343,6 +1433,47 @@ struct ChatView: View {
             }
         }
 
+            if !message.isUser,
+               let imageString = message.fileUrls?.first(where: isImageURL),
+               let imageURL = URL(string: imageString),
+               !(viewModel.isGeneratingImage && message.id == viewModel.messages.last?.id) {
+                HStack(spacing: 6) {
+                    Button {
+                        HapticManager.shared.fire(.lightImpact)
+                        viewModel.useImageAsReference(message)
+                    } label: {
+                        Label("Tahrirlash", systemImage: "slider.horizontal.3")
+                            .font(.system(size: 12, weight: .semibold))
+                            .foregroundColor(SalomTheme.Colors.textPrimary)
+                            .padding(.horizontal, 10)
+                            .padding(.vertical, 7)
+                            .background(SalomTheme.Colors.surfaceMuted, in: RoundedRectangle(cornerRadius: 9, style: .continuous))
+                    }
+                    .buttonStyle(.plain)
+
+                    Button {
+                        HapticManager.shared.fire(.lightImpact)
+                        viewModel.regenerateImage(message)
+                    } label: {
+                        Label("Yangi variant", systemImage: "arrow.clockwise")
+                            .font(.system(size: 12, weight: .medium))
+                            .foregroundColor(SalomTheme.Colors.textSecondary)
+                            .padding(.horizontal, 8)
+                            .padding(.vertical, 7)
+                    }
+                    .buttonStyle(.plain)
+                    .disabled(viewModel.isGeneratingImage)
+
+                    ShareLink(item: imageURL) {
+                        Image(systemName: "square.and.arrow.up")
+                            .font(.system(size: 13, weight: .medium))
+                            .foregroundColor(SalomTheme.Colors.textSecondary)
+                            .frame(width: 30, height: 30)
+                    }
+                }
+                .padding(.leading, 8)
+            }
+
             // AI answer extras: a document card (only if the user asked for a file)
             // + the action row (copy / share / regenerate / 👍 / 👎). Hidden while
             // this message is still streaming.
@@ -1362,9 +1493,9 @@ struct ChatView: View {
                                 Image(systemName: fmt.icon).foregroundColor(SalomTheme.Colors.accentPrimary)
                             }
                             VStack(alignment: .leading, spacing: 1) {
-                                Text(fmt.label).font(.system(size: 14, weight: .semibold)).foregroundColor(.white)
-                                Text(viewModel.generatingDocId == message.id ? "Tayyorlanmoqda…" : "Ochish")
-                                    .font(.system(size: 11)).foregroundColor(.white.opacity(0.5))
+                                Text(String.appLocalized(fmt.label)).font(.system(size: 14, weight: .semibold)).foregroundColor(SalomTheme.Colors.textPrimary)
+                                Text(String.appLocalized(viewModel.generatingDocId == message.id ? "Tayyorlanmoqda…" : "Ochish"))
+                                    .font(.system(size: 11)).foregroundColor(SalomTheme.Colors.textTertiary)
                             }
                             Spacer(minLength: 0)
                             if viewModel.generatingDocId != message.id {
@@ -1398,7 +1529,7 @@ struct ChatView: View {
                 .padding(.vertical, 15)
                 .background(
                     RoundedRectangle(cornerRadius: 20, style: .continuous)
-                        .fill(Color.white.opacity(0.06))
+                        .fill(SalomTheme.Colors.surfaceMuted)
                 )
             Spacer()
         }
@@ -1413,19 +1544,19 @@ struct ChatView: View {
         HStack {
             VStack(alignment: .leading, spacing: 8) {
                 RoundedRectangle(cornerRadius: 12)
-                    .fill(Color.white.opacity(0.1))
+                    .fill(SalomTheme.Colors.surfaceMuted)
                     .frame(width: 200, height: 200)
                     .shimmering()
                 
                 RoundedRectangle(cornerRadius: 4)
-                    .fill(Color.white.opacity(0.1))
+                    .fill(SalomTheme.Colors.surfaceMuted)
                     .frame(width: 120, height: 16)
                     .shimmering()
             }
             .padding(12)
             .background(
                 RoundedRectangle(cornerRadius: 20, style: .continuous)
-                    .fill(Color.white.opacity(0.05))
+                    .fill(SalomTheme.Colors.surface)
             )
             
             Spacer()
@@ -1511,6 +1642,16 @@ struct ChatView: View {
                                         .background(Circle().fill(Color.black.opacity(0.7)))
                                 }
                                 .offset(x: 6, y: -6)
+
+                                if viewModel.isImageMode {
+                                    Text("\(index + 1)")
+                                        .font(.system(size: 11, weight: .bold))
+                                        .foregroundColor(SalomTheme.Colors.textPrimary)
+                                        .frame(width: 22, height: 22)
+                                        .background(SalomTheme.Colors.surface.opacity(0.92), in: Circle())
+                                        .overlay(Circle().stroke(SalomTheme.Colors.border, lineWidth: 0.5))
+                                        .offset(x: -37, y: 37)
+                                }
                             }
                         }
                     }
@@ -1542,15 +1683,17 @@ struct ChatView: View {
                             Label("Rasm galereyasi", systemImage: "photo")
                         }
                         
-                        Button {
-                            viewModel.showDocumentPicker = true
-                        } label: {
-                            Label("Hujjatlar", systemImage: "doc")
+                        if !viewModel.isImageMode {
+                            Button {
+                                viewModel.showDocumentPicker = true
+                            } label: {
+                                Label("Hujjatlar", systemImage: "doc")
+                            }
                         }
                     } label: {
                         Image(systemName: "paperclip")
                             .font(.system(size: 18, weight: .semibold))
-                            .foregroundColor(viewModel.isUploading ? .white : SalomTheme.Colors.accentPrimary)
+                            .foregroundColor(viewModel.isUploading ? SalomTheme.Colors.onAccent : SalomTheme.Colors.accentPrimary)
                             .frame(width: 40, height: 40)
                             .background(
                                 Group {
@@ -1561,7 +1704,7 @@ struct ChatView: View {
                                             endPoint: .bottomTrailing
                                         )
                                     } else {
-                                        Color.white.opacity(0.08)
+                                        SalomTheme.Colors.surfaceMuted
                                     }
                                 }
                             )
@@ -1570,12 +1713,15 @@ struct ChatView: View {
                                 Group {
                                     if viewModel.isUploading {
                                         ProgressView()
-                                            .tint(.white)
+                                            .tint(SalomTheme.Colors.onAccent)
                                     }
                                 }
                             )
                     }
-                    .disabled(viewModel.isRecording || viewModel.isProcessingVoice || viewModel.isUploading || viewModel.isImageMode)
+                    .disabled(
+                        viewModel.isRecording || viewModel.isProcessingVoice || viewModel.isUploading ||
+                        (viewModel.isImageMode && viewModel.attachments.count >= 4)
+                    )
 
                     Spacer()
                 }
@@ -1587,14 +1733,14 @@ struct ChatView: View {
                                 LinearGradient(
                                     colors: viewModel.isImageMode ?
                                     [Color(hex: "#A855F7").opacity(0.18), Color(hex: "#EC4899").opacity(0.18)] :
-                                        [Color.white.opacity(0.08), Color.white.opacity(0.05)],
+                                        [SalomTheme.Colors.surfaceMuted, SalomTheme.Colors.surface],
                                     startPoint: .topLeading,
                                     endPoint: .bottomTrailing
                                 )
                             )
                             .overlay(
                                 RoundedRectangle(cornerRadius: 22, style: .continuous)
-                                    .stroke(Color.white.opacity(0.08))
+                                    .stroke(SalomTheme.Colors.border)
                             )
                         
                         TextField(
@@ -1604,11 +1750,11 @@ struct ChatView: View {
                         )
                         .padding(.horizontal, 12)
                         .padding(.vertical, 8)
-                        .foregroundColor(.white)
-                        .lineLimit(1...4)
+                        .foregroundColor(SalomTheme.Colors.textPrimary)
+                        .lineLimit(1...5)
                         .disabled(viewModel.isRecording || viewModel.isProcessingVoice)
                     }
-                    .frame(maxHeight: 76)
+                    .frame(minHeight: 48, maxHeight: 100)
 
                     // Voice → text (dictation). Tap to record, tap to stop; the
                     // transcription (OpenAI STT via /voice/stt) fills the field.
@@ -1618,14 +1764,14 @@ struct ChatView: View {
                     } label: {
                         ZStack {
                             Circle()
-                                .fill(viewModel.isRecording ? Color.red : Color.white.opacity(0.08))
+                                .fill(viewModel.isRecording ? Color.red : SalomTheme.Colors.surfaceMuted)
                                 .frame(width: 44, height: 44)
                             if viewModel.isProcessingVoice {
                                 ProgressView().tint(SalomTheme.Colors.accentPrimary)
                             } else {
                                 Image(systemName: "mic.fill")
                                     .font(.system(size: 18, weight: .semibold))
-                                    .foregroundColor(viewModel.isRecording ? .white : SalomTheme.Colors.accentPrimary)
+                                    .foregroundColor(viewModel.isRecording ? SalomTheme.Colors.onAccent : SalomTheme.Colors.accentPrimary)
                             }
                         }
                     }
@@ -1653,14 +1799,17 @@ struct ChatView: View {
                             
                             if viewModel.isSending || viewModel.isGeneratingImage {
                                 ProgressView()
-                                    .tint(.white)
+                                    .tint(SalomTheme.Colors.onAccent)
                             } else {
                                 if viewModel.isImageMode {
                                     Image(systemName: "wand.and.stars")
                                         .font(.system(size: 20, weight: .bold))
-                                        .foregroundColor(.white)
+                                        .foregroundColor(SalomTheme.Colors.onAccent)
                                 } else {
-                                    Icon3DView(slug: "rocket", size: 24)
+                                    Image(systemName: "paperplane.fill")
+                                        .font(.system(size: 19, weight: .semibold))
+                                        .foregroundColor(SalomTheme.Colors.onAccent)
+                                        .offset(x: -1, y: 1)
                                 }
                             }
                         }
@@ -1677,7 +1826,7 @@ struct ChatView: View {
             .padding(10)
             .background(
                 RoundedRectangle(cornerRadius: 24, style: .continuous)
-                    .fill(Color.white.opacity(0.05))
+                    .fill(SalomTheme.Colors.surface)
                     .shadow(color: Color.black.opacity(0.25), radius: 12, x: 0, y: 6)
             )
         }
@@ -1696,7 +1845,7 @@ struct ChatView: View {
                 if isActive {
                     Image(systemName: systemName)
                         .font(.system(size: 18, weight: .semibold))
-                        .foregroundColor(.white)
+                        .foregroundColor(SalomTheme.Colors.onAccent)
                         .frame(width: 40, height: 40)
                         .background(
                             LinearGradient(
@@ -1782,11 +1931,11 @@ struct ChatView: View {
                 } label: {
                     Group {
                         if saving {
-                            ProgressView().tint(.white)
+                            ProgressView().tint(SalomTheme.Colors.onMedia)
                         } else {
                             Image(systemName: saved ? "checkmark" : "arrow.down")
                                 .font(.system(size: 15, weight: .bold))
-                                .foregroundColor(.white)
+                                .foregroundColor(SalomTheme.Colors.onMedia)
                         }
                     }
                     .frame(width: 34, height: 34)
@@ -1829,10 +1978,10 @@ struct ChatView: View {
         var body: some View {
             HStack(spacing: 8) {
                 Image(systemName: "doc.fill")
-                    .foregroundColor(.white.opacity(0.8))
+                    .foregroundColor(SalomTheme.Colors.textSecondary)
                 Text(URL(string: url)?.lastPathComponent ?? "File")
                     .font(.caption)
-                    .foregroundColor(.white.opacity(0.9))
+                    .foregroundColor(SalomTheme.Colors.textPrimary)
                     .lineLimit(1)
                 Spacer()
                 if let link = URL(string: url) {
@@ -1843,7 +1992,7 @@ struct ChatView: View {
                 }
             }
             .padding(10)
-            .background(Color.white.opacity(0.08))
+            .background(SalomTheme.Colors.surfaceMuted)
             .clipShape(RoundedRectangle(cornerRadius: 10, style: .continuous))
         }
     }
@@ -1857,7 +2006,7 @@ struct ChatView: View {
 
         var body: some View {
             HStack(spacing: 2) {
-                iconButton(copied ? "checkmark" : "doc.on.doc", tint: copied ? .green : .white.opacity(0.45)) {
+                iconButton(copied ? "checkmark" : "doc.on.doc", tint: copied ? .green : SalomTheme.Colors.textTertiary) {
                     UIPasteboard.general.string = message.text
                     HapticManager.shared.fire(.lightImpact)
                     withAnimation { copied = true }
@@ -1866,21 +2015,21 @@ struct ChatView: View {
 
                 ShareLink(item: message.text) {
                     Image(systemName: "square.and.arrow.up")
-                        .font(.system(size: 13)).foregroundColor(.white.opacity(0.45))
+                        .font(.system(size: 13)).foregroundColor(SalomTheme.Colors.textTertiary)
                         .frame(width: 32, height: 28)
                 }
 
-                iconButton("arrow.clockwise", tint: .white.opacity(0.45)) {
+                iconButton("arrow.clockwise", tint: SalomTheme.Colors.textTertiary) {
                     HapticManager.shared.fire(.lightImpact)
                     onRegenerate()
                 }
 
-                Rectangle().fill(Color.white.opacity(0.12)).frame(width: 1, height: 15).padding(.horizontal, 3)
+                Rectangle().fill(SalomTheme.Colors.border).frame(width: 1, height: 15).padding(.horizontal, 3)
 
                 iconButton(rating == "up" ? "hand.thumbsup.fill" : "hand.thumbsup",
-                           tint: rating == "up" ? SalomTheme.Colors.accentPrimary : .white.opacity(0.45)) { setRating("up") }
+                           tint: rating == "up" ? SalomTheme.Colors.accentPrimary : SalomTheme.Colors.textTertiary) { setRating("up") }
                 iconButton(rating == "down" ? "hand.thumbsdown.fill" : "hand.thumbsdown",
-                           tint: rating == "down" ? .red.opacity(0.85) : .white.opacity(0.45)) { setRating("down") }
+                           tint: rating == "down" ? .red.opacity(0.85) : SalomTheme.Colors.textTertiary) { setRating("down") }
             }
         }
 
@@ -1902,6 +2051,9 @@ struct ChatView: View {
                 "model": model ?? "",
                 "preview": String(message.text.prefix(200))
             ])
+            if nv == "up" {
+                ReviewManager.shared.recordPositiveFeedback()
+            }
         }
     }
 }

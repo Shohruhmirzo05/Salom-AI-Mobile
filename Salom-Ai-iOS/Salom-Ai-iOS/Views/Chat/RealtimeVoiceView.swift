@@ -18,8 +18,7 @@ struct RealtimeVoiceView: View {
     
     var body: some View {
         ZStack {
-            // Dark background
-            Color.black.ignoresSafeArea()
+            SalomTheme.Gradients.background.ignoresSafeArea()
             
             VStack {
                 // Header
@@ -35,10 +34,10 @@ struct RealtimeVoiceView: View {
                     } label: {
                         Image(systemName: "xmark")
                             .font(.system(size: 20, weight: .medium))
-                            .foregroundColor(.white)
+                            .foregroundColor(SalomTheme.Colors.textPrimary)
                             .padding(12)
-                            .background(Circle().fill(Color.white.opacity(0.1)))
-                            .background(Circle().fill(Color.white.opacity(0.1)))
+                            .background(Circle().fill(SalomTheme.Colors.surfaceMuted))
+                            .overlay(Circle().stroke(SalomTheme.Colors.border))
                     }
                     
                     Spacer()
@@ -49,11 +48,12 @@ struct RealtimeVoiceView: View {
                             .font(.system(size: 24))
                         Text(viewModel.currentLanguageName)
                             .font(.system(size: 16, weight: .medium))
-                            .foregroundColor(.white)
+                            .foregroundColor(SalomTheme.Colors.textPrimary)
                     }
                     .padding(.horizontal, 12)
                     .padding(.vertical, 6)
-                    .background(Capsule().fill(Color.white.opacity(0.1)))
+                    .background(Capsule().fill(SalomTheme.Colors.surfaceMuted))
+                    .overlay(Capsule().stroke(SalomTheme.Colors.border))
                     
                     Spacer()
                     
@@ -63,9 +63,10 @@ struct RealtimeVoiceView: View {
                     } label: {
                         Image(systemName: "gearshape.fill")
                             .font(.system(size: 20, weight: .medium))
-                            .foregroundColor(.white)
+                            .foregroundColor(SalomTheme.Colors.textPrimary)
                             .padding(12)
-                            .background(Circle().fill(Color.white.opacity(0.1)))
+                            .background(Circle().fill(SalomTheme.Colors.surfaceMuted))
+                            .overlay(Circle().stroke(SalomTheme.Colors.border))
                     }
                 }
                 .padding()
@@ -84,7 +85,7 @@ struct RealtimeVoiceView: View {
                 VStack(spacing: 8) {
                     Text(statusText)
                         .font(.headline)
-                        .foregroundColor(.white.opacity(0.8))
+                        .foregroundColor(SalomTheme.Colors.textPrimary)
                     
                     // Beta Disclaimer
                     HStack(spacing: 6) {
@@ -98,7 +99,7 @@ struct RealtimeVoiceView: View {
 
                         Text("Sinov rejimi — xatolar bo'lishi mumkin")
                             .font(.caption)
-                            .foregroundColor(.white.opacity(0.5))
+                            .foregroundColor(SalomTheme.Colors.textSecondary)
                     }
                 }
                 .padding(.bottom, 40)
@@ -111,13 +112,14 @@ struct RealtimeVoiceView: View {
                         VStack(spacing: 8) {
                             Image(systemName: viewModel.isMuted ? "mic.slash.fill" : "mic.fill")
                                 .font(.title2)
-                                .foregroundColor(viewModel.isMuted ? .red : .white)
+                                .foregroundColor(viewModel.isMuted ? .red : SalomTheme.Colors.textPrimary)
                                 .frame(width: 60, height: 60)
-                                .background(Circle().fill(Color.white.opacity(0.1)))
+                                .background(Circle().fill(SalomTheme.Colors.surfaceMuted))
+                                .overlay(Circle().stroke(SalomTheme.Colors.border))
                             
                             Text(viewModel.isMuted ? "Ovoz yoqish" : "Ovoz o'chirish")
                                 .font(.caption)
-                                .foregroundColor(.white.opacity(0.6))
+                                .foregroundColor(SalomTheme.Colors.textSecondary)
                         }
                     }
                     
@@ -133,13 +135,13 @@ struct RealtimeVoiceView: View {
                         VStack(spacing: 8) {
                             Image(systemName: "phone.down.fill")
                                 .font(.title2)
-                                .foregroundColor(.white)
+                                .foregroundColor(SalomTheme.Colors.onMedia)
                                 .frame(width: 60, height: 60)
                                 .background(Circle().fill(Color.red))
                             
                             Text("Tugatish")
                                 .font(.caption)
-                                .foregroundColor(.white.opacity(0.6))
+                                .foregroundColor(SalomTheme.Colors.textSecondary)
                         }
                     }
                 }
@@ -202,7 +204,7 @@ struct RealtimeVoiceView: View {
             // or not — close the voice view. They can re-tap voice to retry.
             if let onDismiss = onDismiss { onDismiss() } else { dismiss() }
         }) {
-            PaywallSheet()
+            PaywallSheet(context: .voiceSessionLimit, source: "ios_voice_limit")
         }
     }
     

@@ -78,7 +78,7 @@ struct PresentationEditorView: View {
             .id(revision)
 
             Text("\(min(current + 1, slides.count)) / \(slides.count)")
-                .font(.caption).foregroundColor(.white.opacity(0.5)).padding(.bottom, 4)
+                .font(.caption).foregroundColor(SalomTheme.Colors.textSecondary).padding(.bottom, 4)
 
             chatBar
         }
@@ -86,10 +86,10 @@ struct PresentationEditorView: View {
 
     private var header: some View {
         HStack(spacing: 10) {
-            Button { dismiss() } label: { Image(systemName: "chevron.left").font(.system(size: 16, weight: .semibold)).foregroundColor(.white).padding(8).background(Circle().fill(Color.white.opacity(0.08))) }
+            Button { dismiss() } label: { Image(systemName: "chevron.left").font(.system(size: 16, weight: .semibold)).foregroundColor(SalomTheme.Colors.textPrimary).padding(8).background(Circle().fill(SalomTheme.Colors.surfaceMuted)) }
             VStack(alignment: .leading, spacing: 1) {
-                Text(preso?.title ?? "—").font(.system(size: 15, weight: .semibold)).foregroundColor(.white).lineLimit(1)
-                Text("\(slides.count) \(L.slides)").font(.caption2).foregroundColor(.white.opacity(0.45))
+                Text(preso?.title ?? "—").font(.system(size: 15, weight: .semibold)).foregroundColor(SalomTheme.Colors.textPrimary).lineLimit(1)
+                Text("\(slides.count) \(L.slides)").font(.caption2).foregroundColor(SalomTheme.Colors.textTertiary)
             }
             Spacer()
 
@@ -97,26 +97,26 @@ struct PresentationEditorView: View {
                 ForEach(["midnight", "aurora", "minimal", "sand", "forest", "coral"], id: \.self) { t in
                     Button(t.capitalized) { Task { await changeTheme(t) } }
                 }
-            } label: { Image(systemName: "paintpalette").font(.system(size: 16)).foregroundColor(.white).padding(8).background(Circle().fill(Color.white.opacity(0.08))) }
+            } label: { Image(systemName: "paintpalette").font(.system(size: 16)).foregroundColor(SalomTheme.Colors.textPrimary).padding(8).background(Circle().fill(SalomTheme.Colors.surfaceMuted)) }
 
-            Button { presenting = true } label: { Image(systemName: "play.fill").font(.system(size: 14)).foregroundColor(.white).padding(8).background(Circle().fill(Color.white.opacity(0.08))) }
+            Button { presenting = true } label: { Image(systemName: "play.fill").font(.system(size: 14)).foregroundColor(SalomTheme.Colors.textPrimary).padding(8).background(Circle().fill(SalomTheme.Colors.surfaceMuted)) }
 
             Menu {
                 Button { Task { await runExport("pptx") } } label: { Label("PowerPoint (.pptx)", systemImage: "doc.fill") }
                 Button { Task { await runExport("pdf") } } label: { Label("PDF (.pdf)", systemImage: "doc.richtext") }
             } label: {
                 HStack(spacing: 6) {
-                    if exporting { ProgressView().tint(.white).scaleEffect(0.7) } else { Image(systemName: "square.and.arrow.up") }
+                    if exporting { ProgressView().tint(SalomTheme.Colors.onMedia).scaleEffect(0.7) } else { Image(systemName: "square.and.arrow.up") }
                     Text(exporting ? L.exporting : L.export).font(.system(size: 13, weight: .semibold))
                 }
                 .padding(.horizontal, 12).padding(.vertical, 8)
                 .background(Capsule().fill(LinearGradient(colors: [.cyan, .purple], startPoint: .leading, endPoint: .trailing)))
-                .foregroundColor(.white)
+                .foregroundColor(SalomTheme.Colors.onMedia)
             }
             .disabled(exporting)
         }
         .padding(.horizontal, 14).padding(.vertical, 10)
-        .background(Color.white.opacity(0.03))
+        .background(SalomTheme.Colors.surfaceMuted.opacity(0.72))
     }
 
     private var chatBar: some View {
@@ -126,36 +126,37 @@ struct PresentationEditorView: View {
                 HStack(spacing: 8) {
                     Image(systemName: "sparkles").foregroundColor(.cyan)
                     TextField(L.chatPlaceholder, text: $instruction, axis: .vertical)
-                        .lineLimit(1...3).foregroundColor(.white).font(.system(size: 14))
+                        .lineLimit(1...3).foregroundColor(SalomTheme.Colors.textPrimary).font(.system(size: 14))
                 }
                 .padding(.horizontal, 12).padding(.vertical, 10)
-                .background(RoundedRectangle(cornerRadius: 18).fill(Color.white.opacity(0.06)))
+                .background(RoundedRectangle(cornerRadius: 18).fill(SalomTheme.Colors.controlFill))
+                .overlay(RoundedRectangle(cornerRadius: 18).stroke(SalomTheme.Colors.border))
 
                 Button { Task { await sendEdit() } } label: {
-                    if editing { ProgressView().tint(.white).scaleEffect(0.8) } else { Image(systemName: "arrow.up") }
+                    if editing { ProgressView().tint(SalomTheme.Colors.onMedia).scaleEffect(0.8) } else { Image(systemName: "arrow.up") }
                 }
                 .frame(width: 44, height: 44)
                 .background(Circle().fill(LinearGradient(colors: [.cyan, .purple], startPoint: .top, endPoint: .bottom)))
-                .foregroundColor(.white)
+                .foregroundColor(SalomTheme.Colors.onMedia)
                 .disabled(editing || instruction.trimmingCharacters(in: .whitespaces).isEmpty)
                 .opacity(editing || instruction.trimmingCharacters(in: .whitespaces).isEmpty ? 0.5 : 1)
             }
-            if editing { Text(L.applying).font(.caption2).foregroundColor(.white.opacity(0.4)).frame(maxWidth: .infinity, alignment: .leading).padding(.horizontal, 4) }
+            if editing { Text(L.applying).font(.caption2).foregroundColor(SalomTheme.Colors.textTertiary).frame(maxWidth: .infinity, alignment: .leading).padding(.horizontal, 4) }
         }
         .padding(.horizontal, 12).padding(.top, 8).padding(.bottom, 10)
-        .background(Color.white.opacity(0.03))
+        .background(SalomTheme.Colors.surfaceMuted.opacity(0.72))
     }
 
     private var buildingState: some View {
         VStack(spacing: 18) {
-            Button { dismiss() } label: { Image(systemName: "chevron.left").foregroundColor(.white) }.frame(maxWidth: .infinity, alignment: .leading).padding()
+            Button { dismiss() } label: { Image(systemName: "chevron.left").foregroundColor(SalomTheme.Colors.textPrimary) }.frame(maxWidth: .infinity, alignment: .leading).padding()
             Spacer()
             ZStack {
                 RoundedRectangle(cornerRadius: 26).fill(style.gradient).frame(width: 90, height: 90)
                 Image(systemName: "sparkles").font(.system(size: 34)).foregroundColor(style.accent)
             }
-            ProgressView().tint(.white)
-            Text(L.buildingDeck).font(.subheadline).foregroundColor(.white.opacity(0.6)).multilineTextAlignment(.center).padding(.horizontal, 40)
+            ProgressView().tint(SalomTheme.Colors.accentPrimary)
+            Text(L.buildingDeck).font(.subheadline).foregroundColor(SalomTheme.Colors.textSecondary).multilineTextAlignment(.center).padding(.horizontal, 40)
             Spacer()
         }
     }
@@ -163,7 +164,7 @@ struct PresentationEditorView: View {
     private var failedState: some View {
         VStack(spacing: 16) {
             Image(systemName: "exclamationmark.triangle").font(.system(size: 34)).foregroundColor(.red)
-            Text(preso?.error ?? L.failed).foregroundColor(.white.opacity(0.7)).multilineTextAlignment(.center).padding(.horizontal, 30)
+            Text(preso?.error ?? L.failed).foregroundColor(SalomTheme.Colors.textSecondary).multilineTextAlignment(.center).padding(.horizontal, 30)
             Button(L.back) { dismiss() }.foregroundColor(.cyan)
         }
     }

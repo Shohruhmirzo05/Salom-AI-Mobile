@@ -102,7 +102,7 @@ struct OnboardingView: View {
     @ViewBuilder
     private func BackgroundLayer() -> some View {
         ZStack {
-            Color(hex: "#020617").ignoresSafeArea()
+            SalomTheme.Colors.bgMain.ignoresSafeArea()
 
             GeometryReader { geo in
                 ZStack {
@@ -123,7 +123,7 @@ struct OnboardingView: View {
                 .animation(.easeInOut(duration: 0.6), value: viewModel.currentIndex)
             }
 
-            Color.white.opacity(0.02).blendMode(.overlay)
+            SalomTheme.Colors.textPrimary.opacity(0.02).blendMode(.overlay)
         }
     }
 
@@ -138,7 +138,7 @@ struct OnboardingView: View {
                     .frame(width: 28, height: 28)
                 Text("Salom AI")
                     .font(.system(size: 20, weight: .bold))
-                    .foregroundColor(.white)
+                    .foregroundColor(SalomTheme.Colors.textPrimary)
             }
             Spacer()
             HStack(spacing: 10) {
@@ -180,13 +180,13 @@ struct OnboardingView: View {
                 Text(currentFlag).font(.system(size: 16))
                 Image(systemName: "chevron.down")
                     .font(.system(size: 10, weight: .semibold))
-                    .foregroundColor(.white.opacity(0.55))
+                    .foregroundColor(SalomTheme.Colors.textTertiary)
             }
             .padding(.horizontal, 10).padding(.vertical, 6)
             .background(
                 Capsule()
-                    .fill(Color.white.opacity(0.10))
-                    .overlay(Capsule().stroke(Color.white.opacity(0.15), lineWidth: 0.5))
+                    .fill(SalomTheme.Colors.surfaceMuted)
+                    .overlay(Capsule().stroke(SalomTheme.Colors.border, lineWidth: 0.5))
             )
             .contentShape(Capsule())
         }
@@ -212,7 +212,7 @@ struct OnboardingView: View {
                     .textCase(.uppercase)
                 Text(viewModel.currentScene.title)
                     .font(.system(size: 30, weight: .bold))
-                    .foregroundColor(.white)
+                    .foregroundColor(SalomTheme.Colors.textPrimary)
                     .fixedSize(horizontal: false, vertical: true)
                     .transition(.opacity.combined(with: .move(edge: .bottom)))
                     .id("title-\(viewModel.currentIndex)")
@@ -228,7 +228,7 @@ struct OnboardingView: View {
                 HStack(spacing: 8) {
                     ForEach(0..<viewModel.scenes.count, id: \.self) { index in
                         Capsule()
-                            .fill(index == viewModel.currentIndex ? Color.white : Color.white.opacity(0.2))
+                            .fill(index == viewModel.currentIndex ? SalomTheme.Colors.textPrimary : SalomTheme.Colors.textTertiary.opacity(0.35))
                             .frame(width: index == viewModel.currentIndex ? 24 : 8, height: 8)
                             .animation(.spring(), value: viewModel.currentIndex)
                     }
@@ -256,16 +256,15 @@ struct OnboardingView: View {
     @ViewBuilder
     private var bottomCardSurface: some View {
         if #available(iOS 26.0, *) {
-            // Liquid Glass over a subtle dark tint so the hero glows through.
-            Color(hex: "#0F172A").opacity(0.35)
+            SalomTheme.Colors.surface.opacity(0.72)
                 .glassEffect(.regular, in: .rect(cornerRadius: 40, style: .continuous))
-                .shadow(color: .black.opacity(0.2), radius: 20, x: 0, y: -10)
+                .shadow(color: SalomTheme.Colors.textPrimary.opacity(0.12), radius: 20, x: 0, y: -10)
         } else {
             Rectangle()
-                .fill(Color(hex: "#0F172A").opacity(0.8))
+                .fill(SalomTheme.Colors.surface.opacity(0.86))
                 .background(.ultraThinMaterial)
                 .mask(RoundedRectangle(cornerRadius: 40, style: .continuous))
-                .shadow(color: .black.opacity(0.2), radius: 20, x: 0, y: -10)
+                .shadow(color: SalomTheme.Colors.textPrimary.opacity(0.12), radius: 20, x: 0, y: -10)
         }
     }
 }
@@ -327,12 +326,12 @@ private struct ChatHero: View {
             HStack(spacing: 8) {
                 ForEach(0..<3, id: \.self) { i in
                     Circle()
-                        .fill(Color.white.opacity(typingDot == i ? 0.9 : 0.25))
+                        .fill(SalomTheme.Colors.textPrimary.opacity(typingDot == i ? 0.9 : 0.25))
                         .frame(width: 8, height: 8)
                 }
             }
             .padding(.horizontal, 14).padding(.vertical, 12)
-            .background(Capsule().fill(Color.white.opacity(0.08)))
+            .background(Capsule().fill(SalomTheme.Colors.surfaceMuted))
         }
         .frame(maxWidth: 320)
         .onAppear {
@@ -352,11 +351,15 @@ private struct ChatBubble: View {
             if isUser { Spacer(minLength: 40) }
             Text(text)
                 .font(.system(size: 15, weight: .medium))
-                .foregroundColor(.white)
+                .foregroundColor(isUser ? SalomTheme.Colors.onAccent : SalomTheme.Colors.textPrimary)
                 .padding(.horizontal, 16).padding(.vertical, 12)
                 .background(
                     RoundedRectangle(cornerRadius: 20, style: .continuous)
-                        .fill(isUser ? accent.opacity(0.85) : Color.white.opacity(0.08))
+                        .fill(isUser ? accent.opacity(0.9) : SalomTheme.Colors.surface)
+                        .overlay(
+                            RoundedRectangle(cornerRadius: 20, style: .continuous)
+                                .stroke(SalomTheme.Colors.border, lineWidth: isUser ? 0 : 1)
+                        )
                 )
             if !isUser { Spacer(minLength: 40) }
         }
@@ -432,12 +435,13 @@ private struct FilesHero: View {
     var body: some View {
         ZStack {
             RoundedRectangle(cornerRadius: 18, style: .continuous)
-                .fill(Color.white.opacity(0.08))
+                .fill(SalomTheme.Colors.surface)
+                .overlay(RoundedRectangle(cornerRadius: 18).stroke(SalomTheme.Colors.border, lineWidth: 1))
                 .overlay(
                     VStack(alignment: .leading, spacing: 10) {
                         ForEach(0..<6, id: \.self) { i in
                             Capsule()
-                                .fill(Color.white.opacity(i == 0 ? 0.55 : 0.18))
+                                .fill(SalomTheme.Colors.textPrimary.opacity(i == 0 ? 0.55 : 0.18))
                                 .frame(width: i == 0 ? 130 : CGFloat.random(in: 80...170), height: 8)
                         }
                     }
@@ -455,7 +459,7 @@ private struct FilesHero: View {
                 .shadow(color: accent.opacity(0.3), radius: 30, x: 0, y: 16)
             Image(systemName: "doc.text.magnifyingglass")
                 .font(.system(size: 32, weight: .bold))
-                .foregroundColor(.white)
+                .foregroundColor(SalomTheme.Colors.textPrimary)
                 .offset(y: 170)
                 .opacity(pulse ? 1.0 : 0.5)
         }
@@ -490,20 +494,21 @@ private struct ChecklistRow: View {
         HStack(spacing: 14) {
             ZStack {
                 Circle()
-                    .fill(done ? accent : Color.white.opacity(0.1))
+                    .fill(done ? accent : SalomTheme.Colors.surfaceMuted)
                     .frame(width: 36, height: 36)
                 Image(systemName: done ? "checkmark" : icon)
                     .font(.system(size: 16, weight: .bold))
-                    .foregroundColor(.white)
+                    .foregroundColor(done ? SalomTheme.Colors.onAccent : SalomTheme.Colors.textSecondary)
             }
             Text(text)
                 .font(.system(size: 15, weight: .semibold))
-                .foregroundColor(.white)
-                .strikethrough(done, color: .white.opacity(0.5))
+                .foregroundColor(SalomTheme.Colors.textPrimary)
+                .strikethrough(done, color: SalomTheme.Colors.textTertiary)
             Spacer()
         }
         .padding(.horizontal, 18).padding(.vertical, 12)
-        .background(RoundedRectangle(cornerRadius: 18).fill(Color.white.opacity(0.06)))
+        .background(RoundedRectangle(cornerRadius: 18).fill(SalomTheme.Colors.surface))
+        .overlay(RoundedRectangle(cornerRadius: 18).stroke(SalomTheme.Colors.border, lineWidth: 1))
     }
 }
 

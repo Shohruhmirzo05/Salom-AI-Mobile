@@ -57,12 +57,21 @@ struct SplashView: View {
             // We want to ensure minimum splash time of 1.8s for branding,
             // but also wait for critical data if it takes longer.
             
-            async let minSplashTime: () = try! await Task.sleep(nanoseconds: 1_800_000_000)
+            async let minSplashTime: () = Task.sleep(nanoseconds: 1_800_000_000)
             async let subCheck: () = await SubscriptionManager.shared.checkSubscriptionStatus()
             async let plansFetch: () = await SubscriptionManager.shared.fetchPlans(force: true)
-            
-            // Wait for all to finish
-            _ = await (minSplashTime, subCheck, plansFetch)
+
+            do {
+                // Wait for all to finish. Leaving the splash cancels this task;
+                // cancellation is a normal lifecycle event, never a fatal error.
+                _ = try await (minSplashTime, subCheck, plansFetch)
+            } catch is CancellationError {
+                return
+            } catch {
+                return
+            }
+
+            guard !Task.isCancelled else { return }
             
             withAnimation {
                 isActive = false

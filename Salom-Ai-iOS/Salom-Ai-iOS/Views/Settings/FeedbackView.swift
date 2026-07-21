@@ -15,7 +15,7 @@ struct FeedbackView: View {
             VStack(spacing: 20) {
                 Text("Fikr-mulohaza yuborish")
                     .font(.title2.bold())
-                    .foregroundColor(.white)
+                    .foregroundColor(SalomTheme.Colors.textPrimary)
                     .padding(.top)
                 
                 Text("Taklif va shikoyatlaringizni yozib qoldiring. Biz har bir fikrni o'qib chiqamiz.")
@@ -27,13 +27,13 @@ struct FeedbackView: View {
                 TextEditor(text: $content)
                     .scrollContentBackground(.hidden)
                     .padding()
-                    .background(Color.black.opacity(0.2))
+                    .background(SalomTheme.Colors.controlFill)
                     .cornerRadius(16)
                     .overlay(
                         RoundedRectangle(cornerRadius: 16)
-                            .stroke(Color.white.opacity(0.1), lineWidth: 1)
+                            .stroke(SalomTheme.Colors.border, lineWidth: 1)
                     )
-                    .foregroundColor(.white)
+                    .foregroundColor(SalomTheme.Colors.textPrimary)
                     .frame(height: 200)
                     .padding()
                 
@@ -45,14 +45,14 @@ struct FeedbackView: View {
                     HStack {
                         if isSubmitting {
                             ProgressView()
-                                .progressViewStyle(CircularProgressViewStyle(tint: .white))
+                                .progressViewStyle(CircularProgressViewStyle(tint: SalomTheme.Colors.onAccent))
                         } else {
                             Image(systemName: "paperplane.fill")
                             Text("Yuborish")
                                 .fontWeight(.semibold)
                         }
                     }
-                    .foregroundColor(.white)
+                    .foregroundColor(content.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty ? SalomTheme.Colors.textTertiary : SalomTheme.Colors.onAccent)
                     .frame(maxWidth: .infinity)
                     .padding()
                     .background(
@@ -83,14 +83,14 @@ struct FeedbackView: View {
             let _: FeedbackResponse = try await APIClient.shared.request(.sendFeedback(content: content), decodeTo: FeedbackResponse.self)
             await MainActor.run {
                 isSubmitting = false
-                alertMessage = "Fikr-mulohazangiz uchun rahmat!"
+                alertMessage = String.appLocalized("Fikr-mulohazangiz uchun rahmat!")
                 showAlert = true
                 content = ""
             }
         } catch {
             await MainActor.run {
                 isSubmitting = false
-                alertMessage = "Xatolik yuz berdi: \(error.localizedDescription)"
+                alertMessage = String.appLocalized("Xatolik yuz berdi: ") + error.localizedDescription
                 showAlert = true
             }
         }

@@ -11,6 +11,24 @@ import Foundation
 import OneSignalFramework
 
 enum PushManager {
+    private static let successfulTasksKey = "push_successful_tasks"
+    private static let permissionAskedKey = "push_permission_asked_after_value"
+
+    /// Ask only after repeated value, never during first launch/auth. The system
+    /// prompt is still the source of truth and is shown at most once by us.
+    static func recordSuccessfulTask() {
+        guard TokenStore.shared.accessToken != nil else { return }
+        let defaults = UserDefaults.standard
+        guard !defaults.bool(forKey: permissionAskedKey) else { return }
+        let count = defaults.integer(forKey: successfulTasksKey) + 1
+        defaults.set(count, forKey: successfulTasksKey)
+        guard count >= 3 else { return }
+        defaults.set(true, forKey: permissionAskedKey)
+        OneSignal.Notifications.requestPermission({ accepted in
+            if accepted { syncDevice() }
+        }, fallbackToSettings: false)
+    }
+
     static func syncDevice() {
         guard TokenStore.shared.accessToken != nil else { return }
         Task {

@@ -47,7 +47,7 @@ struct SavedCardsView: View {
             ToolbarItem(placement: .principal) {
                 Text("Saqlangan kartalar")
                     .font(.headline)
-                    .foregroundColor(.white)
+                    .foregroundColor(SalomTheme.Colors.textPrimary)
             }
         }
         .task {
@@ -86,7 +86,7 @@ private struct CardRow: View {
             VStack(alignment: .leading, spacing: 3) {
                 Text(card.maskedNumber)
                     .font(.headline)
-                    .foregroundColor(.white)
+                    .foregroundColor(SalomTheme.Colors.textPrimary)
 
                 Text(card.phoneHint)
                     .font(.caption)
@@ -106,7 +106,8 @@ private struct CardRow: View {
         .padding(16)
         .background(
             RoundedRectangle(cornerRadius: 16)
-                .fill(Color.white.opacity(0.05))
+                .fill(SalomTheme.Colors.surface)
+                .overlay(RoundedRectangle(cornerRadius: 16).stroke(SalomTheme.Colors.border, lineWidth: 1))
         )
     }
 }

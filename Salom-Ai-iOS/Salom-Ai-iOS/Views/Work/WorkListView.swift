@@ -27,7 +27,7 @@ struct Icon3DView: View {
         AsyncImage(url: URL(string: "https://salom-ai.uz/icons3d/\(slug).webp")) { img in
             img.resizable().scaledToFit()
         } placeholder: {
-            RoundedRectangle(cornerRadius: 10).fill(Color.white.opacity(0.06))
+            RoundedRectangle(cornerRadius: 10).fill(SalomTheme.Colors.surfaceMuted)
         }
         .frame(width: size, height: size)
     }
@@ -57,7 +57,7 @@ struct WorkListView: View {
         ZStack {
             SalomTheme.Gradients.background.ignoresSafeArea()
             if loading {
-                ProgressView().tint(.white.opacity(0.6))
+                ProgressView().tint(SalomTheme.Colors.accentPrimary)
             } else {
                 ScrollView {
                     VStack(alignment: .leading, spacing: 16) {
@@ -65,7 +65,7 @@ struct WorkListView: View {
                         if access?.mode == "locked" { lockedBanner }
                         else if let a = access, a.monthlyLimit > 0 {
                             Text("\(L.thisMonth): \(a.monthlyUsed)/\(a.monthlyLimit)")
-                                .font(.system(size: 12)).foregroundColor(.white.opacity(0.45))
+                                .font(.system(size: 12)).foregroundColor(SalomTheme.Colors.textTertiary)
                         }
                         segmentTabs
                         taskGrid
@@ -83,22 +83,22 @@ struct WorkListView: View {
         .fullScreenCover(item: $activeDoc, onDismiss: { Task { await load() } }) { d in
             WorkDetailView(docId: d.id, docLang: L.docLang)
         }
-        .fullScreenCover(isPresented: $showPaywall) { PaywallSheet() }
+        .fullScreenCover(isPresented: $showPaywall) { PaywallSheet(context: .officeFirstValue, source: "ios_work_hub") }
     }
 
     private var header: some View {
         VStack(alignment: .leading, spacing: 4) {
-            Text(L.title).font(.system(size: 24, weight: .bold)).foregroundColor(.white)
-            Text(L.subtitle).font(.system(size: 14)).foregroundColor(.white.opacity(0.55))
+            Text(L.title).font(.system(size: 24, weight: .bold)).foregroundColor(SalomTheme.Colors.textPrimary)
+            Text(L.subtitle).font(.system(size: 14)).foregroundColor(SalomTheme.Colors.textSecondary)
         }
     }
 
     private var lockedBanner: some View {
         VStack(alignment: .leading, spacing: 10) {
-            Text(L.lockedTitle).font(.system(size: 15, weight: .semibold)).foregroundColor(.white)
-            Text(L.lockedDesc).font(.system(size: 13)).foregroundColor(.white.opacity(0.6))
+            Text(L.lockedTitle).font(.system(size: 15, weight: .semibold)).foregroundColor(SalomTheme.Colors.textPrimary)
+            Text(L.lockedDesc).font(.system(size: 13)).foregroundColor(SalomTheme.Colors.textSecondary)
             Button { showPaywall = true } label: {
-                Text(L.upgrade).font(.system(size: 14, weight: .semibold)).foregroundColor(.black)
+                Text(L.upgrade).font(.system(size: 14, weight: .semibold)).foregroundColor(SalomTheme.Colors.onAccent)
                     .padding(.horizontal, 16).padding(.vertical, 9)
                     .background(LinearGradient(colors: [Color(SalomTheme.Colors.accentSecondary), Color(SalomTheme.Colors.accentPrimary)], startPoint: .leading, endPoint: .trailing))
                     .clipShape(Capsule())
@@ -117,9 +117,10 @@ struct WorkListView: View {
                     Button { selectedSegment = s.id } label: {
                         Text(s.label.pick(languageCode))
                             .font(.system(size: 13.5, weight: .semibold))
-                            .foregroundColor(on ? .black : .white.opacity(0.7))
+                            .foregroundColor(on ? SalomTheme.Colors.textPrimary : SalomTheme.Colors.textSecondary)
                             .padding(.horizontal, 15).padding(.vertical, 8)
-                            .background(Capsule().fill(on ? Color.white : Color.white.opacity(0.06)))
+                            .background(Capsule().fill(on ? SalomTheme.Colors.surface : SalomTheme.Colors.controlFill))
+                            .overlay(Capsule().stroke(SalomTheme.Colors.border))
                     }
                 }
             }
@@ -136,20 +137,20 @@ struct WorkListView: View {
                             Icon3DView(lucide: task.icon, size: 40)
                             Spacer()
                             Text(task.output == "xlsx" ? "Excel" : "Word")
-                                .font(.system(size: 9, weight: .semibold)).foregroundColor(.white.opacity(0.35))
+                                .font(.system(size: 9, weight: .semibold)).foregroundColor(SalomTheme.Colors.textTertiary)
                                 .padding(.horizontal, 5).padding(.vertical, 1)
-                                .overlay(RoundedRectangle(cornerRadius: 4).strokeBorder(.white.opacity(0.12)))
+                                .overlay(RoundedRectangle(cornerRadius: 4).strokeBorder(SalomTheme.Colors.border))
                         }
                         Text(task.title.pick(languageCode))
-                            .font(.system(size: 14.5, weight: .semibold)).foregroundColor(.white)
+                            .font(.system(size: 14.5, weight: .semibold)).foregroundColor(SalomTheme.Colors.textPrimary)
                             .fixedSize(horizontal: false, vertical: true).multilineTextAlignment(.leading)
                         Text(task.subtitle.pick(languageCode))
-                            .font(.system(size: 11.5)).foregroundColor(.white.opacity(0.45))
+                            .font(.system(size: 11.5)).foregroundColor(SalomTheme.Colors.textSecondary)
                             .fixedSize(horizontal: false, vertical: true).multilineTextAlignment(.leading)
                     }
                     .padding(14).frame(maxWidth: .infinity, minHeight: 128, alignment: .topLeading)
-                    .background(RoundedRectangle(cornerRadius: 18).fill(Color.white.opacity(0.04)))
-                    .overlay(RoundedRectangle(cornerRadius: 18).strokeBorder(Color.white.opacity(0.07)))
+                    .background(RoundedRectangle(cornerRadius: 18).fill(SalomTheme.Colors.surface))
+                    .overlay(RoundedRectangle(cornerRadius: 18).strokeBorder(SalomTheme.Colors.border))
                 }
             }
         }
@@ -158,19 +159,20 @@ struct WorkListView: View {
     private var recentSection: some View {
         VStack(alignment: .leading, spacing: 8) {
             Text(L.recent.uppercased()).font(.system(size: 12, weight: .semibold))
-                .foregroundColor(.white.opacity(0.4)).tracking(0.5)
+                .foregroundColor(SalomTheme.Colors.textTertiary).tracking(0.5)
             ForEach(recent.prefix(8)) { w in
                 Button { activeDoc = IntId(id: w.id) } label: {
                     HStack(spacing: 10) {
                         Image(systemName: w.outputFormat == "xlsx" ? "tablecells" : "doc.text")
-                            .foregroundColor(.white.opacity(0.4)).font(.system(size: 14))
-                        Text(w.title).font(.system(size: 14)).foregroundColor(.white).lineLimit(1)
+                            .foregroundColor(SalomTheme.Colors.textTertiary).font(.system(size: 14))
+                        Text(w.title).font(.system(size: 14)).foregroundColor(SalomTheme.Colors.textPrimary).lineLimit(1)
                         Spacer()
                         if w.status == "generating" { Text(L.creating).font(.system(size: 11)).foregroundColor(.orange) }
                         else if w.status == "failed" { Text(L.failed).font(.system(size: 11)).foregroundColor(.red) }
                     }
                     .padding(.horizontal, 12).padding(.vertical, 11)
-                    .background(RoundedRectangle(cornerRadius: 12).fill(Color.white.opacity(0.03)))
+                    .background(RoundedRectangle(cornerRadius: 12).fill(SalomTheme.Colors.surface))
+                    .overlay(RoundedRectangle(cornerRadius: 12).stroke(SalomTheme.Colors.border))
                 }
             }
         }

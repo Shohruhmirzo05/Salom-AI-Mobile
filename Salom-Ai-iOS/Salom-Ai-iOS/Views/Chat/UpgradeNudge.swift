@@ -16,6 +16,7 @@ struct UpgradeNudge: View {
     @State private var usage: UsageStatsResponse?
     @State private var dismissedThisSession = false
     @State private var showingPaywall = false
+    @State private var paywallContext: PaywallContextID = .smartModelUpgrade
 
     /// 70% used → start hinting.
     private let threshold: Double = 0.7
@@ -25,7 +26,10 @@ struct UpgradeNudge: View {
             if let payload = currentNudge {
                 NudgeBubble(
                     text: payload.text,
-                    onTap: { showingPaywall = true },
+                    onTap: {
+                        paywallContext = payload.context
+                        showingPaywall = true
+                    },
                     onDismiss: {
                         withAnimation(.spring(response: 0.35, dampingFraction: 0.7)) {
                             dismissedThisSession = true
@@ -39,7 +43,7 @@ struct UpgradeNudge: View {
             await refresh()
         }
         .fullScreenCover(isPresented: $showingPaywall) {
-            PaywallSheet()
+            PaywallSheet(context: paywallContext, source: "ios_upgrade_nudge")
         }
     }
 
@@ -68,12 +72,17 @@ struct UpgradeNudge: View {
         guard let usage else { return nil }
 
         // Candidates: limited resources where used / limit >= threshold.
-        struct Slot { let label: String; let used: Int; let limit: Int }
+        struct Slot {
+            let label: String
+            let used: Int
+            let limit: Int
+            let context: PaywallContextID
+        }
         let slots: [Slot] = [
-            .init(label: "Tezkor xabarlar", used: usage.usage.fastMessages, limit: usage.limits.fastMessages),
-            .init(label: "Aqlli xabarlar", used: usage.usage.smartMessages, limit: usage.limits.smartMessages),
-            .init(label: "Ovozli daqiqalar", used: usage.usage.voiceMinutes, limit: usage.limits.voiceMinutes),
-            .init(label: "Rasm yaratishlar", used: usage.usage.imageGeneration, limit: usage.limits.imageGeneration),
+            .init(label: "Tezkor xabarlar", used: usage.usage.fastMessages, limit: usage.limits.fastMessages, context: .general),
+            .init(label: "Aqlli xabarlar", used: usage.usage.smartMessages, limit: usage.limits.smartMessages, context: .smartModelUpgrade),
+            .init(label: "Ovozli daqiqalar", used: usage.usage.voiceMinutes, limit: usage.limits.voiceMinutes, context: .voiceSessionLimit),
+            .init(label: "Rasm yaratishlar", used: usage.usage.imageGeneration, limit: usage.limits.imageGeneration, context: .imageGenerationLimit),
         ]
         let close = slots
             .filter { $0.limit > 0 && Double($0.used) >= Double($0.limit) * threshold }
@@ -81,15 +90,17 @@ struct UpgradeNudge: View {
 
         guard let top = close.first else { return nil }
         let remaining = max(0, top.limit - top.used)
+        let resource = String.appLocalized(top.label)
         let text = remaining <= 0
-            ? "\(top.label): limit tugadi. Pro rejaga o'tib davom eting."
-            : "\(top.label): \(remaining) qoldi. Pro rejaga o'ting."
-        return NudgePayload(text: text)
+            ? String(format: String.appLocalized("%@: limit tugadi. Pro rejaga o'tib davom eting."), resource)
+            : String(format: String.appLocalized("%@: %lld qoldi. Pro rejaga o'ting."), resource, remaining)
+        return NudgePayload(text: text, context: top.context)
     }
 }
 
 private struct NudgePayload {
     let text: String
+    let context: PaywallContextID
 }
 
 private struct NudgeBubble: View {
@@ -111,9 +122,9 @@ private struct NudgeBubble: View {
             VStack(alignment: .leading, spacing: 1) {
                 Text(text)
                     .font(.caption.weight(.semibold))
-                    .foregroundColor(.white)
+                    .foregroundColor(SalomTheme.Colors.textPrimary)
                     .lineLimit(2)
-                Text("Rejani ko'rish →")
+                Text(String.appLocalized("Rejani ko'rish →"))
                     .font(.caption2.weight(.medium))
                     .foregroundColor(SalomTheme.Colors.accentPrimary)
             }
@@ -124,9 +135,9 @@ private struct NudgeBubble: View {
             } label: {
                 Image(systemName: "xmark")
                     .font(.caption.weight(.semibold))
-                    .foregroundColor(.white.opacity(0.55))
+                    .foregroundColor(SalomTheme.Colors.textSecondary)
                     .frame(width: 26, height: 26)
-                    .background(Circle().fill(Color.white.opacity(0.06)))
+                    .background(Circle().fill(SalomTheme.Colors.surfaceMuted))
             }
             .buttonStyle(.plain)
         }

@@ -15,6 +15,7 @@ struct ChatContainerView: View {
     // bar + system back button), not swapped in place.
     @State private var appsPath: [MainSection] = []
     @AppStorage(AppStorageKeys.preferredLanguageCode) private var languageCode: String = "uz"
+    @ObservedObject private var deepLinks = AppDeepLinkRouter.shared
 
     var body: some View {
         ZStack(alignment: .leading) {
@@ -57,7 +58,10 @@ struct ChatContainerView: View {
             )
             .zIndex(2)
         }
-        .onAppear { Analytics.shared.track("screen_view", ["path": "/\(selectedSection.rawValue)"]) }
+        .onAppear {
+            Analytics.shared.track("screen_view", ["path": "/\(selectedSection.rawValue)"])
+            consumeDeepLink(deepLinks.sectionRequest)
+        }
         .onChange(of: selectedSection) { _, newValue in
             Analytics.shared.track("screen_view", ["path": "/\(newValue.rawValue)"])
         }
@@ -71,6 +75,20 @@ struct ChatContainerView: View {
                 }
             }
         }
+        .onChange(of: deepLinks.sectionRequest) { _, section in
+            consumeDeepLink(section)
+        }
+    }
+
+    private func consumeDeepLink(_ section: MainSection?) {
+        guard let section else { return }
+        withAnimation(.easeInOut(duration: 0.25)) {
+            selectedSection = section
+            appsPath.removeAll()
+            isMenuOpen = false
+        }
+        Analytics.shared.track("feature_opened", ["feature": section.rawValue, "source": "ios_deep_link"])
+        deepLinks.sectionRequest = nil
     }
 
     @ViewBuilder
@@ -213,7 +231,6 @@ struct ChatContainerView: View {
             }
         }
         .toolbarBackground(.hidden, for: .navigationBar)
-        .toolbarColorScheme(.dark, for: .navigationBar)
     }
 
     @ViewBuilder
@@ -262,7 +279,7 @@ struct ChatContainerView: View {
             } label: {
                 Image(systemName: onBack != nil ? "chevron.left" : "line.3.horizontal")
                     .font(.system(size: 18, weight: .medium))
-                    .foregroundColor(.white)
+                    .foregroundColor(SalomTheme.Colors.textPrimary)
                     .salomGlassCircle(40)
             }
 
@@ -273,7 +290,7 @@ struct ChatContainerView: View {
                         .foregroundColor(SalomTheme.Colors.accentPrimary)
                     Text(title)
                         .font(.system(size: 17, weight: .semibold))
-                        .foregroundColor(.white)
+                        .foregroundColor(SalomTheme.Colors.textPrimary)
                 }
 
                 Text(subtitle)
@@ -328,7 +345,7 @@ struct ChatContainerView: View {
             .padding(.vertical, 6)
             .background(
                 Capsule()
-                    .fill(Color.white.opacity(0.08))
+                    .fill(SalomTheme.Colors.surfaceMuted)
             )
         }
     }
@@ -357,7 +374,7 @@ struct ChatContainerView: View {
     
     @ViewBuilder func ShellSeparator() -> some View {
         Rectangle()
-            .fill(Color.white.opacity(0.08))
+            .fill(SalomTheme.Colors.border)
             .frame(height: 0.5)
             .padding(.bottom, 4)
     }

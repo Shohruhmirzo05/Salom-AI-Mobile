@@ -31,19 +31,19 @@ extension View {
                     .background(.ultraThinMaterial, in: RoundedRectangle(cornerRadius: cornerRadius, style: .continuous))
                     .overlay(
                         RoundedRectangle(cornerRadius: cornerRadius, style: .continuous)
-                            .stroke(Color.white.opacity(0.12))
+                            .stroke(SalomTheme.Colors.border)
                     )
             } else {
                 view
                     .padding(padding)
                     .background(
-                        Color.white.opacity(0.12)
+                        SalomTheme.Colors.surfaceMuted.opacity(0.88)
                             .blur(radius: 16)
                     )
                     .clipShape(RoundedRectangle(cornerRadius: cornerRadius, style: .continuous))
                     .overlay(
                         RoundedRectangle(cornerRadius: cornerRadius, style: .continuous)
-                            .stroke(Color.white.opacity(0.18))
+                            .stroke(SalomTheme.Colors.border)
                     )
             }
         }

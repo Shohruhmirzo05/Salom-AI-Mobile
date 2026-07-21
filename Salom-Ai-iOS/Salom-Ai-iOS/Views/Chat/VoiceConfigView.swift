@@ -61,7 +61,7 @@ struct VoiceConfigView: View {
         NavigationView {
             Form {
                 // MARK: Language
-                Section(header: Text("Til / Язык / Language")) {
+                Section(header: Text("Til")) {
                     Picker("", selection: $languageCode) {
                         ForEach(languages, id: \.code) { lang in
                             Text(lang.label).tag(lang.code)
@@ -76,7 +76,7 @@ struct VoiceConfigView: View {
 
                 // MARK: Voice
                 Section(
-                    header: Text("Ovoz / Voice"),
+                    header: Text("Ovoz"),
                     footer: Text("Suhbat boshlanganidan keyin ovoz keyingi sessiyada qo'llaniladi.")
                         .font(.caption)
                 ) {
@@ -165,7 +165,7 @@ struct VoiceConfigView: View {
         do {
             let wireLang = languageCode.hasPrefix("uz") ? "uz" : languageCode
             guard let token = TokenStore.shared.accessToken else {
-                previewError = "No access token"
+                previewError = String.appLocalized("Kirish talab qilinadi")
                 return
             }
             let url = URL(string: "https://api.salom-ai.uz/realtime/voice-preview?voice=\(voiceId)&lang=\(wireLang)")!
@@ -175,7 +175,10 @@ struct VoiceConfigView: View {
 
             let (data, response) = try await URLSession.shared.data(for: req)
             guard let http = response as? HTTPURLResponse, http.statusCode == 200 else {
-                previewError = "Preview failed (HTTP \((response as? HTTPURLResponse)?.statusCode ?? 0))"
+                previewError = String(
+                    format: String.appLocalized("Ovoz namunasini yuklab bo‘lmadi (HTTP %lld)"),
+                    (response as? HTTPURLResponse)?.statusCode ?? 0
+                )
                 return
             }
 
@@ -186,7 +189,7 @@ struct VoiceConfigView: View {
                 viewModel.playPreview(data: data)
             }
         } catch {
-            previewError = "Preview error: \(error.localizedDescription)"
+            previewError = String.appLocalized("Ovoz namunasida xatolik: ") + error.localizedDescription
         }
     }
 }
@@ -209,7 +212,7 @@ private struct VoiceRow: View {
                     VStack(alignment: .leading, spacing: 2) {
                         Text(voice.displayName)
                             .font(.body)
-                        Text(voice.description)
+                        Text(String.appLocalized(voice.description))
                             .font(.caption)
                             .foregroundColor(.secondary)
                     }

@@ -210,7 +210,7 @@ final class APIClient {
         var request = URLRequest(url: url)
         request.cachePolicy = .reloadIgnoringLocalCacheData
         request.httpMethod = endpoint.method.rawValue
-        request.timeoutInterval = 60
+        request.timeoutInterval = endpoint.timeoutInterval
         
         var headers: [String: String] = [
             "Accept": "application/json"
@@ -290,9 +290,10 @@ extension APIClient {
         // Chat
         case chat(conversationId: Int?, text: String, projectId: Int?, model: String?, attachments: [String]?)
         case chatStream(conversationId: Int?, text: String, projectId: Int?, model: String?, attachments: [String]?, regenerate: Bool, webSearch: Bool, platform: String?)
-        case generateImage(conversationId: Int?, prompt: String, projectId: Int?)
+        case generateImage(conversationId: Int?, prompt: String, projectId: Int?, referenceImages: [String]?, regenerate: Bool, replaceImageUrl: String?)
         case saveChat(conversationId: Int, userText: String, assistantText: String)
         case uploadFile(data: Data, filename: String)
+        case uploadReferenceImage(data: Data, filename: String, contentType: String)
         
         // Perplexity
         case perplexityChat(conversationId: Int?, text: String, model: String?, searchMode: String?)
@@ -425,10 +426,23 @@ extension APIClient {
         
         fileprivate var isMultipart: Bool {
             switch self {
-            case .uploadFile, .stt, .chatVoice:
+            case .uploadFile, .uploadReferenceImage, .stt, .chatVoice:
                 return true
             default:
                 return false
+            }
+        }
+
+        fileprivate var timeoutInterval: TimeInterval {
+            switch self {
+            case .generateImage, .chatStream:
+                // Image queues and the first streamed token can legitimately take
+                // longer than the generic API timeout on a busy provider.
+                return 210
+            case .uploadReferenceImage, .uploadFile:
+                return 90
+            default:
+                return 60
             }
         }
         
@@ -463,6 +477,8 @@ extension APIClient {
                 return "/chat/generate-image"
             case .uploadFile:
                 return "/files/upload"
+            case .uploadReferenceImage:
+                return "/images/upload"
             case .generateDocument:
                 return "/documents/generate"
             case .stt:
@@ -653,7 +669,9 @@ extension APIClient {
             case .dtmAnswer(let questionId, let chosenKey):
                 return ["question_id": questionId, "chosen_key": chosenKey]
             case .cancelSurvey(let reason):
-                return ["reason": reason]
+                var body: [String: Any] = ["reason": reason]
+                if let id = PaywallAttributionStore.shared.paywallID { body["paywall_id"] = id }
+                return body
             case .savePersona(let role, let goals):
                 var b: [String: Any] = ["goals": goals]
                 if let role { b["role"] = role }
@@ -678,10 +696,13 @@ extension APIClient {
                 if webSearch { body["web_search"] = true }
                 if let platform { body["platform"] = platform }
                 return body
-            case .generateImage(let conversationId, let prompt, let projectId):
+            case .generateImage(let conversationId, let prompt, let projectId, let referenceImages, let regenerate, let replaceImageUrl):
                 var params: [String: Any] = ["prompt": prompt]
                 if let conversationId { params["conversation_id"] = conversationId }
                 if let projectId { params["project_id"] = projectId }
+                if let referenceImages, !referenceImages.isEmpty { params["reference_images"] = referenceImages }
+                if regenerate { params["regenerate"] = true }
+                if let replaceImageUrl { params["replace_image_url"] = replaceImageUrl }
                 return params
             case .saveChat(let conversationId, let userText, let assistantText):
                 return [
@@ -705,7 +726,9 @@ extension APIClient {
                 if let conversationId { body["conversation_id"] = conversationId }
                 return body
             case .subscribe(let plan, let provider):
-                return ["plan": plan, "provider": provider, "platform": "ios"]
+                var body: [String: Any] = ["plan": plan, "provider": provider]
+                PaywallAttributionStore.shared.requestFields.forEach { body[$0.key] = $0.value }
+                return body
             case .autoRenew(let cardId, let enabled):
                 var body: [String: Any] = ["enabled": enabled]
                 if let cardId { body["card_id"] = cardId }
@@ -715,7 +738,9 @@ extension APIClient {
             case .tokenizeCardRequest(let cardNumber, let expireDate):
                 return ["card_number": cardNumber, "expire_date": expireDate]
             case .tokenizeCardVerify(let requestId, let smsCode, let planCode):
-                return ["request_id": requestId, "sms_code": smsCode, "plan_code": planCode]
+                var body: [String: Any] = ["request_id": requestId, "sms_code": smsCode, "plan_code": planCode]
+                PaywallAttributionStore.shared.requestFields.forEach { body[$0.key] = $0.value }
+                return body
             case .updateSettings(let payload):
                 var body: [String: Any] = [:]
                 if let prompt = payload.systemPrompt { body["system_prompt"] = prompt }
@@ -781,6 +806,12 @@ extension APIClient {
                 append("--\(boundary)\r\n")
                 append("Content-Disposition: form-data; name=\"file\"; filename=\"\(filename)\"\r\n")
                 append("Content-Type: application/octet-stream\r\n\r\n")
+                body.append(data)
+                append("\r\n")
+            case .uploadReferenceImage(let data, let filename, let contentType):
+                append("--\(boundary)\r\n")
+                append("Content-Disposition: form-data; name=\"file\"; filename=\"\(filename)\"\r\n")
+                append("Content-Type: \(contentType)\r\n\r\n")
                 body.append(data)
                 append("\r\n")
             case .stt(let data, let filename, let language):
