@@ -29,6 +29,7 @@ final class SubscriptionManager: ObservableObject {
     /// returned-from but NOT paid (failed / cancelled / abandoned). Observed by
     /// ContentView, which presents the WhyNotPaySurvey sheet.
     @Published var showPaymentSurvey = false
+    @Published private(set) var lastCardChargeFailure: CardChargeFailure?
 
     // MARK: - Redirect-checkout tracking
     //
@@ -46,6 +47,10 @@ final class SubscriptionManager: ObservableObject {
     /// When the checkout was opened; a checkout the user silently abandoned can't
     /// fire a stale toast days later.
     private var pendingCheckoutAt: Date?
+    /// The exact checkout that was declined/abandoned. This is the only source
+    /// allowed to request a discounted plan; generic app launches never do.
+    private var abandonedPaymentId: Int?
+    private var abandonedPlanCode: String?
     /// Freshness window for a pending checkout.
     private let pendingCheckoutTTL: TimeInterval = 30 * 60
     /// Guards against overlapping backend status polls (deep link + foreground).
@@ -117,7 +122,7 @@ final class SubscriptionManager: ObservableObject {
 
         // Fast path — trusted terminal status from the deep link, no round-trip.
         if let kind = PaymentToastKind(status: trustedStatus) {
-            await finishPayment(kind)
+            await finishPayment(kind, paymentID: id)
             return
         }
 
@@ -138,7 +143,8 @@ final class SubscriptionManager: ObservableObject {
             if let resp = try? await APIClient.shared.request(
                     .paymentStatus(id: id), decodeTo: PaymentStatusResponse.self),
                let kind = PaymentToastKind(status: resp.status) {
-                await finishPayment(kind)
+                if let resolvedPlan = resp.plan { pendingCheckoutPlan = resolvedPlan }
+                await finishPayment(kind, paymentID: id)
                 return
             }
         }
@@ -147,6 +153,8 @@ final class SubscriptionManager: ObservableObject {
         // info toast and ask WHY they didn't pay. Keep the checkout armed so a
         // late webhook can still flip it to success on the next foreground.
         guard pendingCheckoutAt != nil else { return }
+        abandonedPaymentId = id
+        abandonedPlanCode = pendingCheckoutPlan
         presentToast(.pending, plan: pendingCheckoutPlan)
         showPaymentSurvey = true
     }
@@ -154,9 +162,16 @@ final class SubscriptionManager: ObservableObject {
     /// Terminal resolution. Claims the pending checkout synchronously (clearing it
     /// before any `await`) so a racing deep-link + foreground pair yields exactly
     /// one toast, then refreshes the plan and presents.
-    private func finishPayment(_ kind: PaymentToastKind) async {
+    private func finishPayment(_ kind: PaymentToastKind, paymentID: Int?) async {
         guard pendingCheckoutAt != nil else { return }  // already claimed by a peer
         let plan = pendingCheckoutPlan
+        if kind == .success {
+            abandonedPaymentId = nil
+            abandonedPlanCode = nil
+        } else {
+            abandonedPaymentId = paymentID ?? pendingPaymentId
+            abandonedPlanCode = plan
+        }
         clearPendingCheckout()
         await checkSubscriptionStatus()
         presentToast(kind, plan: plan)
@@ -178,7 +193,27 @@ final class SubscriptionManager: ObservableObject {
     /// payment state must never be resumed when Google, Apple, or Telegram returns.
     func resetPaymentRecovery() {
         clearPendingCheckout()
+        abandonedPaymentId = nil
+        abandonedPlanCode = nil
         paymentToast = nil
+        showPaymentSurvey = false
+        lastCardChargeFailure = nil
+    }
+
+    /// Records the exact embedded-card checkout that failed. The root survey may
+    /// only become visible after the payment cover closes; it is intentionally
+    /// armed here so dismissing the flow cannot lose the selected plan/payment.
+    func registerCardChargeFailure(_ failure: CardChargeFailure) {
+        lastCardChargeFailure = failure
+        abandonedPaymentId = failure.paymentId
+        abandonedPlanCode = failure.planCode
+        showPaymentSurvey = true
+    }
+
+    func completeEmbeddedCardPayment() {
+        lastCardChargeFailure = nil
+        abandonedPaymentId = nil
+        abandonedPlanCode = nil
         showPaymentSurvey = false
     }
 
@@ -287,6 +322,7 @@ final class SubscriptionManager: ObservableObject {
     /// Step 2: Verify SMS code, save card, charge first payment
     func verifySMS(requestId: String, smsCode: Int, planCode: String) async -> TokenizeVerifyResponse? {
         lastError = nil
+        lastCardChargeFailure = nil
         do {
             let response = try await APIClient.shared.request(
                 .tokenizeCardVerify(requestId: requestId, smsCode: smsCode, planCode: planCode),
@@ -295,7 +331,16 @@ final class SubscriptionManager: ObservableObject {
             return response
         } catch let error as APIError {
             if case .server(_, let message) = error {
-                lastError = message
+                if let message,
+                   let data = message.data(using: .utf8),
+                   let failure = try? JSONDecoder().decode(CardChargeFailure.self, from: data) {
+                    registerCardChargeFailure(failure)
+                    lastError = failure.code == "insufficient_funds"
+                        ? String.appLocalized("Kartada mablag' yetarli emas. Kartani to'ldiring va qayta urining.")
+                        : String.appLocalized("To'lov amalga oshmadi. Boshqa karta bilan urinib ko'ring.")
+                } else {
+                    lastError = message
+                }
             }
             print("❌ Verify SMS failed: \(error)")
             return nil
@@ -391,12 +436,37 @@ final class SubscriptionManager: ObservableObject {
 
     /// Win-back: returns a discounted offer for users who abandoned a payment.
     /// `nil`/`eligible == false` means show normal pricing (no popup).
-    func fetchRecoveryOffer() async -> RecoveryOfferResponse? {
+    func fetchRecoveryOffer(paymentId: Int? = nil, baseCode: String? = nil) async -> RecoveryOfferResponse? {
         do {
-            return try await APIClient.shared.request(.recoveryOffer, decodeTo: RecoveryOfferResponse.self)
+            return try await APIClient.shared.request(
+                .recoveryOffer(paymentId: paymentId, baseCode: baseCode),
+                decodeTo: RecoveryOfferResponse.self
+            )
         } catch {
             print("❌ Recovery offer fetch failed: \(error)")
             return nil
         }
+    }
+
+    /// Fetch one offer for the checkout the user just declined. Returning nil is
+    /// intentional when the backend says it is too early or no matching promo exists.
+    func fetchAbandonedCheckoutOffer() async -> RecoveryOffer? {
+        let paymentId = abandonedPaymentId
+        let planCode = abandonedPlanCode
+        guard paymentId != nil || planCode != nil else { return nil }
+
+        var response = await fetchRecoveryOffer(paymentId: paymentId, baseCode: planCode)
+        // A lingering checkout becomes eligible 15 seconds after it starts. The
+        // survey can be dismissed a few seconds earlier, so retry once without
+        // making the user close/reopen the app.
+        if response?.eligible != true {
+            try? await Task.sleep(for: .seconds(4))
+            response = await fetchRecoveryOffer(paymentId: paymentId, baseCode: planCode)
+        }
+        guard let response, response.eligible, response.offers?.count == 1 else { return nil }
+        let offer = response.offers?.first
+        abandonedPaymentId = nil
+        abandonedPlanCode = nil
+        return offer
     }
 }

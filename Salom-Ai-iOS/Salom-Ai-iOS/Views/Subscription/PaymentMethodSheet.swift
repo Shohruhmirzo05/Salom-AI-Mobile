@@ -67,7 +67,7 @@ struct PaymentMethodSheet: View {
         }
         .toolbar {
             ToolbarItem(placement: .principal) {
-                Text("To'lov")
+                Text(String.appLocalized("To'lov"))
                     .font(.system(size: 15, weight: .semibold))
                     .foregroundColor(SalomTheme.Colors.textPrimary)
             }
@@ -122,11 +122,11 @@ struct PaymentMethodSheet: View {
 
     @ViewBuilder private var header: some View {
         VStack(alignment: .leading, spacing: 6) {
-            Text("To'lov turini tanlang")
+            Text(String.appLocalized("To'lov turini tanlang"))
                 .font(.system(size: 28, weight: .semibold))
                 .foregroundColor(SalomTheme.Colors.textPrimary)
                 .tracking(-0.6)
-            Text("Sizga qulay usulni tanlang.")
+            Text(String.appLocalized("Sizga qulay usulni tanlang."))
                 .font(.system(size: 14))
                 .foregroundColor(SalomTheme.Colors.textSecondary)
         }
@@ -189,7 +189,7 @@ struct PaymentMethodSheet: View {
                     if isLoading {
                         ProgressView().tint(SalomTheme.Colors.onAccent)
                     } else {
-                        Text("Davom etish")
+                        Text(String.appLocalized("Davom etish"))
                             .font(.system(size: 16, weight: .semibold))
                             .foregroundColor(SalomTheme.Colors.onAccent)
                         Image(systemName: "arrow.right")
@@ -199,8 +199,9 @@ struct PaymentMethodSheet: View {
                 }
                 .frame(maxWidth: .infinity)
                 .frame(height: 54)
-                .background(SalomTheme.Colors.accentSecondary)
+                .background(SalomTheme.Gradients.accent)
                 .clipShape(RoundedRectangle(cornerRadius: 14, style: .continuous))
+                .shadow(color: SalomTheme.Colors.accentPrimary.opacity(0.28), radius: 16, x: 0, y: 8)
                 .opacity(isLoading ? 0.7 : 1)
             }
             .buttonStyle(.plain)
@@ -209,7 +210,7 @@ struct PaymentMethodSheet: View {
             HStack(spacing: 5) {
                 Image(systemName: "lock.fill")
                     .font(.system(size: 9))
-                Text("SSL bilan himoyalangan xavfsiz to'lov")
+                Text(String.appLocalized("SSL bilan himoyalangan xavfsiz to'lov"))
                     .font(.system(size: 11))
             }
             .foregroundColor(SalomTheme.Colors.textTertiary)
@@ -319,15 +320,16 @@ private struct MethodRow: View {
             .padding(.vertical, 16)
             .background(
                 RoundedRectangle(cornerRadius: 16, style: .continuous)
-                    .fill(active ? SalomTheme.Colors.surfaceMuted : SalomTheme.Colors.surface)
+                    .fill(active ? SalomTheme.Colors.accentPrimary.opacity(0.11) : SalomTheme.Colors.surface)
             )
             .overlay(
                 RoundedRectangle(cornerRadius: 16, style: .continuous)
                     .strokeBorder(
                         active ? SalomTheme.Colors.accentPrimary : SalomTheme.Colors.border,
-                        lineWidth: active ? 1 : 0.5
+                        lineWidth: active ? 1.5 : 0.5
                     )
             )
+            .shadow(color: active ? SalomTheme.Colors.accentPrimary.opacity(0.14) : Color.clear, radius: 14, x: 0, y: 7)
         }
         .buttonStyle(.plain)
     }

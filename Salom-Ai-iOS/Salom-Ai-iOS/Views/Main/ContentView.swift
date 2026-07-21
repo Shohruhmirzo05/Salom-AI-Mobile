@@ -74,10 +74,9 @@ struct ContentView: View {
             // "Why didn't you pay?" after a returned-but-not-paid checkout.
             WhyNotPaySurvey(
                 onPick: { reason in
-                    Task { await SubscriptionManager.shared.submitCancelSurvey(reason: reason) }
-                    subs.showPaymentSurvey = false
+                    finishPaymentSurvey(reason: reason)
                 },
-                onSkip: { subs.showPaymentSurvey = false }
+                onSkip: { finishPaymentSurvey(reason: nil) }
             )
             .presentationDetents([.height(320)])
         }
@@ -132,8 +131,6 @@ struct ContentView: View {
     @State private var showPaywall = false
     @State private var hasShownPaywall = false
     @State private var winBackOffer: RecoveryOffer?
-    @AppStorage("winback_last_shown_day") private var winBackLastShownDay: String = ""
-    @AppStorage("organic_paywall_last_shown_day") private var organicPaywallLastShownDay: String = ""
     // First-run value showcase ("what can you do") — shown once, before any paywall.
     @AppStorage("value_shown_v1") private var valueShown: Bool = false
     @State private var showValueShowcase = false
@@ -169,34 +166,21 @@ struct ContentView: View {
                 return
             }
 
-            // ONE decision: win-back (for abandoned-payment users, once/day) takes
-            // precedence; otherwise the generic paywall. Never both → no flash.
-            let today = Self.dayKey()
-            if winBackLastShownDay != today,
-               let resp = await SubscriptionManager.shared.fetchRecoveryOffer(),
-               resp.eligible, let best = resp.offers?.first {
-                await MainActor.run { winBackLastShownDay = today }
-                try? await Task.sleep(nanoseconds: 400_000_000)
-                await MainActor.run { winBackOffer = best }
-            } else if Self.daysSince(organicPaywallLastShownDay) >= 7 {
-                await MainActor.run { organicPaywallLastShownDay = today }
-                try? await Task.sleep(nanoseconds: 400_000_000)
-                await MainActor.run { showPaywall = true }
+            // Returning free users go straight to their task. Paywalls are shown
+            // at a feature limit/export/explicit upgrade action, never on launch.
+        }
+    }
+
+    private func finishPaymentSurvey(reason: String?) {
+        subs.showPaymentSurvey = false
+        Task {
+            if let reason {
+                await SubscriptionManager.shared.submitCancelSurvey(reason: reason)
+            }
+            if let offer = await SubscriptionManager.shared.fetchAbandonedCheckoutOffer() {
+                await MainActor.run { winBackOffer = offer }
             }
         }
     }
 
-    private static func dayKey() -> String {
-        let f = DateFormatter()
-        f.dateFormat = "yyyy-MM-dd"
-        return f.string(from: Date())
-    }
-
-    private static func daysSince(_ key: String) -> Int {
-        guard !key.isEmpty else { return .max }
-        let f = DateFormatter()
-        f.dateFormat = "yyyy-MM-dd"
-        guard let date = f.date(from: key) else { return .max }
-        return Calendar.current.dateComponents([.day], from: date, to: Date()).day ?? .max
-    }
 }

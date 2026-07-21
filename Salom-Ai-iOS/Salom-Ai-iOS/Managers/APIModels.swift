@@ -45,8 +45,24 @@ struct OAuthUser: Codable {
     }
 }
 
-struct StatusMessageResponse: Codable {
+struct StatusMessageResponse: Decodable {
     let detail: String?
+
+    private enum CodingKeys: String, CodingKey { case detail }
+
+    init(from decoder: Decoder) throws {
+        let container = try decoder.container(keyedBy: CodingKeys.self)
+        if let message = try? container.decode(String.self, forKey: .detail) {
+            detail = message
+        } else if let failure = try? container.decode(CardChargeFailure.self, forKey: .detail),
+                  let data = try? JSONEncoder().encode(failure) {
+            // Keep APIError's public shape stable while preserving the structured
+            // decline payload for the subscription funnel.
+            detail = String(data: data, encoding: .utf8)
+        } else {
+            detail = nil
+        }
+    }
 }
 
 struct ChatReplyResponse: Codable {
@@ -516,6 +532,22 @@ struct TokenizeVerifyResponse: Codable {
         let id: Int
         let maskedNumber: String
         let phoneHint: String
+    }
+}
+
+struct CardChargeFailure: Codable {
+    let code: String
+    let paymentId: Int?
+    let planCode: String
+    let amountUzs: Int?
+    let canRetry: Bool?
+
+    enum CodingKeys: String, CodingKey {
+        case code
+        case paymentId = "payment_id"
+        case planCode = "plan_code"
+        case amountUzs = "amount_uzs"
+        case canRetry = "can_retry"
     }
 }
 

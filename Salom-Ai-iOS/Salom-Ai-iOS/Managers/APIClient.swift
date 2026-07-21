@@ -385,7 +385,7 @@ extension APIClient {
         case dtmProgress
 
         // Win-back + retention
-        case recoveryOffer
+        case recoveryOffer(paymentId: Int?, baseCode: String?)
         case cancelSurvey(reason: String)
         case savePersona(role: String?, goals: [String])
         case accountStreak
@@ -630,6 +630,11 @@ extension APIClient {
                 var q = [URLQueryItem(name: "subject", value: subject)]
                 if let topic, !topic.isEmpty { q.append(URLQueryItem(name: "topic", value: topic)) }
                 if let difficulty, !difficulty.isEmpty { q.append(URLQueryItem(name: "difficulty", value: difficulty)) }
+                return q
+            case .recoveryOffer(let paymentId, let baseCode):
+                var q: [URLQueryItem] = []
+                if let paymentId { q.append(URLQueryItem(name: "payment_id", value: "\(paymentId)")) }
+                if let baseCode, !baseCode.isEmpty { q.append(URLQueryItem(name: "base_code", value: baseCode)) }
                 return q
             case .listConversations(let limit, let offset):
                 return [

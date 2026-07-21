@@ -20,20 +20,15 @@ struct WinBackOfferSheet: View {
         ZStack {
             SalomTheme.Colors.bgMain.ignoresSafeArea()
 
-            // "Winning" celebration burst when the offer opens.
-            ConfettiBurst()
-                .ignoresSafeArea()
-                .allowsHitTesting(false)
-
             ScrollView(showsIndicators: false) {
-                VStack(spacing: 22) {
+                VStack(spacing: 18) {
                     closeRow
-                    badge
+                    hero
                     headline
                     priceCard
                     benefits
                     ctaButton
-                    Text("Maxsus narx faqat siz uchun, cheklangan vaqtda.")
+                    Text(String.appLocalized("Maxsus narx faqat siz uchun, cheklangan vaqtda."))
                         .font(.system(size: 11))
                         .foregroundColor(SalomTheme.Colors.textTertiary)
                         .multilineTextAlignment(.center)
@@ -56,6 +51,33 @@ struct WinBackOfferSheet: View {
         }
     }
 
+    private var hero: some View {
+        ZStack(alignment: .bottomLeading) {
+            CachedImage(imageUrl: PaywallContextID.paymentRecovery.spec.imageURL)
+                .frame(maxWidth: .infinity)
+                .frame(height: 226)
+                .clipped()
+            LinearGradient(
+                colors: [.clear, .black.opacity(0.78)],
+                startPoint: .center,
+                endPoint: .bottom
+            )
+            VStack(alignment: .leading, spacing: 8) {
+                badge
+                Text(offer.baseName)
+                    .font(.system(size: 24, weight: .heavy))
+                    .foregroundColor(.white)
+                    .lineLimit(2)
+            }
+            .padding(18)
+        }
+        .clipShape(RoundedRectangle(cornerRadius: 26, style: .continuous))
+        .overlay(
+            RoundedRectangle(cornerRadius: 26, style: .continuous)
+                .strokeBorder(SalomTheme.Colors.accentPrimary.opacity(0.42), lineWidth: 1)
+        )
+    }
+
     private var closeRow: some View {
         HStack {
             Spacer()
@@ -71,7 +93,7 @@ struct WinBackOfferSheet: View {
     }
 
     private var badge: some View {
-        Text("-\(offer.discountPct)% CHEGIRMA")
+        Text(String(format: String.appLocalized("-%lld%% CHEGIRMA"), offer.discountPct))
             .font(.system(size: 13, weight: .heavy))
             .tracking(1)
             .foregroundColor(SalomTheme.Colors.onAccent)
@@ -87,13 +109,9 @@ struct WinBackOfferSheet: View {
 
     private var headline: some View {
         VStack(spacing: 8) {
-            Text("Sizni qaytarib olmoqchimiz! 🎁")
+            Text(String.appLocalized("Maxsus narx faqat siz uchun, cheklangan vaqtda."))
                 .font(.system(size: 22, weight: .bold))
                 .foregroundColor(SalomTheme.Colors.textPrimary)
-                .multilineTextAlignment(.center)
-            Text("Pro obunani maxsus, bir martalik chegirma bilan oching.")
-                .font(.system(size: 14))
-                .foregroundColor(SalomTheme.Colors.textSecondary)
                 .multilineTextAlignment(.center)
         }
     }
@@ -128,7 +146,7 @@ struct WinBackOfferSheet: View {
     @ViewBuilder private var benefits: some View {
         if let benefits = offer.benefits, !benefits.isEmpty {
             VStack(alignment: .leading, spacing: 9) {
-                ForEach(0..<min(5, benefits.count), id: \.self) { i in
+                ForEach(0..<min(3, benefits.count), id: \.self) { i in
                     if let line = offer.benefit(at: i, lang: languageCode) {
                         HStack(alignment: .top, spacing: 10) {
                             Image(systemName: "checkmark.circle.fill")
@@ -152,13 +170,14 @@ struct WinBackOfferSheet: View {
             Analytics.shared.track("winback_accepted", ["plan": offer.promoCode])
             payFor = IdentifiablePlanCode(code: offer.promoCode)
         } label: {
-            Text("Chegirmani olish")
+            Text(String.appLocalized("Chegirmani olish"))
                 .font(.system(size: 16, weight: .semibold))
                 .foregroundColor(SalomTheme.Colors.onAccent)
                 .frame(maxWidth: .infinity)
                 .frame(height: 54)
-                .background(SalomTheme.Colors.accentSecondary)
+                .background(SalomTheme.Gradients.accent)
                 .clipShape(RoundedRectangle(cornerRadius: 14, style: .continuous))
+                .shadow(color: SalomTheme.Colors.accentPrimary.opacity(0.3), radius: 16, x: 0, y: 8)
         }
         .buttonStyle(.plain)
     }
@@ -168,59 +187,5 @@ struct WinBackOfferSheet: View {
         f.numberStyle = .decimal
         f.groupingSeparator = " "
         return (f.string(from: NSNumber(value: uzs)) ?? "\(uzs)") + " UZS"
-    }
-}
-
-// MARK: - Confetti "winning" celebration (native SwiftUI, no Lottie dependency)
-
-private struct ConfettiBurst: View {
-    var count: Int = 48
-    @State private var on = false
-
-    private struct Piece: Identifiable {
-        let id: Int
-        let color: Color
-        let xEnd: CGFloat
-        let size: CGFloat
-        let delay: Double
-        let rot: Double
-        let fall: CGFloat
-    }
-
-    private let pieces: [Piece]
-
-    init(count: Int = 48) {
-        self.count = count
-        let palette: [Color] = [
-            Color(hex: "#1ED6FF"), Color(hex: "#7C3AED"), Color(hex: "#FF7A00"),
-            Color(hex: "#FF2D78"), Color(hex: "#FFD23F"), SalomTheme.Colors.accentPrimary,
-        ]
-        pieces = (0..<count).map { i in
-            Piece(
-                id: i,
-                color: palette[i % palette.count],
-                xEnd: CGFloat.random(in: -190...190),
-                size: CGFloat.random(in: 6...12),
-                delay: Double.random(in: 0...0.35),
-                rot: Double.random(in: 180...900),
-                fall: CGFloat.random(in: 480...780)
-            )
-        }
-    }
-
-    var body: some View {
-        ZStack {
-            ForEach(pieces) { p in
-                RoundedRectangle(cornerRadius: 2, style: .continuous)
-                    .fill(p.color)
-                    .frame(width: p.size, height: p.size * 1.7)
-                    .rotationEffect(.degrees(on ? p.rot : 0))
-                    .offset(x: on ? p.xEnd : 0, y: on ? p.fall : -60)
-                    .opacity(on ? 0 : 1)
-                    .animation(.easeOut(duration: 1.8).delay(p.delay), value: on)
-            }
-        }
-        .frame(maxWidth: .infinity, alignment: .top)
-        .onAppear { on = true }
     }
 }

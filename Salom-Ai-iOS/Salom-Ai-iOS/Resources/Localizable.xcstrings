@@ -10276,6 +10276,20 @@
         }
       }
     },
+    "Kartada mablag' yetarli emas. Kartani to'ldiring va qayta urining." : {
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "There are insufficient funds on the card. Top it up and try again." } },
+        "ru" : { "stringUnit" : { "state" : "translated", "value" : "На карте недостаточно средств. Пополните её и повторите попытку." } },
+        "uz-Cyrl" : { "stringUnit" : { "state" : "translated", "value" : "Картада маблағ етарли эмас. Картани тўлдириб, қайта уриниб кўринг." } }
+      }
+    },
+    "To'lov amalga oshmadi. Boshqa karta bilan urinib ko'ring." : {
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "The payment failed. Try another card." } },
+        "ru" : { "stringUnit" : { "state" : "translated", "value" : "Платёж не прошёл. Попробуйте другую карту." } },
+        "uz-Cyrl" : { "stringUnit" : { "state" : "translated", "value" : "Тўлов амалга ошмади. Бошқа карта билан уриниб кўринг." } }
+      }
+    },
     "Русский" : {
       "localizations" : {
         "en" : {

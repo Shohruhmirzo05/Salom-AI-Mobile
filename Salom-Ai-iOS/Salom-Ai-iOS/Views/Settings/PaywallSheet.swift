@@ -7,6 +7,7 @@
 //
 
 import SwiftUI
+internal import UIKit
 
 /// Billing period for the paywalls' Oylik/Yillik toggle (shared across views).
 enum BillingPeriod: Hashable { case yearly, monthly }
@@ -59,12 +60,6 @@ struct PaywallSheet: View {
     @State private var selectedPlanCode: String? = nil
     @State private var billingPeriod: BillingPeriod
 
-    // "Why didn't you pay?" survey — shown once (per 30d) when the user closes the
-    // paywall without subscribing. Feeds the admin Insights breakdown.
-    @State private var askSurvey = false
-    @State private var showSurvey = false
-    @State private var surveyed = false
-
     init(context: PaywallContextID = .general, source: String = "ios") {
         self.context = context
         self.source = source
@@ -89,34 +84,14 @@ struct PaywallSheet: View {
             if selectedPlanCode == nil {
                 selectedPlanCode = recommendedPlan?.code
             }
-            // Whether to ask "why didn't you pay?" on exit (throttled by backend).
-            if let rec = await subscriptionManager.fetchRecoveryOffer() {
-                askSurvey = rec.askSurvey ?? false
-            }
         }
         .onChange(of: subscriptionManager.isPro) { _, isPro in
             if isPro { dismiss() }
         }
-        .sheet(isPresented: $showSurvey, onDismiss: { dismiss() }) {
-            WhyNotPaySurvey(
-                onPick: { reason in
-                    surveyed = true
-                    Task { await subscriptionManager.submitCancelSurvey(reason: reason, paywallID: context.rawValue) }
-                    showSurvey = false
-                },
-                onSkip: { showSurvey = false }
-            )
-            .presentationDetents([.height(320)])
-        }
     }
 
-    /// Intercept close: ask why (once) if they're leaving without subscribing.
     private func handleDismiss() {
-        if !subscriptionManager.isPro && askSurvey && !surveyed {
-            showSurvey = true
-        } else {
-            dismiss()
-        }
+        dismiss()
     }
 
     @ViewBuilder private var content: some View {
@@ -124,7 +99,7 @@ struct PaywallSheet: View {
             SalomTheme.Colors.bgMain.ignoresSafeArea()
 
             ScrollView(showsIndicators: false) {
-                VStack(alignment: .leading, spacing: 24) {
+                VStack(alignment: .leading, spacing: compactPhoneHeight ? 18 : 24) {
                     headerArt
                     headerCopy
                     if hasYearly { billingToggle }
@@ -183,7 +158,7 @@ struct PaywallSheet: View {
         ZStack(alignment: proofAlignment) {
             CachedImage(imageUrl: context.spec.imageURL)
                 .frame(maxWidth: .infinity)
-                .frame(height: context.artStyle == .lesson ? 244 : 272)
+                .frame(height: context.artStyle == .lesson ? min(heroHeight, 244) : heroHeight)
                 .clipped()
             LinearGradient(colors: [.clear, .black.opacity(0.76)], startPoint: .center, endPoint: .bottom)
             proofCapsule
@@ -217,7 +192,7 @@ struct PaywallSheet: View {
             proofCapsule.padding(16)
         }
         .frame(maxWidth: .infinity)
-        .frame(height: context.artStyle == .invoice ? 252 : 272)
+        .frame(height: context.artStyle == .invoice ? min(heroHeight, 252) : heroHeight)
         .clipShape(RoundedRectangle(cornerRadius: context.artStyle == .invoice ? 16 : 28, style: .continuous))
         .overlay(RoundedRectangle(cornerRadius: context.artStyle == .invoice ? 16 : 28, style: .continuous).strokeBorder(artAccent.opacity(0.38), lineWidth: 1))
     }
@@ -249,7 +224,7 @@ struct PaywallSheet: View {
                     .frame(width: proxy.size.width, height: proxy.size.height, alignment: .bottomLeading)
             }
         }
-        .frame(height: 276)
+        .frame(height: heroHeight)
         .clipShape(RoundedRectangle(cornerRadius: 28, style: .continuous))
         .overlay(RoundedRectangle(cornerRadius: 28, style: .continuous).strokeBorder(artAccent.opacity(0.45), lineWidth: 1))
     }
@@ -264,17 +239,17 @@ struct PaywallSheet: View {
                     .clipped()
                 VStack(spacing: gap) {
                     CachedImage(imageUrl: context.spec.imageURL)
-                        .frame(width: small, height: 132)
+                        .frame(width: small, height: (heroHeight - gap) / 2)
                         .clipped()
                     CachedImage(imageUrl: context.spec.imageURL)
                         .scaleEffect(1.12)
-                        .frame(width: small, height: 132)
+                        .frame(width: small, height: (heroHeight - gap) / 2)
                         .clipped()
                 }
             }
             .overlay(alignment: .bottomLeading) { proofCapsule.padding(16) }
         }
-        .frame(height: 272)
+        .frame(height: heroHeight)
         .clipShape(RoundedRectangle(cornerRadius: 28, style: .continuous))
         .overlay(RoundedRectangle(cornerRadius: 28, style: .continuous).strokeBorder(artAccent.opacity(0.4), lineWidth: 1))
     }
@@ -283,7 +258,7 @@ struct PaywallSheet: View {
         ZStack(alignment: .bottomLeading) {
             CachedImage(imageUrl: context.spec.imageURL)
                 .frame(maxWidth: .infinity)
-                .frame(height: 272)
+                .frame(height: heroHeight)
                 .clipped()
             LinearGradient(colors: [.clear, .black.opacity(0.78)], startPoint: .center, endPoint: .bottom)
             VStack(alignment: .leading, spacing: 10) {
@@ -329,7 +304,7 @@ struct PaywallSheet: View {
                 .padding(16)
         }
         .frame(maxWidth: .infinity)
-        .frame(height: 272)
+        .frame(height: heroHeight)
         .clipShape(RoundedRectangle(cornerRadius: 36, style: .continuous))
         .overlay(RoundedRectangle(cornerRadius: 36, style: .continuous).strokeBorder(artAccent.opacity(0.5), lineWidth: 1))
     }
@@ -387,6 +362,9 @@ struct PaywallSheet: View {
             SalomTheme.Colors.accentPrimary
         }
     }
+
+    private var compactPhoneHeight: Bool { UIScreen.main.bounds.height <= 812 }
+    private var heroHeight: CGFloat { compactPhoneHeight ? 236 : 272 }
 
     @ViewBuilder private var headerCopy: some View {
         Text(context.spec.title)
@@ -488,8 +466,9 @@ struct PaywallSheet: View {
                     .foregroundColor(SalomTheme.Colors.onAccent)
                     .frame(maxWidth: .infinity)
                     .frame(height: 54)
-                    .background(SalomTheme.Colors.accentSecondary)
+                    .background(SalomTheme.Gradients.accent)
                     .clipShape(RoundedRectangle(cornerRadius: 14, style: .continuous))
+                    .shadow(color: SalomTheme.Colors.accentPrimary.opacity(0.28), radius: 16, x: 0, y: 8)
                 }
                 .buttonStyle(.plain)
 
@@ -543,7 +522,7 @@ struct PaywallSheet: View {
 
     private var paidPlans: [SubscriptionPlan] {
         subscriptionManager.plans
-            .filter { $0.isPaid }
+            .filter { $0.isPaid && !$0.code.hasSuffix("_promo") }
             .sorted { $0.priceUzs < $1.priceUzs }
     }
 
@@ -653,15 +632,16 @@ private struct PlanPriceRow: View {
             }
             .background(
                 RoundedRectangle(cornerRadius: 16, style: .continuous)
-                    .fill(selected ? SalomTheme.Colors.surfaceMuted : SalomTheme.Colors.surface)
+                    .fill(selected ? SalomTheme.Colors.accentPrimary.opacity(0.11) : SalomTheme.Colors.surface)
             )
             .overlay(
                 RoundedRectangle(cornerRadius: 16, style: .continuous)
                     .strokeBorder(
                         selected ? SalomTheme.Colors.accentPrimary : SalomTheme.Colors.border,
-                        lineWidth: selected ? 1 : 0.5
+                        lineWidth: selected ? 1.5 : 0.5
                     )
             )
+            .shadow(color: selected ? SalomTheme.Colors.accentPrimary.opacity(0.14) : Color.clear, radius: 14, x: 0, y: 7)
         }
         .buttonStyle(.plain)
     }

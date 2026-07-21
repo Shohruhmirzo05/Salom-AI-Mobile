@@ -339,6 +339,7 @@ struct SMSVerifySheet: View {
         if let response = await subscriptionManager.verifySMS(requestId: requestId, smsCode: code, planCode: planCode) {
             if response.success {
                 HapticManager.shared.fire(.success)
+                subscriptionManager.completeEmbeddedCardPayment()
                 await subscriptionManager.checkSubscriptionStatus()
                 await subscriptionManager.fetchSavedCards()
                 withAnimation(.easeInOut(duration: 0.4)) { showSuccess = true }
