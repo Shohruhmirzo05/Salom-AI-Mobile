@@ -48,12 +48,19 @@ struct OAuthUser: Codable {
 struct StatusMessageResponse: Decodable {
     let detail: String?
 
+    private struct PublicErrorDetail: Decodable {
+        let code: String
+        let message: String
+    }
+
     private enum CodingKeys: String, CodingKey { case detail }
 
     init(from decoder: Decoder) throws {
         let container = try decoder.container(keyedBy: CodingKeys.self)
         if let message = try? container.decode(String.self, forKey: .detail) {
             detail = message
+        } else if let failure = try? container.decode(PublicErrorDetail.self, forKey: .detail) {
+            detail = "[\(failure.code)] \(failure.message)"
         } else if let failure = try? container.decode(CardChargeFailure.self, forKey: .detail),
                   let data = try? JSONEncoder().encode(failure) {
             // Keep APIError's public shape stable while preserving the structured

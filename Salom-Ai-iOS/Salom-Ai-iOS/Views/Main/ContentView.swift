@@ -23,13 +23,16 @@ struct ContentView: View {
     @State private var promptedPersonaThisSession = false
 #if DEBUG
     @State private var qaPaywallContext: PaywallContextID?
+    @State private var qaChat = false
 #endif
 
     var body: some View {
         ZStack {
             SalomTheme.Gradients.background
                 .ignoresSafeArea()
-            if showSplash {
+            if debugQAPreviewEnabled {
+                ChatContainerView()
+            } else if showSplash {
                 SplashView(isActive: $showSplash)
                     .transition(.opacity)
             } else if session.contentType == .onboarding || !hasCompletedOnboarding {
@@ -52,6 +55,7 @@ struct ContentView: View {
             Analytics.shared.track("feature_opened", ["feature": "ios_app"])
 #if DEBUG
             let arguments = ProcessInfo.processInfo.arguments
+            qaChat = arguments.contains("-SALOM_QA_CHAT")
             if let marker = arguments.firstIndex(of: "-SALOM_QA_PAYWALL"),
                arguments.indices.contains(marker + 1) {
                 qaPaywallContext = PaywallContextID(rawValue: arguments[marker + 1])
@@ -119,6 +123,14 @@ struct ContentView: View {
                 subs.resetPaymentRecovery()
             }
         }
+    }
+
+    private var debugQAPreviewEnabled: Bool {
+#if DEBUG
+        qaChat
+#else
+        false
+#endif
     }
 
     private var paymentSurveyBinding: Binding<Bool> {

@@ -11,6 +11,11 @@ import PhotosUI
 import Photos
 internal import UIKit
 
+enum ChatRetryKind {
+    case chat
+    case image
+}
+
 struct ChatMessage: Identifiable {
     let id: UUID
     let remoteId: Int?
@@ -22,8 +27,9 @@ struct ChatMessage: Identifiable {
     var searchingWeb: Bool = false    // true while a live web search runs for this reply
     var generatingImage: Bool = false // true while an image is being auto-generated
     var citations: [Citation]? = nil  // web sources for this reply
+    var retryKind: ChatRetryKind? = nil
 
-    init(id: UUID = UUID(), remoteId: Int? = nil, text: String, role: MessageRole, createdAt: Date? = nil, fileUrls: [String]? = nil, docFormat: DocFormat? = nil, searchingWeb: Bool = false, generatingImage: Bool = false, citations: [Citation]? = nil) {
+    init(id: UUID = UUID(), remoteId: Int? = nil, text: String, role: MessageRole, createdAt: Date? = nil, fileUrls: [String]? = nil, docFormat: DocFormat? = nil, searchingWeb: Bool = false, generatingImage: Bool = false, citations: [Citation]? = nil, retryKind: ChatRetryKind? = nil) {
         self.id = id
         self.remoteId = remoteId
         self.text = text
@@ -34,6 +40,7 @@ struct ChatMessage: Identifiable {
         self.searchingWeb = searchingWeb
         self.generatingImage = generatingImage
         self.citations = citations
+        self.retryKind = retryKind
     }
     
     var isUser: Bool {
@@ -44,6 +51,24 @@ struct ChatMessage: Identifiable {
 struct ImageViewerItem: Identifiable {
     let url: URL
     var id: URL { url }
+}
+
+enum ComposerUploadStatus: Equatable {
+    case uploading
+    case ready
+    case failed
+}
+
+struct ComposerAttachment: Identifiable {
+    let id: UUID
+    let name: String
+    let data: Data?
+    let contentType: String
+    let uploadAsReference: Bool
+    let previewImage: UIImage?
+    var remoteURL: String?
+    var status: ComposerUploadStatus
+    var error: String?
 }
 
 /// Real-time "is the user near the bottom" detection from the scroll geometry
@@ -163,8 +188,18 @@ final class ChatViewModel: ObservableObject {
     private let audioRecorder = AudioRecorder()
     
     // File Uploads
-    @Published var attachments: [String] = []
-    @Published var isUploading: Bool = false
+    @Published var composerAttachments: [ComposerAttachment] = []
+    var attachments: [String] {
+        composerAttachments.compactMap { item in
+            item.status == .ready ? item.remoteURL : nil
+        }
+    }
+    var isUploading: Bool {
+        composerAttachments.contains { $0.status == .uploading }
+    }
+    var hasFailedUploads: Bool {
+        composerAttachments.contains { $0.status == .failed }
+    }
     @Published var showAttachmentPicker: Bool = false
     @Published var showPhotoPicker: Bool = false
     @Published var showDocumentPicker: Bool = false
@@ -211,11 +246,74 @@ final class ChatViewModel: ObservableObject {
     
     @MainActor
     func bootstrap() {
+#if DEBUG
+        if ProcessInfo.processInfo.arguments.contains("-SALOM_QA_CHAT") {
+            configureDebugChat()
+            return
+        }
+#endif
         Task {
             await loadModels()
             await loadConversations(selectFirst: false)
         }
     }
+
+#if DEBUG
+    @MainActor
+    private func configureDebugChat() {
+        let mode = ProcessInfo.processInfo.arguments
+            .drop(while: { $0 != "-SALOM_QA_CHAT" })
+            .dropFirst()
+            .first ?? "ready"
+        let preview = UIImage(named: "main-character")
+        let firstStatus: ComposerUploadStatus = mode == "failed" ? .failed : .ready
+        let secondStatus: ComposerUploadStatus = mode == "uploading" ? .uploading : .ready
+
+        availableModels = [
+            AIModel(id: "fast-mini", name: "Tezkor", tier: "fast", vision: true, limit: nil, usage: nil)
+        ]
+        selectedModel = availableModels.first
+        messages = [
+            ChatMessage(
+                text: String.appLocalized("Bu ikki rasmni birlashtirib, fonini zamonaviy qiling."),
+                role: .user,
+                createdAt: Date(),
+                fileUrls: ["https://cdn.salom-ai.uz/qa/reference-one.jpg", "https://cdn.salom-ai.uz/qa/reference-two.jpg"]
+            ),
+            ChatMessage(
+                text: String.appLocalized("Rasmlarni bir kompozitsiyaga moslab tayyorlayman."),
+                role: .assistant,
+                createdAt: Date()
+            )
+        ]
+        inputText = String.appLocalized("Yuzlarni o‘zgartirmang, yorug‘likni tabiiy qiling")
+        isImageMode = true
+        composerAttachments = [
+            ComposerAttachment(
+                id: UUID(),
+                name: "reference-one.jpg",
+                data: Data(),
+                contentType: "image/jpeg",
+                uploadAsReference: true,
+                previewImage: preview,
+                remoteURL: firstStatus == .ready ? "https://cdn.salom-ai.uz/qa/reference-one.jpg" : nil,
+                status: firstStatus,
+                error: firstStatus == .failed ? "Upload failed" : nil
+            ),
+            ComposerAttachment(
+                id: UUID(),
+                name: "reference-two.jpg",
+                data: Data(),
+                contentType: "image/jpeg",
+                uploadAsReference: true,
+                previewImage: preview,
+                remoteURL: secondStatus == .ready ? "https://cdn.salom-ai.uz/qa/reference-two.jpg" : nil,
+                status: secondStatus,
+                error: nil
+            )
+        ]
+    }
+#endif
     
     func loadModels() async {
         do {
@@ -284,59 +382,110 @@ final class ChatViewModel: ObservableObject {
     
     // MARK: - File Upload
     func uploadFile(data: Data, filename: String) {
+        enqueueAttachment(
+            data: data,
+            filename: filename,
+            contentType: "application/octet-stream",
+            uploadAsReference: false,
+            previewImage: nil
+        )
+    }
+
+    private func enqueueAttachment(
+        data: Data,
+        filename: String,
+        contentType: String,
+        uploadAsReference: Bool,
+        previewImage: UIImage?
+    ) {
+        let attachment = ComposerAttachment(
+            id: UUID(),
+            name: filename,
+            data: data,
+            contentType: contentType,
+            uploadAsReference: uploadAsReference,
+            previewImage: previewImage,
+            remoteURL: nil,
+            status: .uploading,
+            error: nil
+        )
+        composerAttachments.append(attachment)
+        uploadAttachment(id: attachment.id)
+    }
+
+    private func uploadAttachment(id: UUID) {
+        guard let item = composerAttachments.first(where: { $0.id == id }),
+              let data = item.data else { return }
         Task {
-            await MainActor.run { isUploading = true }
             do {
-                let response = try await client.request(
-                    .uploadFile(data: data, filename: filename),
-                    decodeTo: FileUploadResponse.self
-                )
+                let endpoint: APIClient.Endpoint = item.uploadAsReference
+                    ? .uploadReferenceImage(data: data, filename: item.name, contentType: item.contentType)
+                    : .uploadFile(data: data, filename: item.name)
+                let response = try await client.request(endpoint, decodeTo: FileUploadResponse.self)
                 await MainActor.run {
-                    self.attachments.append(response.url)
-                    self.isUploading = false
+                    guard let index = self.composerAttachments.firstIndex(where: { $0.id == id }) else { return }
+                    self.composerAttachments[index].remoteURL = response.url
+                    self.composerAttachments[index].status = .ready
+                    self.composerAttachments[index].error = nil
                 }
             } catch {
                 await MainActor.run {
-                    self.errorMessage = String.appLocalized("Fayl yuklashda xatolik: ") + error.localizedDescription
-                    self.isUploading = false
+                    guard let index = self.composerAttachments.firstIndex(where: { $0.id == id }) else { return }
+                    self.composerAttachments[index].status = .failed
+                    self.composerAttachments[index].error = error.localizedDescription
                 }
             }
         }
     }
-    
-    func removeAttachment(at index: Int) {
-        attachments.remove(at: index)
+
+    func retryAttachment(id: UUID) {
+        guard let index = composerAttachments.firstIndex(where: { $0.id == id }) else { return }
+        composerAttachments[index].status = .uploading
+        composerAttachments[index].error = nil
+        uploadAttachment(id: id)
+    }
+
+    func removeAttachment(id: UUID) {
+        composerAttachments.removeAll { $0.id == id }
+    }
+
+    func toggleImageMode() {
+        let next = !isImageMode
+        if next {
+            composerAttachments = Array(composerAttachments.filter { item in
+                item.contentType.hasPrefix("image/") || item.previewImage != nil
+            }.prefix(4))
+        }
+        isImageMode = next
     }
     
     func handlePhotoSelection(_ items: [PhotosPickerItem]) {
         guard !items.isEmpty else { return }
         let imageModeAtSelection = isImageMode
-        let availableSlots = max(0, (imageModeAtSelection ? 4 : 6) - attachments.count)
+        let availableSlots = max(0, (imageModeAtSelection ? 4 : 6) - composerAttachments.count)
         let selectedItems = Array(items.prefix(availableSlots))
         Task {
-            isUploading = true
             defer {
-                isUploading = false
                 selectedPhotoItems = []
             }
 
-            var uploaded: [String] = []
-            do {
-                for (index, item) in selectedItems.enumerated() {
+            for (index, item) in selectedItems.enumerated() {
+                do {
                     guard let data = try await item.loadTransferable(type: Data.self) else { continue }
                     let type = item.supportedContentTypes.first
                     let ext = type?.preferredFilenameExtension ?? "jpg"
                     let contentType = type?.preferredMIMEType ?? "image/jpeg"
                     let filename = "photo_\(Int(Date().timeIntervalSince1970))_\(index).\(ext)"
-                    let endpoint: APIClient.Endpoint = imageModeAtSelection
-                        ? .uploadReferenceImage(data: data, filename: filename, contentType: contentType)
-                        : .uploadFile(data: data, filename: filename)
-                    let response = try await client.request(endpoint, decodeTo: FileUploadResponse.self)
-                    uploaded.append(response.url)
+                    enqueueAttachment(
+                        data: data,
+                        filename: filename,
+                        contentType: contentType,
+                        uploadAsReference: imageModeAtSelection,
+                        previewImage: UIImage(data: data)
+                    )
+                } catch {
+                    errorMessage = String.appLocalized("Rasm yuklashda xatolik: ") + error.localizedDescription
                 }
-                attachments.append(contentsOf: uploaded)
-            } catch {
-                errorMessage = String.appLocalized("Rasm yuklashda xatolik: ") + error.localizedDescription
             }
         }
     }
@@ -460,6 +609,7 @@ final class ChatViewModel: ObservableObject {
         selectedConversation = nil
         messages.removeAll()
         inputText = ""
+        composerAttachments.removeAll()
     }
     
     func deleteConversation(_ conversation: ConversationSummary) {
@@ -481,7 +631,7 @@ final class ChatViewModel: ObservableObject {
     func sendMessage() {
         let trimmed = inputText.trimmingCharacters(in: .whitespacesAndNewlines)
         // Allow sending an attachment with no text (image-only send).
-        guard !isSending, (!trimmed.isEmpty || !attachments.isEmpty) else { return }
+        guard !isSending, !isUploading, !hasFailedUploads, (!trimmed.isEmpty || !attachments.isEmpty) else { return }
 
         // "pdf qil" / "word formatda ber" about the previous answer → just build the
         // file from that answer (attach the card + open it); don't rewrite it.
@@ -515,7 +665,7 @@ final class ChatViewModel: ObservableObject {
         Analytics.shared.track("chat_message", ["has_image": !attachments.isEmpty, "length": trimmed.count])
 
         let currentAttachments = attachments
-        attachments = []
+        composerAttachments = []
 
         streamAssistant(text: trimmed,
                         attachments: currentAttachments.isEmpty ? nil : currentAttachments,
@@ -672,7 +822,17 @@ final class ChatViewModel: ObservableObject {
                         PushManager.recordSuccessfulTask()
                     case "error":
                         if let errorMsg = event.message {
-                            await MainActor.run { self.errorMessage = errorMsg }
+                            let safeError = APIError.safePublicMessage(status: 503, message: errorMsg)
+                            await MainActor.run {
+                                self.errorMessage = safeError
+                                self.messages.append(ChatMessage(
+                                    text: safeError,
+                                    role: .assistant,
+                                    createdAt: Date(),
+                                    retryKind: .chat
+                                ))
+                                self.isTyping = false
+                            }
                         }
                     default:
                         break
@@ -691,6 +851,12 @@ final class ChatViewModel: ObservableObject {
                     self.isTyping = false
                     self.isSending = false
                     self.errorMessage = error.localizedDescription
+                    self.messages.append(ChatMessage(
+                        text: String.appLocalized("Xabar yuborilmadi. Qayta urinib ko‘ring."),
+                        role: .assistant,
+                        createdAt: Date(),
+                        retryKind: .chat
+                    ))
                     print("❌ Chat error: \(error)")
                 }
             }
@@ -705,7 +871,7 @@ final class ChatViewModel: ObservableObject {
         replacing assistant: ChatMessage? = nil
     ) {
         let trimmed = (overridePrompt ?? inputText).trimmingCharacters(in: .whitespacesAndNewlines)
-        guard !trimmed.isEmpty, !isGeneratingImage else { return }
+        guard !trimmed.isEmpty, !isGeneratingImage, !isUploading, !hasFailedUploads else { return }
 
         let referenceImages = (overrideReferences ?? attachments).filter { url in
             guard let ext = URL(string: url)?.pathExtension.lowercased() else { return false }
@@ -719,7 +885,7 @@ final class ChatViewModel: ObservableObject {
             messages.remove(at: replacementIndex)
         } else {
             inputText = ""
-            attachments = []
+            composerAttachments = []
             let userMessage = ChatMessage(
                 remoteId: nil,
                 text: trimmed,
@@ -785,6 +951,13 @@ final class ChatViewModel: ObservableObject {
                     if let assistant, let replacementIndex,
                        !self.messages.contains(where: { $0.id == assistant.id }) {
                         self.messages.insert(assistant, at: min(replacementIndex, self.messages.count))
+                    } else if assistant == nil {
+                        self.messages.append(ChatMessage(
+                            text: String.appLocalized("Rasm yaratilmadi. Qayta urinib ko‘ring."),
+                            role: .assistant,
+                            createdAt: Date(),
+                            retryKind: .image
+                        ))
                     }
                 }
             }
@@ -801,7 +974,17 @@ final class ChatViewModel: ObservableObject {
             guard let ext = URL(string: value)?.pathExtension.lowercased() else { return false }
             return ["jpg", "jpeg", "png", "webp"].contains(ext)
         }) else { return }
-        attachments = [url]
+        composerAttachments = [ComposerAttachment(
+            id: UUID(),
+            name: "reference-image",
+            data: nil,
+            contentType: "image/jpeg",
+            uploadAsReference: true,
+            previewImage: nil,
+            remoteURL: url,
+            status: .ready,
+            error: nil
+        )]
         isImageMode = true
         inputText = ""
     }
@@ -815,6 +998,31 @@ final class ChatViewModel: ObservableObject {
             return ["jpg", "jpeg", "png", "webp"].contains(ext)
         }
         generateImage(prompt: source.text, referenceImages: references, replacing: assistant)
+    }
+
+    @MainActor
+    func retryFailedMessage(_ failed: ChatMessage) {
+        guard let retryKind = failed.retryKind,
+              let index = messages.firstIndex(where: { $0.id == failed.id }),
+              let source = messages[..<index].last(where: { $0.isUser }) else { return }
+        messages.remove(at: index)
+        switch retryKind {
+        case .image:
+            let references = (source.fileUrls ?? []).filter { value in
+                guard let ext = URL(string: value)?.pathExtension.lowercased() else { return false }
+                return ["jpg", "jpeg", "png", "webp"].contains(ext)
+            }
+            generateImage(prompt: source.text, referenceImages: references)
+        case .chat:
+            isSending = true
+            isTyping = true
+            streamAssistant(
+                text: source.text,
+                attachments: source.fileUrls,
+                regenerate: false,
+                docFormat: DocumentExporter.detectFormat(source.text)
+            )
+        }
     }
     
     func search() {
@@ -1050,7 +1258,7 @@ struct ChatView: View {
         } else if error.contains("network") || error.contains("connection") {
             return String.appLocalized("Internet aloqasi bilan muammo. Qayta urinib ko'ring.")
         } else {
-            return error
+            return APIError.safePublicMessage(status: 500, message: error)
         }
     }
     
@@ -1245,7 +1453,9 @@ struct ChatView: View {
             // the bottom (no yank while reading). Scroll to the LAST REAL VIEW's id so
             // it reaches the true bottom (a 1px anchor only scrolled partway).
             .onChange(of: viewModel.messages.count) { _, _ in
-                scrollToLatest(proxy: proxy, animated: true)
+                if isAtBottom || viewModel.isSending {
+                    scrollToLatest(proxy: proxy, animated: true)
+                }
             }
             .onChange(of: viewModel.messages.last?.text) { _, _ in
                 if isAtBottom { scrollToLatest(proxy: proxy, animated: false) }
@@ -1255,6 +1465,9 @@ struct ChatView: View {
             }
             .onChange(of: viewModel.isGeneratingImage) { _, generating in
                 if generating { scrollToLatest(proxy: proxy, animated: true) }
+            }
+            .onChange(of: viewModel.messages.last?.fileUrls) { _, _ in
+                if isAtBottom { scrollToLatest(proxy: proxy, animated: false) }
             }
         }
     }
@@ -1345,6 +1558,22 @@ struct ChatView: View {
                     }
                     .textSelection(.enabled)
                     .transition(.opacity.combined(with: .move(edge: .bottom)))
+                }
+
+                if !message.isUser, message.retryKind != nil {
+                    Button {
+                        HapticManager.shared.fire(.lightImpact)
+                        viewModel.retryFailedMessage(message)
+                    } label: {
+                        Label(String.appLocalized("Qayta urinish"), systemImage: "arrow.clockwise")
+                            .font(.system(size: 12, weight: .semibold))
+                            .foregroundColor(Color.red)
+                            .padding(.horizontal, 10)
+                            .padding(.vertical, 7)
+                            .background(Color.red.opacity(0.1), in: Capsule())
+                    }
+                    .buttonStyle(.plain)
+                    .disabled(viewModel.isSending || viewModel.isGeneratingImage)
                 }
 
                 // Web sources / citations
@@ -1620,27 +1849,71 @@ struct ChatView: View {
                 .padding(.bottom, 4)
             }
             
-            if !viewModel.attachments.isEmpty {
+            if !viewModel.composerAttachments.isEmpty {
                 ScrollView(.horizontal, showsIndicators: false) {
                     HStack(spacing: 8) {
-                        ForEach(viewModel.attachments.indices, id: \.self) { index in
+                        ForEach(Array(viewModel.composerAttachments.enumerated()), id: \.element.id) { index, attachment in
                             ZStack(alignment: .topTrailing) {
-                                AsyncImage(url: URL(string: viewModel.attachments[index])) { image in
-                                    image.resizable().scaledToFill()
-                                } placeholder: {
-                                    Color.gray.opacity(0.3)
+                                Group {
+                                    if let preview = attachment.previewImage {
+                                        Image(uiImage: preview)
+                                            .resizable()
+                                            .scaledToFill()
+                                    } else if let remoteURL = attachment.remoteURL,
+                                              let url = URL(string: remoteURL) {
+                                        AsyncImage(url: url) { image in
+                                            image.resizable().scaledToFill()
+                                        } placeholder: {
+                                            SalomTheme.Colors.surfaceMuted
+                                        }
+                                    } else {
+                                        ZStack {
+                                            SalomTheme.Colors.surfaceMuted
+                                            Image(systemName: "doc.fill")
+                                                .foregroundColor(SalomTheme.Colors.textSecondary)
+                                        }
+                                    }
                                 }
-                                .frame(width: 64, height: 64)
-                                .clipShape(RoundedRectangle(cornerRadius: 12, style: .continuous))
+                                .frame(width: 72, height: 72)
+                                .clipShape(RoundedRectangle(cornerRadius: 16, style: .continuous))
+                                .overlay(
+                                    RoundedRectangle(cornerRadius: 16, style: .continuous)
+                                        .stroke(attachment.status == .failed ? Color.red.opacity(0.7) : SalomTheme.Colors.border)
+                                )
+
+                                if attachment.status == .uploading {
+                                    ZStack {
+                                        Color.black.opacity(0.35)
+                                        ProgressView().tint(.white)
+                                    }
+                                    .frame(width: 72, height: 72)
+                                    .clipShape(RoundedRectangle(cornerRadius: 16, style: .continuous))
+                                } else if attachment.status == .failed {
+                                    Button {
+                                        viewModel.retryAttachment(id: attachment.id)
+                                    } label: {
+                                        Image(systemName: "arrow.clockwise")
+                                            .font(.system(size: 20, weight: .bold))
+                                            .foregroundColor(.white)
+                                            .frame(width: 38, height: 38)
+                                            .background(Color.red.opacity(0.9), in: Circle())
+                                        .frame(width: 72, height: 72)
+                                        .background(Color.black.opacity(0.68))
+                                        .clipShape(RoundedRectangle(cornerRadius: 16, style: .continuous))
+                                    }
+                                    .buttonStyle(.plain)
+                                    .accessibilityLabel(String.appLocalized("Qayta urinish"))
+                                }
                                 
                                 Button {
-                                    viewModel.removeAttachment(at: index)
+                                    viewModel.removeAttachment(id: attachment.id)
                                 } label: {
                                     Image(systemName: "xmark.circle.fill")
                                         .font(.system(size: 16, weight: .bold))
                                         .foregroundColor(.white)
                                         .background(Circle().fill(Color.black.opacity(0.7)))
                                 }
+                                .buttonStyle(.plain)
                                 .offset(x: 6, y: -6)
 
                                 if viewModel.isImageMode {
@@ -1667,7 +1940,7 @@ struct ChatView: View {
                         action: {
                             HapticManager.shared.fire(.mediumImpact)
                             withAnimation(.spring(response: 0.35, dampingFraction: 0.8)) {
-                                viewModel.isImageMode.toggle()
+                                viewModel.toggleImageMode()
                             }
                         }
                     )
@@ -1720,7 +1993,7 @@ struct ChatView: View {
                     }
                     .disabled(
                         viewModel.isRecording || viewModel.isProcessingVoice || viewModel.isUploading ||
-                        (viewModel.isImageMode && viewModel.attachments.count >= 4)
+                        (viewModel.isImageMode && viewModel.composerAttachments.count >= 4)
                     )
 
                     Spacer()
@@ -1815,7 +2088,7 @@ struct ChatView: View {
                         }
                     }
                     .disabled(
-                        viewModel.isRecording || viewModel.isProcessingVoice ||
+                        viewModel.isRecording || viewModel.isProcessingVoice || viewModel.isUploading || viewModel.hasFailedUploads ||
                         // Image-gen needs a prompt; normal send allows image-only.
                         (viewModel.isImageMode
                             ? viewModel.inputText.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
@@ -1823,13 +2096,17 @@ struct ChatView: View {
                     )
                 }
             }
-            .padding(10)
-            .background(
-                RoundedRectangle(cornerRadius: 24, style: .continuous)
-                    .fill(SalomTheme.Colors.surface)
-                    .shadow(color: Color.black.opacity(0.25), radius: 12, x: 0, y: 6)
-            )
         }
+        .padding(10)
+        .background(
+            RoundedRectangle(cornerRadius: 26, style: .continuous)
+                .fill(SalomTheme.Colors.surface)
+                .overlay(
+                    RoundedRectangle(cornerRadius: 26, style: .continuous)
+                        .stroke(SalomTheme.Colors.border, lineWidth: 0.7)
+                )
+                .shadow(color: Color.black.opacity(0.18), radius: 12, x: 0, y: 6)
+        )
         .padding(.horizontal, 14)
         .padding(.vertical, 10)
     }

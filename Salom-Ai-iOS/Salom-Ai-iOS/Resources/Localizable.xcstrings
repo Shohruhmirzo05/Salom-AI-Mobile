@@ -10290,6 +10290,27 @@
         "uz-Cyrl" : { "stringUnit" : { "state" : "translated", "value" : "Тўлов амалга ошмади. Бошқа карта билан уриниб кўринг." } }
       }
     },
+    "Qayta urinish" : {
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Try again" } },
+        "ru" : { "stringUnit" : { "state" : "translated", "value" : "Повторить" } },
+        "uz-Cyrl" : { "stringUnit" : { "state" : "translated", "value" : "Қайта уриниш" } }
+      }
+    },
+    "Xabar yuborilmadi. Qayta urinib ko‘ring." : {
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "The message couldn't be sent. Try again." } },
+        "ru" : { "stringUnit" : { "state" : "translated", "value" : "Не удалось отправить сообщение. Попробуйте ещё раз." } },
+        "uz-Cyrl" : { "stringUnit" : { "state" : "translated", "value" : "Хабар юборилмади. Қайта уриниб кўринг." } }
+      }
+    },
+    "Rasm yaratilmadi. Qayta urinib ko‘ring." : {
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "The image couldn't be created. Try again." } },
+        "ru" : { "stringUnit" : { "state" : "translated", "value" : "Не удалось создать изображение. Попробуйте ещё раз." } },
+        "uz-Cyrl" : { "stringUnit" : { "state" : "translated", "value" : "Расм яратилмади. Қайта уриниб кўринг." } }
+      }
+    },
     "Русский" : {
       "localizations" : {
         "en" : {

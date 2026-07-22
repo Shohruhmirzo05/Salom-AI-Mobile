@@ -870,8 +870,31 @@ enum APIError: LocalizedError {
         case .unauthorized:
             return "Session expired. Please sign in again."
         case .server(let status, let message):
-            return message ?? "Request failed with status \(status)"
+            return Self.safePublicMessage(status: status, message: message)
         }
+    }
+
+    /// Provider responses may contain vendor names, request IDs and policy
+    /// internals. Those stay in backend logs; the app presents Salom AI copy.
+    static func safePublicMessage(status: Int, message: String?) -> String {
+        let value = message ?? ""
+        let lowered = value.lowercased()
+        let providerMarkers = [
+            "openai", "help.openai.com", "api.openai.com", "fal.ai",
+            "queue.fal.run", "api.bfl.ai", "request id", "request_id",
+            "req_", "safety_violation", "content_policy", "traceback"
+        ]
+        let imageCodes = ["[IMAGE_GENERATION_UNAVAILABLE]", "[INVALID_IMAGE_INPUT]"]
+        if imageCodes.contains(where: value.contains) || lowered.contains("image generation") {
+            return String.appLocalized("Rasm yaratilmadi. Qayta urinib ko‘ring.")
+        }
+        if providerMarkers.contains(where: lowered.contains) || value.contains("[CONTENT_RESTRICTED]") {
+            return String.appLocalized("Xabar yuborilmadi. Qayta urinib ko‘ring.")
+        }
+        if value.contains("[AI_TEMPORARILY_UNAVAILABLE]") || status >= 500 {
+            return String.appLocalized("Xabar yuborilmadi. Qayta urinib ko‘ring.")
+        }
+        return message ?? String.appLocalized("Xatolik yuz berdi")
     }
 }
 
