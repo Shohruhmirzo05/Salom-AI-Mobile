@@ -145,7 +145,8 @@ struct OnboardingView: View {
                 LanguageMenuButton()
                 Button {
                     HapticManager.shared.fire(.selection)
-                    viewModel.markAsCompleted()
+                    Analytics.shared.trackOnce("onboarding_persona_shown", ["source": "capability_skip"])
+                    showPersona = true
                 } label: {
                     Text("O'tkazib yuborish")
                         .font(.system(size: 15, weight: .medium))

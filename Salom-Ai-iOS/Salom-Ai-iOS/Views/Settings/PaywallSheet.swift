@@ -605,7 +605,7 @@ private struct PlanPriceRow: View {
                                 .font(.system(size: 11.5))
                                 .foregroundColor(SalomTheme.Colors.textTertiary)
                             if let s = savingsPct, s > 0 {
-                                Text("−\(s)% tejang")
+                                Text(String(format: String.appLocalized("−%lld%% tejang"), Int64(s)))
                                     .font(.system(size: 10, weight: .bold))
                                     .foregroundColor(SalomTheme.Colors.signal)
                             }
@@ -706,10 +706,12 @@ struct SubscriptionPaymentFlow: View {
 
 private func localizedPlanTier(_ plan: SubscriptionPlan) -> String {
     let code = plan.code.lowercased()
+    let name = plan.name.lowercased()
+    let identity = "\(code) \(name)"
     let tier: String
-    if code.contains("pro") {
+    if identity.contains("pro") {
         tier = String.appLocalized("Pro")
-    } else if code.contains("standard") {
+    } else if identity.contains("standard") {
         tier = String.appLocalized("Standard")
     } else {
         tier = plan.name

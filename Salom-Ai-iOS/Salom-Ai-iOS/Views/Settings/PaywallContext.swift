@@ -91,7 +91,10 @@ enum PaywallContextID: String, CaseIterable, Identifiable {
         case "student": .studentFirstValue
         case "teacher": .teacherFirstValue
         case "business", "entrepreneur": .businessFirstValue
-        case "employee", "office": .officeFirstValue
+        case "accountant", "finance": .accountingReport
+        case "employee", "office", "jobseeker": .officeFirstValue
+        case "freelancer", "creator": .imageGenerationLimit
+        case "developer", "it": .smartModelUpgrade
         default: .general
         }
     }

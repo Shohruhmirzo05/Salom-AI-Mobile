@@ -678,7 +678,7 @@ extension APIClient {
                 if let id = PaywallAttributionStore.shared.paywallID { body["paywall_id"] = id }
                 return body
             case .savePersona(let role, let goals):
-                var b: [String: Any] = ["goals": goals]
+                var b: [String: Any] = ["goals": goals, "version": PersonaStore.schemaVersion]
                 if let role { b["role"] = role }
                 return b
             case .registerPushDevice(let token, let platform):

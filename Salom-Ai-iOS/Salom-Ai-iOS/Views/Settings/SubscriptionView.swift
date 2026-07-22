@@ -33,7 +33,9 @@ struct SubscriptionView: View {
                         RecoverySection()
                         CurrentPlanSection()
                         AutoRenewSection()
-                        PlansGrid()
+                        if subscriptionManager.currentPlan?.active != true {
+                            PlansGrid()
+                        }
                     }
                 }
                 .padding(.horizontal, 20)
@@ -78,11 +80,15 @@ struct SubscriptionView: View {
     @ViewBuilder
     private func HeaderSection() -> some View {
         VStack(spacing: 8) {
-            Text("Pro imkoniyatlar")
+            Text(subscriptionManager.currentPlan?.active == true
+                 ? L4(uz: "Obunangiz", kr: "Обунангиз", ru: "Ваша подписка", en: "Your subscription").t(languageCode)
+                 : L4(uz: "Pro imkoniyatlar", kr: "Pro имкониятлар", ru: "Возможности Pro", en: "Pro benefits").t(languageCode))
                 .font(.title2.weight(.bold))
                 .foregroundColor(SalomTheme.Colors.textPrimary)
             
-            Text("Cheklovsiz muloqot va ko'proq imkoniyatlar")
+            Text(subscriptionManager.currentPlan?.active == true
+                 ? L4(uz: "Reja, yangilanish va kartalarni boshqaring", kr: "Режа, янгиланиш ва карталарни бошқаринг", ru: "Управляйте планом, продлением и картами", en: "Manage your plan, renewal, and cards").t(languageCode)
+                 : L4(uz: "Ko‘proq AI, rasm, ovoz va hujjatlar", kr: "Кўпроқ AI, расм, овоз ва ҳужжатлар", ru: "Больше ИИ, изображений, голоса и документов", en: "More AI, images, voice, and documents").t(languageCode))
                 .font(.subheadline)
                 .foregroundColor(SalomTheme.Colors.textSecondary)
                 .multilineTextAlignment(.center)

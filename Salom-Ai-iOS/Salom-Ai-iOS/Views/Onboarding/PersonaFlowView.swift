@@ -59,14 +59,59 @@ private let PERSONA_ROLES: [PersonaRole] = [
             .init(uz: "Biznes-reja va hisob-fakturalar", kr: "Бизнес-режа ва ҳисоб-фактура", ru: "Бизнес-планы и счета", en: "Business plans & invoices"),
             .init(uz: "Taqdimotlar — mijoz va investorlar uchun", kr: "Тақдимотлар — мижозлар учун", ru: "Презентации для клиентов", en: "Presentations for clients"),
           ]),
-    .init(id: "office", emoji: "🏢", accent: Color(red: 0.98, green: 0.62, blue: 0.15),
-          title: .init(uz: "Ofis / Buxgalter / Yurist", kr: "Офис / Бухгалтер / Юрист", ru: "Офис / Бухгалтер / Юрист", en: "Office / Accountant / Lawyer"),
-          tagline: .init(uz: "Hisobot, rasmiy xat, QQS", kr: "Ҳисобот, расмий хат, ҚҚС", ru: "Отчёты, письма, НДС", en: "Reports, letters, tax"),
+    .init(id: "accountant", emoji: "🧮", accent: Color(red: 0.10, green: 0.65, blue: 0.56),
+          title: .init(uz: "Buxgalter / Moliyachi", kr: "Бухгалтер / Молиячи", ru: "Бухгалтер / Финансист", en: "Accountant / Finance"),
+          tagline: .init(uz: "Hisobot, QQS, hisob-faktura", kr: "Ҳисобот, ҚҚС, ҳисоб-фактура", ru: "Отчёты, НДС, счета", en: "Reports, tax, invoices"),
           photo: "https://images.pexels.com/photos/32201000/pexels-photo-32201000.jpeg?auto=compress&cs=tinysrgb&w=1000",
           values: [
-            .init(uz: "Rasmiy xatlar va hisobotlar", kr: "Расмий хатлар ва ҳисоботлар", ru: "Официальные письма и отчёты", en: "Official letters & reports"),
+            .init(uz: "Moliyaviy hisobot va tahlillar", kr: "Молиявий ҳисобот ва таҳлиллар", ru: "Финансовые отчёты и анализ", en: "Financial reports and analysis"),
             .init(uz: "Soliq/QQS izohlari, ish haqi vedomosti", kr: "Солиқ/ҚҚС, иш ҳақи ведомости", ru: "Налоги/НДС, зарплатные ведомости", en: "Tax/VAT notes, payroll"),
-            .init(uz: "Shartnoma va dalolatnomalar", kr: "Шартнома ва далолатномалар", ru: "Договоры и акты", en: "Contracts & acts"),
+            .init(uz: "Hisob-faktura va dalolatnomalar", kr: "Ҳисоб-фактура ва далолатномалар", ru: "Счета и акты", en: "Invoices and acts"),
+          ]),
+    .init(id: "office", emoji: "🏢", accent: Color(red: 0.98, green: 0.62, blue: 0.15),
+          title: .init(uz: "Ofis mutaxassisi", kr: "Офис мутахассиси", ru: "Офисный специалист", en: "Office professional"),
+          tagline: .init(uz: "Xat, tahlil, taqdimot", kr: "Хат, таҳлил, тақдимот", ru: "Письма, анализ, презентации", en: "Letters, analysis, presentations"),
+          photo: "https://images.pexels.com/photos/3184465/pexels-photo-3184465.jpeg?auto=compress&cs=tinysrgb&w=1000",
+          values: [
+            .init(uz: "Rasmiy xatlar va hisobotlar", kr: "Расмий хатлар ва ҳисоботлар", ru: "Официальные письма и отчёты", en: "Official letters and reports"),
+            .init(uz: "Uchrashuv xulosasi va tahlil", kr: "Учрашув хулосаси ва таҳлил", ru: "Итоги встреч и анализ", en: "Meeting summaries and analysis"),
+            .init(uz: "Taqdimot va tarjimalar", kr: "Тақдимот ва таржималар", ru: "Презентации и переводы", en: "Presentations and translations"),
+          ]),
+    .init(id: "freelancer", emoji: "🎨", accent: Color(red: 0.91, green: 0.30, blue: 0.62),
+          title: .init(uz: "Frilanser / Ijodkor", kr: "Фрилансер / Ижодкор", ru: "Фрилансер / Автор", en: "Freelancer / Creator"),
+          tagline: .init(uz: "Kontent, rasm, mijozlar", kr: "Контент, расм, мижозлар", ru: "Контент, изображения, клиенты", en: "Content, images, clients"),
+          photo: "https://images.pexels.com/photos/3861969/pexels-photo-3861969.jpeg?auto=compress&cs=tinysrgb&w=1000",
+          values: [
+            .init(uz: "Kontent g‘oyalari va matnlar", kr: "Контент ғоялари ва матнлар", ru: "Идеи и тексты для контента", en: "Content ideas and copy"),
+            .init(uz: "AI rasmlar va variantlar", kr: "AI расмлар ва вариантлар", ru: "ИИ-изображения и варианты", en: "AI images and variations"),
+            .init(uz: "Mijoz uchun taklif va brief", kr: "Мижоз учун таклиф ва бриф", ru: "Предложения и брифы для клиентов", en: "Client proposals and briefs"),
+          ]),
+    .init(id: "developer", emoji: "💻", accent: Color(red: 0.15, green: 0.63, blue: 0.91),
+          title: .init(uz: "Dasturchi / IT", kr: "Дастурчи / IT", ru: "Разработчик / IT", en: "Developer / IT"),
+          tagline: .init(uz: "Kod, tahlil, hujjatlar", kr: "Код, таҳлил, ҳужжатлар", ru: "Код, анализ, документация", en: "Code, analysis, documentation"),
+          photo: "https://images.pexels.com/photos/574071/pexels-photo-574071.jpeg?auto=compress&cs=tinysrgb&w=1000",
+          values: [
+            .init(uz: "Kod yozish va xatoni topish", kr: "Код ёзиш ва хатони топиш", ru: "Написание и проверка кода", en: "Write and debug code"),
+            .init(uz: "Texnik tahlil va hujjatlar", kr: "Техник таҳлил ва ҳужжатлар", ru: "Технический анализ и документация", en: "Technical analysis and docs"),
+            .init(uz: "Murakkab mavzuni tez tushunish", kr: "Мураккаб мавзуни тез тушуниш", ru: "Быстро разбираться в сложном", en: "Understand complex topics faster"),
+          ]),
+    .init(id: "jobseeker", emoji: "🎯", accent: Color(red: 0.94, green: 0.45, blue: 0.20),
+          title: .init(uz: "Ish izlayapman", kr: "Иш излаяпман", ru: "Ищу работу", en: "Looking for work"),
+          tagline: .init(uz: "CV, suhbat, ingliz tili", kr: "CV, суҳбат, инглиз тили", ru: "Резюме, интервью, английский", en: "CV, interviews, English"),
+          photo: "https://images.pexels.com/photos/4344860/pexels-photo-4344860.jpeg?auto=compress&cs=tinysrgb&w=1000",
+          values: [
+            .init(uz: "Vakansiyaga mos CV va xat", kr: "Вакансияга мос CV ва хат", ru: "Резюме и письмо под вакансию", en: "Tailored CV and cover letter"),
+            .init(uz: "Suhbat savollariga tayyorgarlik", kr: "Суҳбат саволларига тайёргарлик", ru: "Подготовка к интервью", en: "Interview preparation"),
+            .init(uz: "Inglizcha javoblarni mashq qilish", kr: "Инглизча жавобларни машқ қилиш", ru: "Практика ответов на английском", en: "Practice answers in English"),
+          ]),
+    .init(id: "personal", emoji: "✨", accent: Color(red: 0.47, green: 0.38, blue: 0.95),
+          title: .init(uz: "Shaxsiy foydalanish", kr: "Шахсий фойдаланиш", ru: "Для себя", en: "Personal use"),
+          tagline: .init(uz: "Savol, tarjima, rasm, ovoz", kr: "Савол, таржима, расм, овоз", ru: "Вопросы, перевод, изображения, голос", en: "Questions, translation, images, voice"),
+          photo: "https://images.pexels.com/photos/3769021/pexels-photo-3769021.jpeg?auto=compress&cs=tinysrgb&w=1000",
+          values: [
+            .init(uz: "Kundalik savollarga tez javob", kr: "Кундалик саволларга тез жавоб", ru: "Быстрые ответы на каждый день", en: "Fast everyday answers"),
+            .init(uz: "Tarjima, matn va rasm", kr: "Таржима, матн ва расм", ru: "Перевод, тексты и изображения", en: "Translation, writing and images"),
+            .init(uz: "Ovozli suhbat va yordam", kr: "Овозли суҳбат ва ёрдам", ru: "Голосовой разговор и помощь", en: "Voice conversation and help"),
           ]),
 ]
 
@@ -77,6 +122,9 @@ private let PERSONA_GOALS: [PersonaGoal] = [
     .init(id: "presentations", emoji: "📊", label: .init(uz: "Taqdimot yasash", kr: "Тақдимот ясаш", ru: "Презентации", en: "Presentations")),
     .init(id: "referat", emoji: "📝", label: .init(uz: "Referat / insho", kr: "Реферат / иншо", ru: "Рефераты / эссе", en: "Referats / essays")),
     .init(id: "work_docs", emoji: "💼", label: .init(uz: "Ish hujjatlari", kr: "Иш ҳужжатлари", ru: "Рабочие документы", en: "Work documents")),
+    .init(id: "accounting", emoji: "🧮", label: .init(uz: "Hisobot va soliqlar", kr: "Ҳисобот ва солиқлар", ru: "Отчёты и налоги", en: "Reports and tax")),
+    .init(id: "coding", emoji: "💻", label: .init(uz: "Kod va IT", kr: "Код ва IT", ru: "Код и IT", en: "Code and IT")),
+    .init(id: "cv", emoji: "🎯", label: .init(uz: "CV va suhbat", kr: "CV ва суҳбат", ru: "Резюме и интервью", en: "CV and interviews")),
     .init(id: "images", emoji: "🖼️", label: .init(uz: "Rasm yaratish", kr: "Расм яратиш", ru: "Генерация картинок", en: "Image generation")),
     .init(id: "english", emoji: "🇬🇧", label: .init(uz: "Ingliz tili", kr: "Инглиз тили", ru: "Английский язык", en: "English")),
     .init(id: "translate", emoji: "🌐", label: .init(uz: "Tarjima", kr: "Таржима", ru: "Перевод", en: "Translation")),
@@ -103,6 +151,20 @@ struct PersonaFlowView: View {
 
     private func roleFor(_ id: String) -> PersonaRole {
         PERSONA_ROLES.first { $0.id == id } ?? PERSONA_ROLES[0]
+    }
+
+    private func goalIDs(for roleID: String) -> Set<String> {
+        switch roleID {
+        case "student": return Set(["dtm", "presentations", "referat", "english"])
+        case "teacher": return Set(["presentations", "work_docs", "images", "daily"])
+        case "business": return Set(["presentations", "work_docs", "images", "translate"])
+        case "accountant": return Set(["accounting", "work_docs", "translate", "daily"])
+        case "office": return Set(["work_docs", "presentations", "translate", "daily"])
+        case "freelancer": return Set(["images", "presentations", "work_docs", "translate"])
+        case "developer": return Set(["coding", "work_docs", "english", "translate"])
+        case "jobseeker": return Set(["cv", "english", "translate", "work_docs"])
+        default: return Set(["daily", "translate", "images", "english"])
+        }
     }
 
     var body: some View {
@@ -273,7 +335,7 @@ struct PersonaFlowView: View {
                 .font(.system(size: 14)).foregroundColor(SalomTheme.Colors.textSecondary)
 
             ScrollView(showsIndicators: false) {
-                FlowChips(goals: $goals, lang: lang)
+                FlowChips(goals: $goals, lang: lang, allowedIDs: goalIDs(for: r.id))
                     .padding(.top, 18).padding(.bottom, 24)
             }
             primaryButton(L4(uz: "Tayyor", kr: "Тайёр", ru: "Готово", en: "Done").t(lang)) {
@@ -329,11 +391,12 @@ struct ShimmerView: View {
 private struct FlowChips: View {
     @Binding var goals: Set<String>
     let lang: String
+    let allowedIDs: Set<String>
 
     var body: some View {
         // Simple 2-column grid keeps it robust across iOS versions.
         LazyVGrid(columns: [GridItem(.flexible(), spacing: 10), GridItem(.flexible(), spacing: 10)], spacing: 10) {
-            ForEach(PERSONA_GOALS) { g in
+            ForEach(PERSONA_GOALS.filter { allowedIDs.contains($0.id) }) { g in
                 let on = goals.contains(g.id)
                 Button {
                     HapticManager.shared.fire(.selection)

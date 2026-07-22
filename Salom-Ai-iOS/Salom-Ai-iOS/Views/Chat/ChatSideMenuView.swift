@@ -268,7 +268,7 @@ struct ChatSideMenuView: View {
                     )
                 }
                 .fullScreenCover(isPresented: $showPaywall) {
-                    PaywallSheet(context: .general, source: "ios_side_menu")
+                    PaywallSheet(context: .onboardingPersona, source: "ios_side_menu")
                 }
             }
             

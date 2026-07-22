@@ -249,7 +249,7 @@ struct BannerAdSlot: View {
             print("🪧 BannerAdSlot appear — isPro=\(subs.isPro)")
             trackImpression(0)
         }
-        .fullScreenCover(isPresented: $showPaywall) { PaywallSheet(context: .general, source: "ios_house_ad") }
+        .fullScreenCover(isPresented: $showPaywall) { PaywallSheet(context: .onboardingPersona, source: "ios_house_ad") }
     }
 
     @ViewBuilder private var carousel: some View {

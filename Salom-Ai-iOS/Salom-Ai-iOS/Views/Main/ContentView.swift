@@ -19,6 +19,8 @@ struct ContentView: View {
     // Observe the payment-abandon survey flag (set after a non-paid checkout return).
     @ObservedObject private var subs = SubscriptionManager.shared
     @ObservedObject private var deepLinks = AppDeepLinkRouter.shared
+    @State private var showPersonaOnboarding = false
+    @State private var promptedPersonaThisSession = false
 #if DEBUG
     @State private var qaPaywallContext: PaywallContextID?
 #endif
@@ -58,6 +60,18 @@ struct ContentView: View {
         }
         .fullScreenCover(isPresented: $showPaywall) {
             PaywallSheet(context: .onboardingPersona, source: "ios_first_value")
+        }
+        .fullScreenCover(isPresented: $showPersonaOnboarding) {
+            PersonaFlowView { role, goals in
+                if let role {
+                    PersonaStore.saveLocal(role: role, goals: goals)
+                    PersonaStore.syncIfPending()
+                    Analytics.shared.track("onboarding_completed", ["platform": "ios", "role": role, "goals": goals.count])
+                } else {
+                    Analytics.shared.track("onboarding_skipped", ["platform": "ios", "surface": "persona_resume"])
+                }
+                showPersonaOnboarding = false
+            }
         }
         .fullScreenCover(item: paywallDeepLinkBinding) { request in
             PaywallSheet(context: request.context, source: request.source)
@@ -99,6 +113,7 @@ struct ContentView: View {
                  checkAndShowPaywall()
                  // Push onboarding persona answers now that we're logged in.
                  PersonaStore.syncIfPending()
+                 presentPersonaIfNeeded()
             } else if newValue != .main {
                 // A payment prompt must never leak across logout/auth/onboarding.
                 subs.resetPaymentRecovery()
@@ -168,6 +183,16 @@ struct ContentView: View {
 
             // Returning free users go straight to their task. Paywalls are shown
             // at a feature limit/export/explicit upgrade action, never on launch.
+        }
+    }
+
+    private func presentPersonaIfNeeded() {
+        guard !PersonaStore.isCompleted, !promptedPersonaThisSession else { return }
+        promptedPersonaThisSession = true
+        Task { @MainActor in
+            try? await Task.sleep(nanoseconds: 650_000_000)
+            guard session.contentType == .main, !showPaywall, deepLinks.paywallRequest == nil else { return }
+            showPersonaOnboarding = true
         }
     }
 

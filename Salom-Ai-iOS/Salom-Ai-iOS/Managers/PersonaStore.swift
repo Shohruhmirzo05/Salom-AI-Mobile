@@ -9,18 +9,25 @@
 import Foundation
 
 enum PersonaStore {
+    static let schemaVersion = 2
     private static let roleKey = "persona_role"
     private static let goalsKey = "persona_goals"
     private static let pendingKey = "persona_pending_sync"
+    private static let completedVersionKey = "persona_completed_version"
 
     static var role: String? { UserDefaults.standard.string(forKey: roleKey) }
     static var goals: [String] { UserDefaults.standard.stringArray(forKey: goalsKey) ?? [] }
+    static var isCompleted: Bool {
+        role != nil && UserDefaults.standard.integer(forKey: completedVersionKey) >= schemaVersion
+    }
 
     /// Save answers locally (during onboarding, pre-auth) and mark for sync.
     static func saveLocal(role: String?, goals: [String]) {
         let d = UserDefaults.standard
-        if let role { d.set(role, forKey: roleKey) }
+        guard let role, !role.isEmpty else { return }
+        d.set(role, forKey: roleKey)
         d.set(goals, forKey: goalsKey)
+        d.set(schemaVersion, forKey: completedVersionKey)
         d.set(true, forKey: pendingKey)
     }
 
