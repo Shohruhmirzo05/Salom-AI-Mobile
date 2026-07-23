@@ -230,7 +230,7 @@
 /* End PBXProject section */
 
 /* Begin PBXBuildRule section */
-																						/* End PBXBuildRule section */
+/* End PBXBuildRule section */
 
 /* Begin PBXResourcesBuildPhase section */
 		8C67233A2EC36FFD0020C08B /* Resources */ = {

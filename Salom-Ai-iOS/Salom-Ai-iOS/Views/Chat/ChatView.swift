@@ -28,8 +28,9 @@ struct ChatMessage: Identifiable {
     var generatingImage: Bool = false // true while an image is being auto-generated
     var citations: [Citation]? = nil  // web sources for this reply
     var retryKind: ChatRetryKind? = nil
+    var sponsored: SponsoredRecommendation? = nil
 
-    init(id: UUID = UUID(), remoteId: Int? = nil, text: String, role: MessageRole, createdAt: Date? = nil, fileUrls: [String]? = nil, docFormat: DocFormat? = nil, searchingWeb: Bool = false, generatingImage: Bool = false, citations: [Citation]? = nil, retryKind: ChatRetryKind? = nil) {
+    init(id: UUID = UUID(), remoteId: Int? = nil, text: String, role: MessageRole, createdAt: Date? = nil, fileUrls: [String]? = nil, docFormat: DocFormat? = nil, searchingWeb: Bool = false, generatingImage: Bool = false, citations: [Citation]? = nil, retryKind: ChatRetryKind? = nil, sponsored: SponsoredRecommendation? = nil) {
         self.id = id
         self.remoteId = remoteId
         self.text = text
@@ -41,6 +42,7 @@ struct ChatMessage: Identifiable {
         self.generatingImage = generatingImage
         self.citations = citations
         self.retryKind = retryKind
+        self.sponsored = sponsored
     }
     
     var isUser: Bool {
@@ -283,7 +285,16 @@ final class ChatViewModel: ObservableObject {
             ChatMessage(
                 text: String.appLocalized("Rasmlarni bir kompozitsiyaga moslab tayyorlayman."),
                 role: .assistant,
-                createdAt: Date()
+                createdAt: Date(),
+                sponsored: SponsoredRecommendation(
+                    product: "fera",
+                    label: String.appLocalized("Reklama"),
+                    headline: String.appLocalized("Sayt, mobil ilova yoki AI mahsulot yarating"),
+                    description: String.appLocalized("Fera Tech g‘oyadan launchgacha yordam beradi."),
+                    cta: String.appLocalized("Loyihani muhokama qilish"),
+                    url: "https://fera-tech.com/",
+                    asset: "fera"
+                )
             )
         ]
         inputText = String.appLocalized("Yuzlarni o‘zgartirmang, yorug‘likni tabiiy qiling")
@@ -575,7 +586,8 @@ final class ChatViewModel: ObservableObject {
                         text: dto.text ?? "",
                         role: dto.role,
                         createdAt: dto.createdAt,
-                        fileUrls: attachments.isEmpty ? nil : attachments
+                        fileUrls: attachments.isEmpty ? nil : attachments,
+                        sponsored: dto.sponsored
                     )
                 }
                 // Re-attach document cards: an assistant answer whose preceding user
@@ -730,6 +742,7 @@ final class ChatViewModel: ObservableObject {
                 var generatingImage = false
                 var imageUrls: [String]? = nil
                 var citations: [Citation]? = nil
+                var sponsored: SponsoredRecommendation? = nil
 
                 // Rebuild (or create) the assistant bubble with the latest state. The
                 // ChatMessage is immutable, so streaming updates replace it in place,
@@ -747,7 +760,8 @@ final class ChatViewModel: ObservableObject {
                             docFormat: docFormat,
                             searchingWeb: searchingWeb,
                             generatingImage: generatingImage,
-                            citations: citations
+                            citations: citations,
+                            sponsored: sponsored
                         )
                     } else {
                         let newMessage = ChatMessage(
@@ -758,7 +772,8 @@ final class ChatViewModel: ObservableObject {
                             docFormat: docFormat,
                             searchingWeb: searchingWeb,
                             generatingImage: generatingImage,
-                            citations: citations
+                            citations: citations,
+                            sponsored: sponsored
                         )
                         assistantMessageId = newMessage.id
                         self.messages.append(newMessage)
@@ -805,6 +820,11 @@ final class ChatViewModel: ObservableObject {
                         // Web-search quota hit: the answer continues from the model's
                         // own knowledge; surface the upgrade paywall.
                         await MainActor.run { self.pendingSearchUpgrade = true }
+                    case "sponsored":
+                        if let recommendation = event.sponsored {
+                            sponsored = recommendation
+                            await MainActor.run { upsertAssistant() }
+                        }
                     case "done":
                         if let newId = event.conversationId {
                             await MainActor.run {
@@ -1127,7 +1147,9 @@ struct ChatView: View {
                 // who've burned through ≥70% of any resource. No-op otherwise.
                 UpgradeNudge()
                 // Premium banner — free users only, hidden for Pro / when off.
-                BannerAdSlot()
+                if !viewModel.messages.suffix(2).contains(where: { $0.sponsored != nil }) {
+                    BannerAdSlot()
+                }
                 InputBar()
             }
         }
@@ -1601,6 +1623,15 @@ struct ChatView: View {
                             }
                         }
                     }
+                    .padding(.top, 2)
+                }
+
+                if !message.isUser, let recommendation = message.sponsored {
+                    ContextualSponsoredRecommendationView(
+                        recommendation: recommendation,
+                        messageID: message.remoteId.map(String.init) ?? message.id.uuidString,
+                        conversationID: viewModel.selectedConversation?.id
+                    )
                     .padding(.top, 2)
                 }
             }

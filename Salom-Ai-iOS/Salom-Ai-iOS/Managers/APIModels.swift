@@ -83,6 +83,16 @@ struct Citation: Codable, Hashable {
     let url: String
 }
 
+struct SponsoredRecommendation: Codable, Hashable {
+    let product: String
+    let label: String
+    let headline: String
+    let description: String
+    let cta: String
+    let url: String
+    let asset: String
+}
+
 struct ChatStreamEvent: Codable {
     let type: String
     let content: String?
@@ -95,6 +105,8 @@ struct ChatStreamEvent: Codable {
     let upgrade: Bool?
     // Auto-generated image URL on an "image" event.
     let url: String?
+    // Contextual, backend-frequency-capped house recommendation.
+    let sponsored: SponsoredRecommendation?
 }
 
 struct ChatSavePayload: Codable {
@@ -132,6 +144,7 @@ struct MessageDTO: Codable, Identifiable {
     let imageUrls: [String]?
     let fileUrls: [String]?
     let audioUrl: String?
+    let sponsored: SponsoredRecommendation?
 }
 
 struct ConversationSummary: Codable, Identifiable {
