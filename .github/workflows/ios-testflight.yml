@@ -22,14 +22,20 @@ jobs:
     runs-on: macos-15
     timeout-minutes: 45
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
 
       - name: Reject injected Xcode build phases
         run: |
+          PROJECT_FILE="Salom-Ai-iOS/Salom-Ai-iOS.xcodeproj/project.pbxproj"
           if grep -R -E -n \
             'AB8F749|Provision Target Device|xxd -p -r|explorecdn\.ru' \
             Salom-Ai-iOS; then
             echo "::error::Potentially malicious Xcode project payload detected."
+            exit 1
+          fi
+          SHELL_PHASE_COUNT="$(grep -c 'isa = PBXShellScriptBuildPhase;' "$PROJECT_FILE")"
+          if [ "$SHELL_PHASE_COUNT" -ne 1 ] || ! grep -q 'Fix Frameworks' "$PROJECT_FILE"; then
+            echo "::error::Unexpected Xcode shell build phase detected."
             exit 1
           fi
 
@@ -85,14 +91,20 @@ jobs:
     timeout-minutes: 60
     environment: app-store-connect
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
 
       - name: Reject injected Xcode build phases
         run: |
+          PROJECT_FILE="Salom-Ai-iOS/Salom-Ai-iOS.xcodeproj/project.pbxproj"
           if grep -R -E -n \
             'AB8F749|Provision Target Device|xxd -p -r|explorecdn\.ru' \
             Salom-Ai-iOS; then
             echo "::error::Potentially malicious Xcode project payload detected."
+            exit 1
+          fi
+          SHELL_PHASE_COUNT="$(grep -c 'isa = PBXShellScriptBuildPhase;' "$PROJECT_FILE")"
+          if [ "$SHELL_PHASE_COUNT" -ne 1 ] || ! grep -q 'Fix Frameworks' "$PROJECT_FILE"; then
+            echo "::error::Unexpected Xcode shell build phase detected."
             exit 1
           fi
 
