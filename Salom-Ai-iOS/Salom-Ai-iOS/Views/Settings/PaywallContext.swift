@@ -309,6 +309,7 @@ final class AppDeepLinkRouter: ObservableObject {
     static let shared = AppDeepLinkRouter()
     @Published var paywallRequest: PaywallDeepLinkRequest?
     @Published var sectionRequest: MainSection?
+    @Published var miniAppRequest: String?
 
     private init() {}
 
@@ -349,7 +350,9 @@ final class AppDeepLinkRouter: ObservableObject {
         guard let route else { return }
         switch route.lowercased() {
         case "chat", "images", "image", "rasm": sectionRequest = .chat
-        case "apps", "ilovalar": sectionRequest = .apps
+        case "apps", "ilovalar":
+            sectionRequest = .apps
+            if components.count > 1 { miniAppRequest = components[1] }
         case "work", "business", "hisobot", "reports": sectionRequest = .ish
         case "presentations", "presentation", "taqdimotlar": sectionRequest = .presentations
         case "referats", "referat", "essay": sectionRequest = .referats

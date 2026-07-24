@@ -16,6 +16,7 @@ struct ChatContainerView: View {
     @State private var appsPath: [MainSection] = []
     @AppStorage(AppStorageKeys.preferredLanguageCode) private var languageCode: String = "uz"
     @ObservedObject private var deepLinks = AppDeepLinkRouter.shared
+    @State private var remoteMiniApp: RemoteMiniApp?
 
     var body: some View {
         ZStack(alignment: .leading) {
@@ -61,6 +62,7 @@ struct ChatContainerView: View {
         .onAppear {
             Analytics.shared.track("screen_view", ["path": "/\(selectedSection.rawValue)"])
             consumeDeepLink(deepLinks.sectionRequest)
+            consumeMiniAppDeepLink(deepLinks.miniAppRequest)
         }
         .onChange(of: selectedSection) { _, newValue in
             Analytics.shared.track("screen_view", ["path": "/\(newValue.rawValue)"])
@@ -78,6 +80,9 @@ struct ChatContainerView: View {
         .onChange(of: deepLinks.sectionRequest) { _, section in
             consumeDeepLink(section)
         }
+        .onChange(of: deepLinks.miniAppRequest) { _, appID in
+            consumeMiniAppDeepLink(appID)
+        }
     }
 
     private func consumeDeepLink(_ section: MainSection?) {
@@ -91,115 +96,134 @@ struct ChatContainerView: View {
         deepLinks.sectionRequest = nil
     }
 
+    private func consumeMiniAppDeepLink(_ appID: String?) {
+        guard let appID,
+              let app = IlovalarView.remoteApps.first(where: { $0.id == appID }) else { return }
+        selectedSection = .apps
+        appsPath.removeAll()
+        isMenuOpen = false
+        remoteMiniApp = app
+        Analytics.shared.track("mini_app_open", ["app_id": appID, "source": "ios_deep_link"])
+        deepLinks.miniAppRequest = nil
+    }
+
     @ViewBuilder
     private var contentView: some View {
-        switch selectedSection {
-        case .chat:
-            ChatView(viewModel: chatViewModel, isMenuOpen: $isMenuOpen)
-                .navigationBarHidden(true)
+        Group {
+            switch selectedSection {
+            case .chat:
+                ChatView(viewModel: chatViewModel, isMenuOpen: $isMenuOpen)
+                    .navigationBarHidden(true)
 
-        case .apps:
-            NavigationStack(path: $appsPath) {
-                IlovalarView(
-                    onOpen: { section in
-                        // Document tools push onto the hub's nav stack (native
-                        // nav bar + back button). Voice/DTM/image own their own
-                        // surfaces, so switch the whole section for those.
-                        switch section {
-                        case .ish, .presentations, .referats:
-                            appsPath.append(section)
-                        default:
-                            withAnimation(.easeInOut(duration: 0.25)) { selectedSection = section }
+            case .apps:
+                NavigationStack(path: $appsPath) {
+                    IlovalarView(
+                        onOpen: { section in
+                            // Document tools push onto the hub's nav stack (native
+                            // nav bar + back button). Voice/DTM/image own their own
+                            // surfaces, so switch the whole section for those.
+                            switch section {
+                            case .ish, .presentations, .referats:
+                                appsPath.append(section)
+                            default:
+                                withAnimation(.easeInOut(duration: 0.25)) { selectedSection = section }
+                            }
+                        },
+                        onOpenRemote: { app in
+                            remoteMiniApp = app
+                        },
+                        onMenu: {
+                            HapticManager.shared.fire(.selection)
+                            withAnimation(.spring(response: 0.45, dampingFraction: 0.86)) { isMenuOpen = true }
                         }
-                    },
-                    onMenu: {
-                        HapticManager.shared.fire(.selection)
-                        withAnimation(.spring(response: 0.45, dampingFraction: 0.86)) { isMenuOpen = true }
+                    )
+                    .navigationBarHidden(true)
+                    .navigationDestination(for: MainSection.self) { section in
+                        pushedTool(section)
                     }
-                )
+                }
+
+                //        case .voice:
+                //            SectionScaffold(
+                //                icon: MainSection.voice.icon,
+                //                title: "Ovozli suhbat",
+                //                subtitle: ""
+                //            ) {
+                //                VoiceView()
+                //            }
+
+            case .realtime:
+                RealtimeVoiceView(onDismiss: {
+                    withAnimation {
+                        selectedSection = .chat
+                    }
+                })
                 .navigationBarHidden(true)
-                .navigationDestination(for: MainSection.self) { section in
-                    pushedTool(section)
+
+            case .ish:
+                SectionScaffold(
+                    icon: MainSection.ish.icon,
+                    title: copy("Ish hujjatlari", "Иш ҳужжатлари", "Рабочие документы", "Work documents"),
+                    subtitle: copy("Kasbiy hujjatlarni tayyorlang", "Касбий ҳужжатларни тайёрланг", "Подготовьте рабочие документы", "Prepare professional documents"),
+                    onBack: { selectedSection = .apps }
+                ) {
+                    WorkListView()
+                        .frame(maxWidth: .infinity, maxHeight: .infinity)
+                }
+
+            case .presentations:
+                SectionScaffold(
+                    icon: MainSection.presentations.icon,
+                    title: copy("Taqdimotlar", "Тақдимотлар", "Презентации", "Presentations"),
+                    subtitle: copy("AI bilan taqdimot yarating", "AI билан тақдимот яратинг", "Создайте презентацию с ИИ", "Create a presentation with AI"),
+                    onBack: { selectedSection = .apps }
+                ) {
+                    PresentationsListView()
+                        .frame(maxWidth: .infinity, maxHeight: .infinity)
+                }
+
+            case .referats:
+                SectionScaffold(
+                    icon: MainSection.referats.icon,
+                    title: copy("Referat va insho", "Реферат ва иншо", "Реферат и эссе", "Paper and essay"),
+                    subtitle: copy("AI bilan tayyor hujjat", "AI билан тайёр ҳужжат", "Готовый документ с ИИ", "A ready document with AI"),
+                    onBack: { selectedSection = .apps }
+                ) {
+                    ReferatsListView()
+                        .frame(maxWidth: .infinity, maxHeight: .infinity)
+                }
+
+            case .dtm:
+                // DtmView owns its NavigationStack (native back) + a toolbar menu
+                // button that opens the side menu.
+                DtmView(onMenu: {
+                    HapticManager.shared.fire(.selection)
+                    withAnimation(.spring(response: 0.45, dampingFraction: 0.86)) { isMenuOpen = true }
+                })
+
+            case .notifications:
+                SectionScaffold(
+                    icon: MainSection.notifications.icon,
+                    title: copy("Bildirishnomalar", "Билдиришномалар", "Уведомления", "Notifications"),
+                    subtitle: copy("Xabarlar tarixi", "Хабарлар тарихи", "История сообщений", "Message history")
+                ) {
+                    NotificationHistoryView()
+                        .frame(maxWidth: .infinity, maxHeight: .infinity)
+                }
+
+            case .settings:
+                SectionScaffold(
+                    icon: MainSection.settings.icon,
+                    title: copy("Sozlamalar", "Созламалар", "Настройки", "Settings"),
+                    subtitle: copy("Hisob, ko‘rinish va til", "Ҳисоб, кўриниш ва тил", "Аккаунт, тема и язык", "Account, appearance and language"),
+                    trailing: { LanguageMenuButton() }
+                ) {
+                    SettingsScreen()
                 }
             }
-
-            //        case .voice:
-            //            SectionScaffold(
-            //                icon: MainSection.voice.icon,
-            //                title: "Ovozli suhbat",
-            //                subtitle: ""
-            //            ) {
-            //                VoiceView()
-            //            }
-            
-        case .realtime:
-            RealtimeVoiceView(onDismiss: {
-                withAnimation {
-                    selectedSection = .chat
-                }
-            })
-            .navigationBarHidden(true)
-            
-        case .ish:
-            SectionScaffold(
-                icon: MainSection.ish.icon,
-                title: "Ish — hujjatlar",
-                subtitle: "Kasbiy hujjatlarni tayyorlang",
-                onBack: { selectedSection = .apps }
-            ) {
-                WorkListView()
-                    .frame(maxWidth: .infinity, maxHeight: .infinity)
-            }
-
-        case .presentations:
-            SectionScaffold(
-                icon: MainSection.presentations.icon,
-                title: "Presentatsiyalar",
-                subtitle: "AI presentatsiya yaratish",
-                onBack: { selectedSection = .apps }
-            ) {
-                PresentationsListView()
-                    .frame(maxWidth: .infinity, maxHeight: .infinity)
-            }
-
-        case .referats:
-            SectionScaffold(
-                icon: MainSection.referats.icon,
-                title: "Referat / Insho",
-                subtitle: "AI referat va insho",
-                onBack: { selectedSection = .apps }
-            ) {
-                ReferatsListView()
-                    .frame(maxWidth: .infinity, maxHeight: .infinity)
-            }
-
-        case .dtm:
-            // DtmView owns its NavigationStack (native back) + a toolbar menu
-            // button that opens the side menu.
-            DtmView(onMenu: {
-                HapticManager.shared.fire(.selection)
-                withAnimation(.spring(response: 0.45, dampingFraction: 0.86)) { isMenuOpen = true }
-            })
-
-        case .notifications:
-            SectionScaffold(
-                icon: MainSection.notifications.icon,
-                title: "Bildirishnomalar",
-                subtitle: "Xabarlar tarixi"
-            ) {
-                NotificationHistoryView()
-                    .frame(maxWidth: .infinity, maxHeight: .infinity)
-            }
-            
-        case .settings:
-            SectionScaffold(
-                icon: MainSection.settings.icon,
-                title: "Sozlamalar",
-                subtitle: "Hisob va til sozlamalari",
-                trailing: { LanguageMenuButton() }
-            ) {
-                SettingsScreen()
-            }
+        }
+        .fullScreenCover(item: $remoteMiniApp) { app in
+            RemoteMiniAppView(app: app)
         }
     }
     
@@ -220,7 +244,7 @@ struct ChatContainerView: View {
             }
             .frame(maxWidth: .infinity, maxHeight: .infinity)
         }
-        .navigationTitle(section.title)
+        .navigationTitle(toolTitle(section))
         .navigationBarTitleDisplayMode(.inline)
         .toolbar {
             ToolbarItem(placement: .topBarTrailing) {
@@ -236,8 +260,8 @@ struct ChatContainerView: View {
     @ViewBuilder
     private func SectionScaffold<Content: View, Trailing: View>(
         icon: String,
-        title: LocalizedStringKey,
-        subtitle: LocalizedStringKey,
+        title: String,
+        subtitle: String,
         onBack: (() -> Void)? = nil,
         @ViewBuilder trailing: () -> Trailing = { EmptyView() },
         @ViewBuilder content: () -> Content
@@ -258,8 +282,8 @@ struct ChatContainerView: View {
     @ViewBuilder
     private func ShellHeader<Trailing: View>(
         icon: String,
-        title: LocalizedStringKey,
-        subtitle: LocalizedStringKey,
+        title: String,
+        subtitle: String,
         onBack: (() -> Void)? = nil,
         @ViewBuilder trailing: () -> Trailing = { EmptyView() }
     ) -> some View {
@@ -305,6 +329,23 @@ struct ChatContainerView: View {
         .padding(.horizontal, 16)
         .padding(.top, 12)
         .padding(.bottom, 10)
+    }
+
+    private func copy(_ uz: String, _ cyrl: String, _ ru: String, _ en: String) -> String {
+        IlovalarView.Copy(uz: uz, cyrl: cyrl, ru: ru, en: en).pick(languageCode)
+    }
+
+    private func toolTitle(_ section: MainSection) -> String {
+        switch section {
+        case .ish:
+            copy("Ish hujjatlari", "Иш ҳужжатлари", "Рабочие документы", "Work documents")
+        case .presentations:
+            copy("Taqdimotlar", "Тақдимотлар", "Презентации", "Presentations")
+        case .referats:
+            copy("Referat va insho", "Реферат ва иншо", "Реферат и эссе", "Paper and essay")
+        default:
+            section.rawValue.capitalized
+        }
     }
 
     // MARK: - Language Menu Button (shown in Settings header)

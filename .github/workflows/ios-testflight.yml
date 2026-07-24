@@ -1,0 +1,173 @@
+name: iOS build and TestFlight
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths:
+      - "Salom-Ai-iOS/**"
+      - "ci_scripts/**"
+      - ".github/workflows/ios-testflight.yml"
+
+concurrency:
+  group: ios-testflight-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  compile:
+    name: Compile iOS
+    runs-on: macos-15
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Select latest stable Xcode
+        uses: maxim-lobanov/setup-xcode@v1
+        with:
+          xcode-version: latest-stable
+
+      - name: Build for Simulator
+        run: |
+          set -o pipefail
+          xcodebuild \
+            -project Salom-Ai-iOS/Salom-Ai-iOS.xcodeproj \
+            -scheme Salom-Ai-iOS \
+            -configuration Debug \
+            -destination 'generic/platform=iOS Simulator' \
+            CODE_SIGNING_ALLOWED=NO \
+            build
+
+  testflight:
+    name: Archive and upload to TestFlight
+    needs: compile
+    if: ${{ vars.IOS_TESTFLIGHT_ENABLED == 'true' }}
+    runs-on: macos-15
+    timeout-minutes: 60
+    environment: app-store-connect
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Select latest stable Xcode
+        uses: maxim-lobanov/setup-xcode@v1
+        with:
+          xcode-version: latest-stable
+
+      - name: Validate required secrets
+        env:
+          API_KEY_ID: ${{ secrets.APP_STORE_CONNECT_API_KEY_ID }}
+          API_ISSUER_ID: ${{ secrets.APP_STORE_CONNECT_ISSUER_ID }}
+          API_KEY_P8: ${{ secrets.APP_STORE_CONNECT_API_KEY_P8 }}
+          CERT: ${{ secrets.IOS_DISTRIBUTION_CERTIFICATE_BASE64 }}
+          CERT_PASSWORD: ${{ secrets.IOS_DISTRIBUTION_CERTIFICATE_PASSWORD }}
+          APP_PROFILE: ${{ secrets.IOS_PROVISIONING_PROFILE_BASE64 }}
+          EXT_PROFILE: ${{ secrets.IOS_NOTIFICATION_PROVISIONING_PROFILE_BASE64 }}
+        run: |
+          for name in API_KEY_ID API_ISSUER_ID API_KEY_P8 CERT CERT_PASSWORD APP_PROFILE EXT_PROFILE; do
+            if [ -z "${!name}" ]; then
+              echo "::error::Missing required iOS signing secret: ${name}"
+              exit 1
+            fi
+          done
+
+      - name: Install signing certificate
+        uses: apple-actions/import-codesign-certs@v3
+        with:
+          p12-file-base64: ${{ secrets.IOS_DISTRIBUTION_CERTIFICATE_BASE64 }}
+          p12-password: ${{ secrets.IOS_DISTRIBUTION_CERTIFICATE_PASSWORD }}
+
+      - name: Install provisioning profiles
+        env:
+          APP_PROFILE: ${{ secrets.IOS_PROVISIONING_PROFILE_BASE64 }}
+          EXT_PROFILE: ${{ secrets.IOS_NOTIFICATION_PROVISIONING_PROFILE_BASE64 }}
+        run: |
+          mkdir -p "$HOME/Library/MobileDevice/Provisioning Profiles"
+          printf '%s' "$APP_PROFILE" | base64 --decode > "$HOME/Library/MobileDevice/Provisioning Profiles/salom-ai.mobileprovision"
+          printf '%s' "$EXT_PROFILE" | base64 --decode > "$HOME/Library/MobileDevice/Provisioning Profiles/salom-ai-notification.mobileprovision"
+
+      - name: Prepare App Store Connect key
+        env:
+          API_KEY_P8: ${{ secrets.APP_STORE_CONNECT_API_KEY_P8 }}
+          API_KEY_ID: ${{ secrets.APP_STORE_CONNECT_API_KEY_ID }}
+        run: |
+          mkdir -p "$RUNNER_TEMP/private_keys"
+          printf '%s' "$API_KEY_P8" > "$RUNNER_TEMP/private_keys/AuthKey_${API_KEY_ID}.p8"
+          chmod 600 "$RUNNER_TEMP/private_keys/AuthKey_${API_KEY_ID}.p8"
+
+      - name: Set unique build number
+        working-directory: Salom-Ai-iOS
+        run: xcrun agvtool new-version -all "${GITHUB_RUN_NUMBER}"
+
+      - name: Create export options
+        env:
+          TEAM_ID: 3TC3999J6N
+        run: |
+          cat > "$RUNNER_TEMP/ExportOptions.plist" <<PLIST
+          <?xml version="1.0" encoding="UTF-8"?>
+          <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+          <plist version="1.0">
+          <dict>
+            <key>method</key><string>app-store-connect</string>
+            <key>destination</key><string>export</string>
+            <key>signingStyle</key><string>automatic</string>
+            <key>teamID</key><string>${TEAM_ID}</string>
+            <key>stripSwiftSymbols</key><true/>
+            <key>uploadSymbols</key><true/>
+          </dict>
+          </plist>
+          PLIST
+
+      - name: Archive
+        env:
+          API_KEY_ID: ${{ secrets.APP_STORE_CONNECT_API_KEY_ID }}
+          API_ISSUER_ID: ${{ secrets.APP_STORE_CONNECT_ISSUER_ID }}
+        run: |
+          set -o pipefail
+          xcodebuild \
+            -project Salom-Ai-iOS/Salom-Ai-iOS.xcodeproj \
+            -scheme Salom-Ai-iOS \
+            -configuration Release \
+            -destination 'generic/platform=iOS' \
+            -archivePath "$RUNNER_TEMP/SalomAI.xcarchive" \
+            -allowProvisioningUpdates \
+            -authenticationKeyPath "$RUNNER_TEMP/private_keys/AuthKey_${API_KEY_ID}.p8" \
+            -authenticationKeyID "$API_KEY_ID" \
+            -authenticationKeyIssuerID "$API_ISSUER_ID" \
+            archive
+
+      - name: Export IPA
+        env:
+          API_KEY_ID: ${{ secrets.APP_STORE_CONNECT_API_KEY_ID }}
+          API_ISSUER_ID: ${{ secrets.APP_STORE_CONNECT_ISSUER_ID }}
+        run: |
+          xcodebuild \
+            -exportArchive \
+            -archivePath "$RUNNER_TEMP/SalomAI.xcarchive" \
+            -exportPath "$RUNNER_TEMP/export" \
+            -exportOptionsPlist "$RUNNER_TEMP/ExportOptions.plist" \
+            -allowProvisioningUpdates \
+            -authenticationKeyPath "$RUNNER_TEMP/private_keys/AuthKey_${API_KEY_ID}.p8" \
+            -authenticationKeyID "$API_KEY_ID" \
+            -authenticationKeyIssuerID "$API_ISSUER_ID"
+
+      - name: Upload to TestFlight
+        env:
+          API_KEY_ID: ${{ secrets.APP_STORE_CONNECT_API_KEY_ID }}
+          API_ISSUER_ID: ${{ secrets.APP_STORE_CONNECT_ISSUER_ID }}
+        run: |
+          IPA="$(find "$RUNNER_TEMP/export" -name '*.ipa' -print -quit)"
+          test -n "$IPA"
+          xcrun altool --upload-app \
+            --type ios \
+            --file "$IPA" \
+            --apiKey "$API_KEY_ID" \
+            --apiIssuer "$API_ISSUER_ID"
+
+      - name: Preserve release artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: Salom-AI-${{ github.run_number }}
+          path: ${{ runner.temp }}/export/*.ipa
+          retention-days: 14

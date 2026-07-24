@@ -15,11 +15,7 @@ final class TokenStore {
     private init() {}
     
     var accessToken: String? {
-        let token = defaults.string(forKey: AppStorageKeys.accessToken)
-        if let t = token {
-            print("🔑 Access Token: \(t)")
-        }
-        return token
+        defaults.string(forKey: AppStorageKeys.accessToken)
     }
     
     var refreshToken: String? {
