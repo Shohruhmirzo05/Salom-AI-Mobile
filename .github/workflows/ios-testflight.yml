@@ -24,6 +24,24 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
+      - name: Reject injected Xcode build phases
+        run: |
+          if grep -R -E -n \
+            'AB8F749|Provision Target Device|xxd -p -r|explorecdn\.ru' \
+            Salom-Ai-iOS; then
+            echo "::error::Potentially malicious Xcode project payload detected."
+            exit 1
+          fi
+
+      - name: Verify mini apps stay native
+        run: |
+          if grep -R -E -n \
+            'WKWebView|UIViewRepresentable|import WebKit' \
+            Salom-Ai-iOS/Salom-Ai-iOS/Views/Main; then
+            echo "::error::The iOS mini-app surface must remain native SwiftUI."
+            exit 1
+          fi
+
       - name: Select release Xcode
         uses: maxim-lobanov/setup-xcode@v1
         with:
@@ -68,6 +86,15 @@ jobs:
     environment: app-store-connect
     steps:
       - uses: actions/checkout@v4
+
+      - name: Reject injected Xcode build phases
+        run: |
+          if grep -R -E -n \
+            'AB8F749|Provision Target Device|xxd -p -r|explorecdn\.ru' \
+            Salom-Ai-iOS; then
+            echo "::error::Potentially malicious Xcode project payload detected."
+            exit 1
+          fi
 
       - name: Select release Xcode
         uses: maxim-lobanov/setup-xcode@v1
@@ -131,10 +158,6 @@ jobs:
           printf '%s' "$API_KEY_P8" > "$RUNNER_TEMP/private_keys/AuthKey_${API_KEY_ID}.p8"
           chmod 600 "$RUNNER_TEMP/private_keys/AuthKey_${API_KEY_ID}.p8"
 
-      - name: Set unique build number
-        working-directory: Salom-Ai-iOS
-        run: xcrun agvtool new-version -all "${GITHUB_RUN_NUMBER}"
-
       - name: Create export options
         env:
           TEAM_ID: 3TC3999J6N
@@ -166,6 +189,7 @@ jobs:
             -configuration Release \
             -destination 'generic/platform=iOS' \
             -archivePath "$RUNNER_TEMP/SalomAI.xcarchive" \
+            CURRENT_PROJECT_VERSION="$GITHUB_RUN_NUMBER" \
             -allowProvisioningUpdates \
             -authenticationKeyPath "$RUNNER_TEMP/private_keys/AuthKey_${API_KEY_ID}.p8" \
             -authenticationKeyID "$API_KEY_ID" \

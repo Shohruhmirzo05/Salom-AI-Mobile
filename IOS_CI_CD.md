@@ -11,6 +11,11 @@ Every iOS change first compiles on a clean macOS runner. TestFlight upload is
 intentionally disabled until signing is configured, so an ordinary push cannot
 create a broken release.
 
+The workflow also rejects known injected Xcode build-phase signatures before
+resolving packages or compiling, and verifies that the iOS mini-app surface has
+not regressed to WebKit. Build numbers use the GitHub run number without editing
+the checked-out project.
+
 Create the `app-store-connect` GitHub environment, add these secrets to the
 `Shohruhmirzo05/Salom-AI-Mobile` repository, then set repository variable
 `IOS_TESTFLIGHT_ENABLED=true`:

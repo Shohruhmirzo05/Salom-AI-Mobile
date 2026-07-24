@@ -223,7 +223,17 @@ struct ChatContainerView: View {
             }
         }
         .fullScreenCover(item: $remoteMiniApp) { app in
-            RemoteMiniAppView(app: app)
+            RemoteMiniAppView(app: app) { prompt in
+                chatViewModel.inputText = prompt
+                remoteMiniApp = nil
+                DispatchQueue.main.async {
+                    withAnimation(.easeInOut(duration: 0.25)) {
+                        selectedSection = .chat
+                        appsPath.removeAll()
+                        isMenuOpen = false
+                    }
+                }
+            }
         }
     }
     

@@ -41,6 +41,21 @@ enum PaywallContextID: String, CaseIterable, Identifiable {
     case businessFirstValue = "business_first_value"
     case officeFirstValue = "office_first_value"
     case paymentRecovery = "payment_recovery"
+    case documentExplainerPro = "document_explainer_pro"
+    case governmentGuidePro = "government_guide_pro"
+    case taxPlannerPro = "tax_planner_pro"
+    case salaryPlannerPro = "salary_planner_pro"
+    case vehicleAssistantPro = "vehicle_assistant_pro"
+    case moneyPlannerPro = "money_planner_pro"
+    case jobAssistantPro = "job_assistant_pro"
+    case migrantHelperPro = "migrant_helper_pro"
+    case familyBenefitsPro = "family_benefits_pro"
+    case teacherAssistantPro = "teacher_assistant_pro"
+    case utilitiesHelperPro = "utilities_helper_pro"
+    case marketplaceSellerPro = "marketplace_seller_pro"
+    case voiceNotesPro = "voice_notes_pro"
+    case farmerAssistantPro = "farmer_assistant_pro"
+    case healthVisitPro = "health_visit_pro"
 
     var id: String { rawValue }
 
@@ -70,6 +85,21 @@ enum PaywallContextID: String, CaseIterable, Identifiable {
         case .businessFirstValue: .business
         case .officeFirstValue: .office
         case .paymentRecovery: .recovery
+        case .documentExplainerPro: .fileAnalysis
+        case .governmentGuidePro: .secureDocument
+        case .taxPlannerPro: .beforeAfter
+        case .salaryPlannerPro: .score
+        case .vehicleAssistantPro: .roadmap
+        case .moneyPlannerPro: .score
+        case .jobAssistantPro: .beforeAfter
+        case .migrantHelperPro: .roadmap
+        case .familyBenefitsPro: .secureDocument
+        case .teacherAssistantPro: .lesson
+        case .utilitiesHelperPro: .beforeAfter
+        case .marketplaceSellerPro: .gallery
+        case .voiceNotesPro: .voice
+        case .farmerAssistantPro: .roadmap
+        case .healthVisitPro: .secureDocument
         }
     }
 
@@ -143,6 +173,36 @@ enum PaywallContextID: String, CaseIterable, Identifiable {
             .init(self, "/apps/work.webp", "Ish AI to‘plami", "Xat • bayonnoma • hisobot", "To‘plamni ochish", .yearly, "pro")
         case .paymentRecovery:
             .init(self, "/apps/work.webp", "Ishingiz saqlangan", "Hech narsani qayta boshlamang", "Taklifni ko‘rish", .monthly, "standard")
+        case .documentExplainerPro:
+            .init(self, "/mini-app-assets/document-explainer.webp", "Hujjatdagi muhim joyni toping", "Bandlar • muddatlar • xavflar", "Hujjatni tahlil qilish", .monthly, "pro")
+        case .governmentGuidePro:
+            .init(self, "/mini-app-assets/government-guide.webp", "To‘g‘ri xizmatga boring", "Rasmiy manba • aniq qadam", "Yo‘riqchini ochish", .monthly, "standard")
+        case .taxPlannerPro:
+            .init(self, "/mini-app-assets/tax-self-employed.webp", "Soliq yo‘lingizni aniqlang", "Maqom • tushum • rasmiy qadam", "Hisobni boshlash", .yearly, "pro")
+        case .salaryPlannerPro:
+            .init(self, "/mini-app-assets/salary-employment.webp", "Maoshingizni tushuning", "Brutto → netto → hujjatlar", "Hisobni ochish", .monthly, "standard")
+        case .vehicleAssistantPro:
+            .init(self, "/mini-app-assets/vehicle-assistant.webp", "Safarni oldindan hisoblang", "Yoqilg‘i • xizmat • ishonchnoma", "Avto yordamchini ochish", .yearly, "pro")
+        case .moneyPlannerPro:
+            .init(self, "/mini-app-assets/money-planner.webp", "Pul qayerga ketayotganini ko‘ring", "Daromad → xarajat → jamg‘arma", "Byudjetni tuzish", .monthly, "standard")
+        case .jobAssistantPro:
+            .init(self, "/mini-app-assets/job-assistant.webp", "Vakansiyaga mos CV", "CV • xat • suhbat", "Ish to‘plamini ochish", .monthly, "pro")
+        case .migrantHelperPro:
+            .init(self, "/mini-app-assets/migrant-helper.webp", "Safarga xavfsiz tayyorlaning", "Hujjat • muddat • rasmiy manba", "Ro‘yxatni olish", .monthly, "standard")
+        case .familyBenefitsPro:
+            .init(self, "/mini-app-assets/family-benefits.webp", "Oilaga mos yordamni toping", "Nafaqa • bog‘cha • hujjatlar", "Yo‘riqchini ochish", .monthly, "standard")
+        case .teacherAssistantPro:
+            .init(self, "/mini-app-assets/teacher-assistant.webp", "Darsni tezroq tayyorlang", "Reja • test • baholash", "O‘qituvchi to‘plamini ochish", .yearly, "pro")
+        case .utilitiesHelperPro:
+            .init(self, "/mini-app-assets/utilities-helper.webp", "Kvitansiyani tushuning", "Hisob • izoh • murojaat", "Yordamchini ochish", .monthly, "standard")
+        case .marketplaceSellerPro:
+            .init(self, "/mini-app-assets/marketplace-seller.webp", "Mahsulotni yaxshiroq soting", "Kartochka • narx • javoblar", "Sotuvchi to‘plamini ochish", .yearly, "pro")
+        case .voiceNotesPro:
+            .init(self, "/mini-app-assets/voice-notes.webp", "Gapiring — natija tayyor", "Xulosa • vazifa • qaror", "Ovozli vositani ochish", .monthly, "pro")
+        case .farmerAssistantPro:
+            .init(self, "/mini-app-assets/farmer-assistant.webp", "Mavsumni aniq rejalang", "Ekin • xarajat • ish jadvali", "Dehqon rejasini ochish", .yearly, "pro")
+        case .healthVisitPro:
+            .init(self, "/mini-app-assets/health-visit.webp", "Qabulga tayyor boring", "Alomat • dori • savollar", "Qabul varag‘ini ochish", .monthly, "standard")
         }
     }
 }
@@ -272,6 +332,36 @@ private extension PaywallContextID {
             .init(uz: ("Ish AI to‘plami", "Xat • bayonnoma • hisobot", "To‘plamni ochish"), ru: ("Рабочий ИИ-набор", "Письма • протоколы • отчёты", "Открыть набор"), en: ("Work AI kit", "Letters • minutes • reports", "Open toolkit"))
         case .paymentRecovery:
             .init(uz: ("Ishingiz saqlangan", "Hech narsani qayta boshlamang", "Taklifni ko‘rish"), ru: ("Ваша работа сохранена", "Не начинайте заново", "Посмотреть предложение"), en: ("Your work is saved", "No need to start over", "View offer"))
+        case .documentExplainerPro:
+            .init(uz: ("Hujjatdagi muhim joyni toping", "Bandlar • muddatlar • xavflar", "Hujjatni tahlil qilish"), ru: ("Найдите главное в документе", "Пункты • сроки • риски", "Разобрать документ"), en: ("Find what matters in a document", "Clauses • dates • risks", "Analyze document"))
+        case .governmentGuidePro:
+            .init(uz: ("To‘g‘ri xizmatga boring", "Rasmiy manba • aniq qadam", "Yo‘riqchini ochish"), ru: ("Перейдите к нужной услуге", "Официально • пошагово", "Открыть навигатор"), en: ("Reach the right service", "Official • step by step", "Open guide"))
+        case .taxPlannerPro:
+            .init(uz: ("Soliq yo‘lingizni aniqlang", "Maqom • tushum • rasmiy qadam", "Hisobni boshlash"), ru: ("Разберитесь с налогами", "Статус • доход • шаги", "Начать расчёт"), en: ("Clarify your tax path", "Status • revenue • official steps", "Start calculation"))
+        case .salaryPlannerPro:
+            .init(uz: ("Maoshingizni tushuning", "Brutto → netto → hujjatlar", "Hisobni ochish"), ru: ("Разберитесь в зарплате", "Брутто → нетто → справки", "Открыть расчёт"), en: ("Understand your salary", "Gross → net → certificates", "Open calculator"))
+        case .vehicleAssistantPro:
+            .init(uz: ("Safarni oldindan hisoblang", "Yoqilg‘i • xizmat • ishonchnoma", "Avto yordamchini ochish"), ru: ("Рассчитайте поездку заранее", "Топливо • услуги • доверенность", "Открыть автопомощник"), en: ("Plan the trip before you go", "Fuel • services • authorization", "Open vehicle assistant"))
+        case .moneyPlannerPro:
+            .init(uz: ("Pul qayerga ketayotganini ko‘ring", "Daromad → xarajat → jamg‘arma", "Byudjetni tuzish"), ru: ("Узнайте, куда уходят деньги", "Доход → расходы → накопления", "Составить бюджет"), en: ("See where your money goes", "Income → expenses → savings", "Build budget"))
+        case .jobAssistantPro:
+            .init(uz: ("Vakansiyaga mos CV", "CV • xat • suhbat", "Ish to‘plamini ochish"), ru: ("Резюме под вакансию", "Резюме • письмо • интервью", "Открыть набор"), en: ("A CV tailored to the role", "CV • letter • interview", "Open job toolkit"))
+        case .migrantHelperPro:
+            .init(uz: ("Safarga xavfsiz tayyorlaning", "Hujjat • muddat • rasmiy manba", "Ro‘yxatni olish"), ru: ("Подготовьтесь к поездке безопасно", "Документы • сроки • официально", "Получить список"), en: ("Prepare to travel safely", "Documents • timing • official sources", "Get checklist"))
+        case .familyBenefitsPro:
+            .init(uz: ("Oilaga mos yordamni toping", "Nafaqa • bog‘cha • hujjatlar", "Yo‘riqchini ochish"), ru: ("Найдите помощь для семьи", "Пособия • сад • документы", "Открыть навигатор"), en: ("Find support for your family", "Benefits • kindergarten • documents", "Open guide"))
+        case .teacherAssistantPro:
+            .init(uz: ("Darsni tezroq tayyorlang", "Reja • test • baholash", "O‘qituvchi to‘plamini ochish"), ru: ("Готовьте уроки быстрее", "План • тест • оценивание", "Открыть набор учителя"), en: ("Prepare lessons faster", "Plan • quiz • assessment", "Open teacher toolkit"))
+        case .utilitiesHelperPro:
+            .init(uz: ("Kvitansiyani tushuning", "Hisob • izoh • murojaat", "Yordamchini ochish"), ru: ("Разберитесь в квитанции", "Расчёт • объяснение • обращение", "Открыть помощник"), en: ("Understand your utility bill", "Charges • explanation • request", "Open helper"))
+        case .marketplaceSellerPro:
+            .init(uz: ("Mahsulotni yaxshiroq soting", "Kartochka • narx • javoblar", "Sotuvchi to‘plamini ochish"), ru: ("Продавайте товар лучше", "Карточка • цена • ответы", "Открыть набор продавца"), en: ("Sell your product better", "Listing • price • replies", "Open seller toolkit"))
+        case .voiceNotesPro:
+            .init(uz: ("Gapiring — natija tayyor", "Xulosa • vazifa • qaror", "Ovozli vositani ochish"), ru: ("Говорите — результат готов", "Итог • задачи • решения", "Открыть голосовой инструмент"), en: ("Speak—get a result", "Summary • tasks • decisions", "Open voice tool"))
+        case .farmerAssistantPro:
+            .init(uz: ("Mavsumni aniq rejalang", "Ekin • xarajat • ish jadvali", "Dehqon rejasini ochish"), ru: ("Планируйте сезон точнее", "Культура • затраты • график", "Открыть план"), en: ("Plan the season clearly", "Crop • costs • work schedule", "Open farm plan"))
+        case .healthVisitPro:
+            .init(uz: ("Qabulga tayyor boring", "Alomat • dori • savollar", "Qabul varag‘ini ochish"), ru: ("Подготовьтесь к приёму", "Симптомы • лекарства • вопросы", "Открыть лист приёма"), en: ("Arrive prepared for your visit", "Symptoms • medicines • questions", "Open visit sheet"))
         }
     }
 }
