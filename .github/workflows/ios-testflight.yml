@@ -27,10 +27,10 @@ jobs:
       - name: Select release Xcode
         uses: maxim-lobanov/setup-xcode@v1
         with:
-          # Xcode 26.3 currently races while materializing OneSignal's binary
-          # SwiftPM artifacts on clean GitHub runners. 16.4 matches the project
-          # format and is the stable App Store release toolchain for this app.
-          xcode-version: "16.4"
+          # The app uses iOS 26 SwiftUI APIs. Xcode 26.3 currently races while
+          # materializing OneSignal's binary artifacts on clean runners, so use
+          # the preceding iOS 26 release toolchain.
+          xcode-version: "26.2"
 
       - name: Resolve Swift packages reliably
         run: |
@@ -72,7 +72,7 @@ jobs:
       - name: Select release Xcode
         uses: maxim-lobanov/setup-xcode@v1
         with:
-          xcode-version: "16.4"
+          xcode-version: "26.2"
 
       - name: Resolve Swift packages reliably
         run: |
