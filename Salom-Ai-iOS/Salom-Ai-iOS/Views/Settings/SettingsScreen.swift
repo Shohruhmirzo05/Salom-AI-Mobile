@@ -134,6 +134,7 @@ struct SettingsScreen: View {
                     .foregroundColor(SalomTheme.Colors.textTertiary)
                     .padding(.top, 4)
             }
+            .frame(maxWidth: .infinity)
             .padding(.horizontal, 20)
             .padding(.bottom, 40)
         }

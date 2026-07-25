@@ -85,6 +85,53 @@ struct WorkDoc: Decodable, Identifiable {
     let updatedAt: Date?
 }
 
+#if DEBUG
+extension WorkDoc {
+    /// A completed native document used only by the deterministic App Store
+    /// capture route. It renders through the same document reader, export bar,
+    /// and AI editing controls as a document returned by production.
+    static let appStorePreview = WorkDoc(
+        id: -10_008,
+        templateId: "tijorat_taklifi",
+        segment: "business",
+        title: "Tijorat taklifi — Savdo avtomatlashtirish",
+        language: "uz",
+        outputFormat: "docx",
+        status: "ready",
+        error: nil,
+        content: """
+        # TIJORAT TAKLIFI
+
+        **Mijoz:** Navqiron Savdo MChJ  
+        **Loyiha:** Savdo va mijozlar bilan ishlashni avtomatlashtirish
+
+        ## Taklif mazmuni
+
+        Salom AI mijozlar murojaatlarini saralash, takroriy savollarga tezkor javob berish va savdo bo‘yicha kunlik hisobotlarni tayyorlashga yordam beradi.
+
+        ## Kutiladigan natija
+
+        - Murojaatlarga javob berish vaqti qisqaradi
+        - Menejerlar uchun yagona ish tartibi yaratiladi
+        - Savdo natijalari bo‘yicha tayyor hisobot olinadi
+
+        ## Ish rejasi
+
+        **1-bosqich:** Jarayonlarni tahlil qilish  
+        **2-bosqich:** Yechimni sozlash va sinovdan o‘tkazish  
+        **3-bosqich:** Jamoani o‘qitish va ishga tushirish
+
+        **Amal qilish muddati:** 15 kun
+        """,
+        locked: false,
+        mode: "full",
+        canExport: true,
+        createdAt: nil,
+        updatedAt: nil
+    )
+}
+#endif
+
 private struct WorkListResponse: Decodable { let work: [WorkDoc] }
 struct CreateWorkResponse: Decodable { let id: Int; let status: String }
 struct WorkChatResponse: Decodable { let reply: String; let content: String; let title: String }

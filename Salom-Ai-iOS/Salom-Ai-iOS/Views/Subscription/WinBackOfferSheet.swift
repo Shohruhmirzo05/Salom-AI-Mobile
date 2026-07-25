@@ -33,6 +33,7 @@ struct WinBackOfferSheet: View {
                         .foregroundColor(SalomTheme.Colors.textTertiary)
                         .multilineTextAlignment(.center)
                 }
+                .frame(maxWidth: .infinity)
                 .padding(.horizontal, 22)
                 .padding(.top, 12)
                 .padding(.bottom, 28)

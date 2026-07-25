@@ -113,6 +113,25 @@ struct DtmView: View {
 
     private func loadSubjects() async {
         loading = true
+#if DEBUG
+        let arguments = ProcessInfo.processInfo.arguments
+        if let marker = arguments.firstIndex(of: "-SALOM_QA_SURFACE"),
+           arguments.indices.contains(marker + 1),
+           arguments[marker + 1] == "dtm" {
+            subjects = [
+                DtmSubject(key: "matematika", label: "Matematika", questionCount: 320),
+                DtmSubject(key: "ona_tili", label: "Ona tili", questionCount: 280),
+                DtmSubject(key: "tarix", label: "O‘zbekiston tarixi", questionCount: 240),
+                DtmSubject(key: "ingliz_tili", label: "Ingliz tili", questionCount: 300),
+                DtmSubject(key: "fizika", label: "Fizika", questionCount: 190),
+                DtmSubject(key: "kimyo", label: "Kimyo", questionCount: 180),
+                DtmSubject(key: "biologiya", label: "Biologiya", questionCount: 210),
+                DtmSubject(key: "geografiya", label: "Geografiya", questionCount: 160),
+            ]
+            loading = false
+            return
+        }
+#endif
         subjects = (try? await DtmService.subjects()) ?? []
         loading = false
     }

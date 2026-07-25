@@ -24,6 +24,7 @@ struct ContentView: View {
 #if DEBUG
     @State private var qaPaywallContext: PaywallContextID?
     @State private var qaChat = false
+    @State private var qaSurface: String?
 #endif
 
     var body: some View {
@@ -31,7 +32,7 @@ struct ContentView: View {
             SalomTheme.Gradients.background
                 .ignoresSafeArea()
             if debugQAPreviewEnabled {
-                ChatContainerView()
+                debugQARoot
             } else if showSplash {
                 SplashView(isActive: $showSplash)
                     .transition(.opacity)
@@ -56,6 +57,10 @@ struct ContentView: View {
 #if DEBUG
             let arguments = ProcessInfo.processInfo.arguments
             qaChat = arguments.contains("-SALOM_QA_CHAT")
+            if let marker = arguments.firstIndex(of: "-SALOM_QA_SURFACE"),
+               arguments.indices.contains(marker + 1) {
+                qaSurface = arguments[marker + 1]
+            }
             if let marker = arguments.firstIndex(of: "-SALOM_QA_PAYWALL"),
                arguments.indices.contains(marker + 1) {
                 qaPaywallContext = PaywallContextID(rawValue: arguments[marker + 1])
@@ -127,9 +132,33 @@ struct ContentView: View {
 
     private var debugQAPreviewEnabled: Bool {
 #if DEBUG
-        qaChat
+        qaChat || qaSurface != nil
 #else
         false
+#endif
+    }
+
+    @ViewBuilder
+    private var debugQARoot: some View {
+#if DEBUG
+        if let rawSurface = qaSurface {
+            if rawSurface == "ish-document" {
+                WorkDetailView(previewDocument: .appStorePreview, docLang: "uz")
+            } else if rawSurface == "realtime-preview" {
+                RealtimeVoiceView(previewState: .listening)
+            } else if rawSurface.hasPrefix("miniapp:"),
+               let app = RemoteMiniApp.catalog.first(where: {
+                   $0.id == String(rawSurface.dropFirst("miniapp:".count))
+               }) {
+                RemoteMiniAppView(app: app)
+            } else {
+                ChatContainerView(initialSection: MainSection(rawValue: rawSurface) ?? .apps)
+            }
+        } else {
+            ChatContainerView()
+        }
+#else
+        EmptyView()
 #endif
     }
 

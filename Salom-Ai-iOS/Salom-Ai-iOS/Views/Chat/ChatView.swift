@@ -275,54 +275,103 @@ final class ChatViewModel: ObservableObject {
             AIModel(id: "fast-mini", name: "Tezkor", tier: "fast", vision: true, limit: nil, usage: nil)
         ]
         selectedModel = availableModels.first
-        messages = [
-            ChatMessage(
-                text: String.appLocalized("Bu ikki rasmni birlashtirib, fonini zamonaviy qiling."),
-                role: .user,
-                createdAt: Date(),
-                fileUrls: ["https://cdn.salom-ai.uz/qa/reference-one.jpg", "https://cdn.salom-ai.uz/qa/reference-two.jpg"]
-            ),
-            ChatMessage(
-                text: String.appLocalized("Rasmlarni bir kompozitsiyaga moslab tayyorlayman."),
-                role: .assistant,
-                createdAt: Date(),
-                sponsored: SponsoredRecommendation(
-                    product: "fera",
-                    label: String.appLocalized("Reklama"),
-                    headline: String.appLocalized("Sayt, mobil ilova yoki AI mahsulot yarating"),
-                    description: String.appLocalized("Fera Tech g‘oyadan launchgacha yordam beradi."),
-                    cta: String.appLocalized("Loyihani muhokama qilish"),
-                    url: "https://fera-tech.com/",
-                    asset: "fera"
+        switch mode {
+        case "search":
+            messages = [
+                ChatMessage(
+                    text: String.appLocalized("O‘zbekistonda o‘zini o‘zi band qilish uchun nima kerak?"),
+                    role: .user,
+                    createdAt: Date()
+                ),
+                ChatMessage(
+                    text: String.appLocalized("""
+                    O‘zini o‘zi band qilishni **Soliq** ilovasi yoki my.gov.uz orqali boshlashingiz mumkin.
+
+                    1. Faoliyat turini tanlang
+                    2. JShShIR bilan ro‘yxatdan o‘ting
+                    3. Elektron ma’lumotnomani yuklab oling
+
+                    Arizani yuborishdan oldin amaldagi talablarni rasmiy sahifada tekshiring.
+                    """),
+                    role: .assistant,
+                    createdAt: Date(),
+                    citations: [
+                        Citation(title: "MyGov", url: "https://my.gov.uz/uz/service/491"),
+                        Citation(title: "Soliq qo‘mitasi", url: "https://soliq.uz/")
+                    ]
                 )
-            )
-        ]
-        inputText = String.appLocalized("Yuzlarni o‘zgartirmang, yorug‘likni tabiiy qiling")
-        isImageMode = true
-        composerAttachments = [
-            ComposerAttachment(
-                id: UUID(),
-                name: "reference-one.jpg",
-                data: Data(),
-                contentType: "image/jpeg",
-                uploadAsReference: true,
-                previewImage: preview,
-                remoteURL: firstStatus == .ready ? "https://cdn.salom-ai.uz/qa/reference-one.jpg" : nil,
-                status: firstStatus,
-                error: firstStatus == .failed ? "Upload failed" : nil
-            ),
-            ComposerAttachment(
-                id: UUID(),
-                name: "reference-two.jpg",
-                data: Data(),
-                contentType: "image/jpeg",
-                uploadAsReference: true,
-                previewImage: preview,
-                remoteURL: secondStatus == .ready ? "https://cdn.salom-ai.uz/qa/reference-two.jpg" : nil,
-                status: secondStatus,
-                error: nil
-            )
-        ]
+            ]
+            inputText = ""
+            isImageMode = false
+            composerAttachments = []
+
+        case "work":
+            messages = [
+                ChatMessage(
+                    text: String.appLocalized("Mijozga yuborish uchun qisqa tijorat taklifi yozib bering."),
+                    role: .user,
+                    createdAt: Date()
+                ),
+                ChatMessage(
+                    text: String.appLocalized("""
+                    **Tijorat taklifi**
+
+                    Assalomu alaykum! Biz sizning savdo jarayoningizni avtomatlashtirish uchun qulay yechim taklif qilamiz:
+
+                    • mijozlar bilan tezkor aloqa  
+                    • buyurtmalarni bir joyda boshqarish  
+                    • haftalik natijalar hisoboti
+
+                    Taklifni kompaniyangiz nomi va narx bilan moslab beraymi?
+                    """),
+                    role: .assistant,
+                    createdAt: Date()
+                )
+            ]
+            inputText = ""
+            isImageMode = false
+            composerAttachments = []
+
+        default:
+            messages = [
+                ChatMessage(
+                    text: String.appLocalized("Ikki rasmdagi odamlarni bitta tabiiy kompozitsiyaga birlashtiring."),
+                    role: .user,
+                    createdAt: Date()
+                ),
+                ChatMessage(
+                    text: String.appLocalized("Tayyor. Yuzlarni saqlab, yorug‘lik va fonni bitta sahnaga moslayman."),
+                    role: .assistant,
+                    createdAt: Date()
+                )
+            ]
+            inputText = String.appLocalized("Yuzlarni o‘zgartirmang, yorug‘likni tabiiy qiling")
+            isImageMode = true
+            composerAttachments = [
+                ComposerAttachment(
+                    id: UUID(),
+                    name: "reference-one.jpg",
+                    data: Data(),
+                    contentType: "image/jpeg",
+                    uploadAsReference: true,
+                    previewImage: preview,
+                    remoteURL: firstStatus == .ready ? "https://cdn.salom-ai.uz/qa/reference-one.jpg" : nil,
+                    status: firstStatus,
+                    error: firstStatus == .failed ? "Upload failed" : nil
+                ),
+                ComposerAttachment(
+                    id: UUID(),
+                    name: "reference-two.jpg",
+                    data: Data(),
+                    contentType: "image/jpeg",
+                    uploadAsReference: true,
+                    previewImage: preview,
+                    remoteURL: secondStatus == .ready ? "https://cdn.salom-ai.uz/qa/reference-two.jpg" : nil,
+                    status: secondStatus,
+                    error: nil
+                )
+            ]
+        }
     }
 #endif
     

@@ -52,6 +52,7 @@ struct CancelSurveySheet: View {
                         }
                         .padding(.top, 4)
                     }
+                    .frame(maxWidth: .infinity, alignment: .leading)
                     .padding(20)
                 }
 

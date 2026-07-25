@@ -59,6 +59,7 @@ struct PaymentMethodSheet: View {
                     trustStrip
                     Spacer(minLength: 140)
                 }
+                .frame(maxWidth: .infinity, alignment: .leading)
                 .padding(.horizontal, 22)
                 .padding(.top, 8)
             }
@@ -312,10 +313,14 @@ private struct MethodRow: View {
                     Text(String.appLocalized(subtitle))
                         .font(.system(size: 12.5))
                         .foregroundColor(SalomTheme.Colors.textSecondary)
+                        .lineLimit(2)
+                        .fixedSize(horizontal: false, vertical: true)
                 }
+                .frame(maxWidth: .infinity, alignment: .leading)
 
                 Spacer()
             }
+            .frame(maxWidth: .infinity, alignment: .leading)
             .padding(.horizontal, 16)
             .padding(.vertical, 16)
             .background(
@@ -332,6 +337,7 @@ private struct MethodRow: View {
             .shadow(color: active ? SalomTheme.Colors.accentPrimary.opacity(0.14) : Color.clear, radius: 14, x: 0, y: 7)
         }
         .buttonStyle(.plain)
+        .frame(maxWidth: .infinity)
     }
 }
 

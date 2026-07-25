@@ -95,28 +95,32 @@ struct PaywallSheet: View {
     }
 
     @ViewBuilder private var content: some View {
-        ZStack(alignment: .bottom) {
-            SalomTheme.Colors.bgMain.ignoresSafeArea()
+        GeometryReader { viewport in
+            let horizontalInset: CGFloat = 22
+            let contentWidth = max(viewport.size.width - (horizontalInset * 2), 0)
 
-            ScrollView(showsIndicators: false) {
-                VStack(alignment: .leading, spacing: compactPhoneHeight ? 18 : 24) {
-                    headerArt
-                    headerCopy
-                    if hasYearly { billingToggle }
-                    planList
-                    Spacer(minLength: 90)
+            ZStack(alignment: .bottom) {
+                SalomTheme.Colors.bgMain.ignoresSafeArea()
+
+                ScrollView(showsIndicators: false) {
+                    VStack(alignment: .leading, spacing: compactPhoneHeight ? 18 : 24) {
+                        headerArt
+                        headerCopy
+                        if hasYearly { billingToggle }
+                        planList
+                        Spacer(minLength: 90)
+                    }
+                    // SwiftUI can preserve an oversized ideal width for content
+                    // inside a vertical ScrollView. Pinning the actual content
+                    // width to the live viewport prevents horizontal clipping on
+                    // every iPhone size, split view, and Dynamic Type setting.
+                    .frame(width: contentWidth, alignment: .leading)
+                    .padding(.top, 8)
+                    .padding(.bottom, 130)
                 }
-                // A vertical ScrollView does not always constrain its content's
-                // cross axis. Yearly prices are wider than monthly prices and
-                // could otherwise expand the entire paywall beyond the screen,
-                // pushing labels and controls off-canvas.
-                .padding(.horizontal, 22)
-                .containerRelativeFrame(.horizontal)
-                .padding(.top, 8)
-                .padding(.bottom, 130)
-            }
 
-            stickyCTA
+                stickyCTA
+            }
         }
         .toolbar {
             ToolbarItem(placement: .topBarLeading) {
@@ -335,6 +339,8 @@ struct PaywallSheet: View {
         Text(context.spec.proof)
             .font(.system(size: 13, weight: .bold))
             .foregroundColor(.white)
+            .lineLimit(1)
+            .minimumScaleFactor(0.72)
             .padding(.horizontal, 12)
             .padding(.vertical, 7)
             .background(.black.opacity(0.45), in: Capsule())
@@ -413,6 +419,7 @@ struct PaywallSheet: View {
             }
         }
         .padding(4)
+        .frame(maxWidth: .infinity)
         .background(RoundedRectangle(cornerRadius: 13, style: .continuous).fill(SalomTheme.Colors.surfaceMuted))
     }
 
@@ -437,6 +444,7 @@ struct PaywallSheet: View {
                     }
                 }
             }
+            .frame(maxWidth: .infinity)
         }
     }
 
@@ -611,6 +619,7 @@ private struct PlanPriceRow: View {
                             }
                         }
                     }
+                    .frame(maxWidth: .infinity, alignment: .leading)
 
                     Spacer(minLength: 8)
 
@@ -626,10 +635,13 @@ private struct PlanPriceRow: View {
                             .font(.system(size: 11))
                             .foregroundColor(SalomTheme.Colors.textTertiary)
                     }
+                    .layoutPriority(1)
                 }
+                .frame(maxWidth: .infinity, alignment: .leading)
                 .padding(.horizontal, 16)
                 .padding(.vertical, 16)
             }
+            .frame(maxWidth: .infinity, alignment: .leading)
             .background(
                 RoundedRectangle(cornerRadius: 16, style: .continuous)
                     .fill(selected ? SalomTheme.Colors.accentPrimary.opacity(0.11) : SalomTheme.Colors.surface)
@@ -644,6 +656,7 @@ private struct PlanPriceRow: View {
             .shadow(color: selected ? SalomTheme.Colors.accentPrimary.opacity(0.14) : Color.clear, radius: 14, x: 0, y: 7)
         }
         .buttonStyle(.plain)
+        .frame(maxWidth: .infinity)
     }
 
     private var periodLabel: String {

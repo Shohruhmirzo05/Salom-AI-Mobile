@@ -137,6 +137,7 @@ struct SMSVerifySheet: View {
                 timerView
                 errorActionView
             }
+            .frame(maxWidth: .infinity)
         }
         .safeAreaInset(edge: .bottom) {
             // Verify button + footer

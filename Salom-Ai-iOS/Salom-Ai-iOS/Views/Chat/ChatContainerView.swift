@@ -10,13 +10,17 @@ import SwiftUI
 struct ChatContainerView: View {
     @StateObject private var chatViewModel = ChatViewModel()
     @State private var isMenuOpen = false
-    @State private var selectedSection: MainSection = .chat
+    @State private var selectedSection: MainSection
     // Native navigation stack for the Ilovalar hub → tools are PUSHED (real nav
     // bar + system back button), not swapped in place.
     @State private var appsPath: [MainSection] = []
     @AppStorage(AppStorageKeys.preferredLanguageCode) private var languageCode: String = "uz"
     @ObservedObject private var deepLinks = AppDeepLinkRouter.shared
     @State private var remoteMiniApp: RemoteMiniApp?
+
+    init(initialSection: MainSection = .chat) {
+        _selectedSection = State(initialValue: initialSection)
+    }
 
     var body: some View {
         ZStack(alignment: .leading) {

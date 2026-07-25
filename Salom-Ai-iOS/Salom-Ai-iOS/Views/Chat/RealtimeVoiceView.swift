@@ -10,11 +10,22 @@ import SwiftUI
 struct RealtimeVoiceView: View {
     @StateObject private var viewModel = RealtimeVoiceViewModel()
     @Environment(\.dismiss) var dismiss
+    @AppStorage(AppStorageKeys.preferredLanguageCode)
+    private var languageCode: String = "uz"
     @State private var showSettings = false
     @State private var showPaywall = false
     @State private var showBlockAlert = false
     @State private var didRunPreflight = false
+    private let previewState: RealtimeVoiceState?
     var onDismiss: (() -> Void)?
+
+    init(
+        previewState: RealtimeVoiceState? = nil,
+        onDismiss: (() -> Void)? = nil
+    ) {
+        self.previewState = previewState
+        self.onDismiss = onDismiss
+    }
     
     var body: some View {
         ZStack {
@@ -75,8 +86,8 @@ struct RealtimeVoiceView: View {
                 
                 // Visualizer
                 RealtimeVisualizerView(
-                    audioLevel: viewModel.audioLevel,
-                    state: viewModel.voiceState
+                    audioLevel: previewState == nil ? viewModel.audioLevel : 0.34,
+                    state: displayedVoiceState
                 )
                 
                 Spacer()
@@ -97,7 +108,12 @@ struct RealtimeVoiceView: View {
                             .background(Color.yellow)
                             .cornerRadius(4)
 
-                        Text("Sinov rejimi — xatolar bo'lishi mumkin")
+                        Text(copy(
+                            "Sinov rejimi — xatolar bo‘lishi mumkin",
+                            "Синов режими — хатолар бўлиши мумкин",
+                            "Тестовый режим — возможны ошибки",
+                            "Beta mode — errors may occur"
+                        ))
                             .font(.caption)
                             .foregroundColor(SalomTheme.Colors.textSecondary)
                     }
@@ -117,7 +133,9 @@ struct RealtimeVoiceView: View {
                                 .background(Circle().fill(SalomTheme.Colors.surfaceMuted))
                                 .overlay(Circle().stroke(SalomTheme.Colors.border))
                             
-                            Text(viewModel.isMuted ? "Ovoz yoqish" : "Ovoz o'chirish")
+                            Text(viewModel.isMuted
+                                 ? copy("Ovoz yoqish", "Овозни ёқиш", "Включить микрофон", "Unmute")
+                                 : copy("Ovoz o‘chirish", "Овозни ўчириш", "Выключить микрофон", "Mute"))
                                 .font(.caption)
                                 .foregroundColor(SalomTheme.Colors.textSecondary)
                         }
@@ -139,7 +157,7 @@ struct RealtimeVoiceView: View {
                                 .frame(width: 60, height: 60)
                                 .background(Circle().fill(Color.red))
                             
-                            Text("Tugatish")
+                            Text(copy("Tugatish", "Тугатиш", "Завершить", "End"))
                                 .font(.caption)
                                 .foregroundColor(SalomTheme.Colors.textSecondary)
                         }
@@ -149,6 +167,7 @@ struct RealtimeVoiceView: View {
             }
         }
         .onAppear {
+            guard previewState == nil else { return }
             // Preflight subscription check BEFORE opening any WS so a blocked
             // user goes straight to the paywall instead of seeing a brief
             // "connecting..." then a hard close.
@@ -185,6 +204,7 @@ struct RealtimeVoiceView: View {
             }
         }
         .onDisappear {
+            guard previewState == nil else { return }
             viewModel.disconnect()
         }
         .sheet(isPresented: $showSettings) {
@@ -209,12 +229,30 @@ struct RealtimeVoiceView: View {
     }
     
     private var statusText: String {
-        switch viewModel.voiceState {
-        case .idle: return NSLocalizedString("Ulanmoqda...", comment: "Connecting")
-        case .listening: return NSLocalizedString("Eshitmoqdaman...", comment: "Listening")
-        case .transcribing: return NSLocalizedString("Tushunmoqdaman...", comment: "Transcribing")
-        case .thinking: return NSLocalizedString("O'ylayapman...", comment: "Thinking")
-        case .speaking: return NSLocalizedString("Gapiryapman...", comment: "Speaking")
+        switch displayedVoiceState {
+        case .idle:
+            return copy("Ulanmoqda…", "Уланмоқда…", "Подключение…", "Connecting…")
+        case .listening:
+            return copy("Eshitmoqdaman…", "Эшитмоқдаман…", "Слушаю…", "Listening…")
+        case .transcribing:
+            return copy("Tushunmoqdaman…", "Тушунмоқдаман…", "Распознаю…", "Understanding…")
+        case .thinking:
+            return copy("O‘ylayapman…", "Ўйлаяпман…", "Думаю…", "Thinking…")
+        case .speaking:
+            return copy("Javob bermoqdaman…", "Жавоб бермоқдаман…", "Отвечаю…", "Speaking…")
         }
+    }
+
+    private var displayedVoiceState: RealtimeVoiceState {
+        previewState ?? viewModel.voiceState
+    }
+
+    private func copy(
+        _ uz: String,
+        _ cyrl: String,
+        _ ru: String,
+        _ en: String
+    ) -> String {
+        L4(uz: uz, kr: cyrl, ru: ru, en: en).t(languageCode)
     }
 }

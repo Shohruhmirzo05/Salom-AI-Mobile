@@ -38,6 +38,15 @@ struct WorkDetailView: View {
         _currentDocId = State(initialValue: docId)
     }
 
+#if DEBUG
+    init(previewDocument: WorkDoc, docLang: String) {
+        self.taskDef = nil
+        self.docLang = docLang
+        _currentDocId = State(initialValue: previewDocument.id)
+        _doc = State(initialValue: previewDocument)
+    }
+#endif
+
     var body: some View {
         ZStack {
             SalomTheme.Gradients.background.ignoresSafeArea()

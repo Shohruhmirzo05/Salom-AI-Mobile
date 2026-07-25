@@ -42,6 +42,7 @@ struct CardInputSheet: View {
                         securityBadge(icon: "eye.slash.fill", text: "Maxfiy")
                     }
                 }
+                .frame(maxWidth: .infinity)
                 .padding(.top, 25)
             }
         }

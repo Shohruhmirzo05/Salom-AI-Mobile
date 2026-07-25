@@ -5,6 +5,7 @@
 
     },
     "-%lld%% CHEGIRMA" : {
+      "extractionState" : "stale",
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -49,6 +50,7 @@
       }
     },
     "·" : {
+      "extractionState" : "stale",
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -210,6 +212,7 @@
       }
     },
     "%@ / %@" : {
+      "extractionState" : "stale",
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -238,6 +241,7 @@
       }
     },
     "%@ / kun" : {
+      "extractionState" : "stale",
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -470,6 +474,16 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "%@: лимит тугади. Pro режага ўтиб давом этинг."
+          }
+        }
+      }
+    },
+    "%@. %@. %@" : {
+      "localizations" : {
+        "uz" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "%1$@. %2$@. %3$@"
           }
         }
       }
@@ -2440,6 +2454,7 @@
       }
     },
     "Chegirmani olish" : {
+      "extractionState" : "stale",
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -2507,6 +2522,7 @@
       }
     },
     "Cheklovsiz muloqot va ko'proq imkoniyatlar" : {
+      "extractionState" : "stale",
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -2529,6 +2545,7 @@
       }
     },
     "Cheklovsiz suhbat, ovoz va eng aqlli modellar." : {
+      "extractionState" : "stale",
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -2645,16 +2662,46 @@
     },
     "click" : {
       "localizations" : {
-        "en" : { "stringUnit" : { "state" : "translated", "value" : "click" } },
-        "ru" : { "stringUnit" : { "state" : "translated", "value" : "нажмите" } },
-        "uz-Cyrl" : { "stringUnit" : { "state" : "translated", "value" : "босинг" } }
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "click"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "нажмите"
+          }
+        },
+        "uz-Cyrl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "босинг"
+          }
+        }
       }
     },
     "Click" : {
       "localizations" : {
-        "en" : { "stringUnit" : { "state" : "translated", "value" : "Click" } },
-        "ru" : { "stringUnit" : { "state" : "translated", "value" : "Click" } },
-        "uz-Cyrl" : { "stringUnit" : { "state" : "translated", "value" : "Click" } }
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Click"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Click"
+          }
+        },
+        "uz-Cyrl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Click"
+          }
+        }
       }
     },
     "Click (bir martalik)" : {
@@ -3047,6 +3094,7 @@
     },
     "Eshitmoqdaman..." : {
       "comment" : "Listening",
+      "extractionState" : "stale",
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -3316,6 +3364,7 @@
       }
     },
     "Foydalanish shartlari" : {
+      "extractionState" : "stale",
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -3453,6 +3502,7 @@
     },
     "Gapiryapman..." : {
       "comment" : "Speaking",
+      "extractionState" : "stale",
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -3610,6 +3660,7 @@
       }
     },
     "Hisob va til sozlamalari" : {
+      "extractionState" : "stale",
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -4433,6 +4484,29 @@
         }
       }
     },
+    "Kartada mablag' yetarli emas. Kartani to'ldiring va qayta urining." : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "There are insufficient funds on the card. Top it up and try again."
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "На карте недостаточно средств. Пополните её и повторите попытку."
+          }
+        },
+        "uz-Cyrl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Картада маблағ етарли эмас. Картани тўлдириб, қайта уриниб кўринг."
+          }
+        }
+      }
+    },
     "Kartam/balansim yo‘q" : {
       "extractionState" : "stale",
       "localizations" : {
@@ -4524,6 +4598,7 @@
       }
     },
     "Kasbiy hujjatlarni tayyorlang" : {
+      "extractionState" : "stale",
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -4570,6 +4645,7 @@
       }
     },
     "Ketishdan oldin — nega to‘lamadingiz?" : {
+      "extractionState" : "stale",
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -5122,6 +5198,7 @@
       }
     },
     "Maxsus narx faqat siz uchun, cheklangan vaqtda." : {
+      "extractionState" : "stale",
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -5604,6 +5681,7 @@
       }
     },
     "O‘tkazib yuborish" : {
+      "extractionState" : "stale",
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -5627,6 +5705,7 @@
     },
     "O'ylayapman..." : {
       "comment" : "Thinking",
+      "extractionState" : "stale",
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -5811,6 +5890,7 @@
       }
     },
     "Obuna avtomatik yangilanadi · to'lovlar qaytarilmaydi" : {
+      "extractionState" : "stale",
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -6139,9 +6219,24 @@
     },
     "Ovoz" : {
       "localizations" : {
-        "en" : { "stringUnit" : { "state" : "translated", "value" : "Voice" } },
-        "ru" : { "stringUnit" : { "state" : "translated", "value" : "Голос" } },
-        "uz-Cyrl" : { "stringUnit" : { "state" : "translated", "value" : "Овоз" } }
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Voice"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Голос"
+          }
+        },
+        "uz-Cyrl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Овоз"
+          }
+        }
       }
     },
     "Ovoz (Voice)" : {
@@ -6260,6 +6355,7 @@
       }
     },
     "Ovoz o'chirish" : {
+      "extractionState" : "stale",
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -6307,6 +6403,7 @@
       }
     },
     "Ovoz yoqish" : {
+      "extractionState" : "stale",
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -6579,6 +6676,7 @@
       }
     },
     "Oylik" : {
+      "extractionState" : "stale",
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -6917,6 +7015,7 @@
       }
     },
     "Pro imkoniyatlar" : {
+      "extractionState" : "stale",
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -6961,6 +7060,7 @@
       }
     },
     "Pro obunani maxsus, bir martalik chegirma bilan oching." : {
+      "extractionState" : "stale",
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -7157,6 +7257,29 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Расм тавсифини киритинг..."
+          }
+        }
+      }
+    },
+    "Rasm yaratilmadi. Qayta urinib ko‘ring." : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "The image couldn't be created. Try again."
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Не удалось создать изображение. Попробуйте ещё раз."
+          }
+        },
+        "uz-Cyrl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Расм яратилмади. Қайта уриниб кўринг."
           }
         }
       }
@@ -7667,6 +7790,7 @@
       }
     },
     "Salom AI Pro" : {
+      "extractionState" : "stale",
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -7942,6 +8066,7 @@
       }
     },
     "Sinov rejimi — xatolar bo'lishi mumkin" : {
+      "extractionState" : "stale",
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -7964,6 +8089,7 @@
       }
     },
     "Sizga qulay usulni tanlang." : {
+      "extractionState" : "stale",
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -8015,6 +8141,7 @@
       }
     },
     "Sizni qaytarib olmoqchimiz! 🎁" : {
+      "extractionState" : "stale",
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -8266,6 +8393,7 @@
       }
     },
     "SSL bilan himoyalangan xavfsiz to'lov" : {
+      "extractionState" : "stale",
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -8627,6 +8755,7 @@
       }
     },
     "Tavsiya" : {
+      "extractionState" : "stale",
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -9060,6 +9189,7 @@
       }
     },
     "To'lov" : {
+      "extractionState" : "stale",
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -9099,6 +9229,29 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Тўлов амалга ошмади"
+          }
+        }
+      }
+    },
+    "To'lov amalga oshmadi. Boshqa karta bilan urinib ko'ring." : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "The payment failed. Try another card."
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Платёж не прошёл. Попробуйте другую карту."
+          }
+        },
+        "uz-Cyrl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Тўлов амалга ошмади. Бошқа карта билан уриниб кўринг."
           }
         }
       }
@@ -9261,6 +9414,7 @@
       }
     },
     "To'lov turini tanlang" : {
+      "extractionState" : "stale",
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -9351,6 +9505,7 @@
       }
     },
     "Tugatish" : {
+      "extractionState" : "stale",
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -9396,6 +9551,7 @@
     },
     "Tushunmoqdaman..." : {
       "comment" : "Transcribing",
+      "extractionState" : "stale",
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -9419,6 +9575,7 @@
     },
     "Ulanmoqda..." : {
       "comment" : "Connecting",
+      "extractionState" : "stale",
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -9661,6 +9818,29 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Хабар"
+          }
+        }
+      }
+    },
+    "Xabar yuborilmadi. Qayta urinib ko‘ring." : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "The message couldn't be sent. Try again."
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Не удалось отправить сообщение. Попробуйте ещё раз."
+          }
+        },
+        "uz-Cyrl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Хабар юборилмади. Қайта уриниб кўринг."
           }
         }
       }
@@ -10030,6 +10210,7 @@
       }
     },
     "Yillik" : {
+      "extractionState" : "stale",
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -10274,41 +10455,6 @@
             "value" : "Кириллча"
           }
         }
-      }
-    },
-    "Kartada mablag' yetarli emas. Kartani to'ldiring va qayta urining." : {
-      "localizations" : {
-        "en" : { "stringUnit" : { "state" : "translated", "value" : "There are insufficient funds on the card. Top it up and try again." } },
-        "ru" : { "stringUnit" : { "state" : "translated", "value" : "На карте недостаточно средств. Пополните её и повторите попытку." } },
-        "uz-Cyrl" : { "stringUnit" : { "state" : "translated", "value" : "Картада маблағ етарли эмас. Картани тўлдириб, қайта уриниб кўринг." } }
-      }
-    },
-    "To'lov amalga oshmadi. Boshqa karta bilan urinib ko'ring." : {
-      "localizations" : {
-        "en" : { "stringUnit" : { "state" : "translated", "value" : "The payment failed. Try another card." } },
-        "ru" : { "stringUnit" : { "state" : "translated", "value" : "Платёж не прошёл. Попробуйте другую карту." } },
-        "uz-Cyrl" : { "stringUnit" : { "state" : "translated", "value" : "Тўлов амалга ошмади. Бошқа карта билан уриниб кўринг." } }
-      }
-    },
-    "Qayta urinish" : {
-      "localizations" : {
-        "en" : { "stringUnit" : { "state" : "translated", "value" : "Try again" } },
-        "ru" : { "stringUnit" : { "state" : "translated", "value" : "Повторить" } },
-        "uz-Cyrl" : { "stringUnit" : { "state" : "translated", "value" : "Қайта уриниш" } }
-      }
-    },
-    "Xabar yuborilmadi. Qayta urinib ko‘ring." : {
-      "localizations" : {
-        "en" : { "stringUnit" : { "state" : "translated", "value" : "The message couldn't be sent. Try again." } },
-        "ru" : { "stringUnit" : { "state" : "translated", "value" : "Не удалось отправить сообщение. Попробуйте ещё раз." } },
-        "uz-Cyrl" : { "stringUnit" : { "state" : "translated", "value" : "Хабар юборилмади. Қайта уриниб кўринг." } }
-      }
-    },
-    "Rasm yaratilmadi. Qayta urinib ko‘ring." : {
-      "localizations" : {
-        "en" : { "stringUnit" : { "state" : "translated", "value" : "The image couldn't be created. Try again." } },
-        "ru" : { "stringUnit" : { "state" : "translated", "value" : "Не удалось создать изображение. Попробуйте ещё раз." } },
-        "uz-Cyrl" : { "stringUnit" : { "state" : "translated", "value" : "Расм яратилмади. Қайта уриниб кўринг." } }
       }
     },
     "Русский" : {

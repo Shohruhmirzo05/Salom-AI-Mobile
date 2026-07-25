@@ -4,7 +4,7 @@
 //
 //  The "Ilovalar" hub — every Salom AI mini-tool as a grid (matches the web hub).
 //  Tapping a tile switches the main section. Tiles show remote artwork from
-//  salom-ai.uz/apps/<key>.webp when present (same asset the web uses); until
+//  salom-ai.uz/mini-app-assets/<key>.webp (the same asset the web uses); until
 //  then a branded gradient + 3D icon is shown.
 //
 
@@ -36,7 +36,7 @@ struct IlovalarView: View {
     fileprivate struct Tile: Identifiable {
         let id = UUID()
         let section: MainSection   // where tapping the tile navigates
-        let key: String            // artwork filename → salom-ai.uz/apps/<key>.webp
+        let key: String            // artwork filename → /mini-app-assets/<key>.webp
         let n3d: String            // fallback 3D icon slug
         let title: Copy
         let subtitle: Copy
@@ -115,7 +115,7 @@ struct IlovalarView: View {
                     .padding(.horizontal, 16)
 
                     VStack(alignment: .leading, spacing: 12) {
-                        Text(Copy(uz: "O‘zbekiston uchun yordamchilar", cyrl: "Ўзбекистон учун ёрдамчилар", ru: "Помощники для Узбекистана", en: "Helpers for Uzbekistan").pick(languageCode))
+                        Text(Copy(uz: "Kundalik vositalar", cyrl: "Кундалик воситалар", ru: "Инструменты на каждый день", en: "Everyday tools").pick(languageCode))
                             .font(.system(size: 20, weight: .bold))
                             .foregroundColor(SalomTheme.Colors.textPrimary)
 
@@ -199,7 +199,7 @@ private struct RemoteTileCardView: View {
     }
 }
 
-// A single hub tile. Loads remote artwork (salom-ai.uz/apps/<key>.webp) over the
+// A single hub tile. Loads the same real artwork used by the web app over the
 // branded gradient; when the artwork loads the 3D icon is hidden so it "replaces"
 // the icon, otherwise the gradient + icon are shown.
 private struct TileCardView: View {
@@ -211,7 +211,7 @@ private struct TileCardView: View {
         ZStack {
             LinearGradient(colors: tile.colors, startPoint: .topLeading, endPoint: .bottomTrailing)
 
-            AsyncImage(url: URL(string: "https://salom-ai.uz/apps/\(tile.key).webp")) { phase in
+            AsyncImage(url: URL(string: "https://salom-ai.uz/mini-app-assets/\(tile.key).webp")) { phase in
                 if case .success(let image) = phase {
                     image.resizable().scaledToFill()
                         .onAppear { artworkLoaded = true }
