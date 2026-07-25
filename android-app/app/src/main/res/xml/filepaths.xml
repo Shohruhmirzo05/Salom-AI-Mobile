@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Temporary destination for photos taken from inside the web file picker.
+     Cache, not files: these are handed straight to the page and never needed
+     again, so the OS is free to reclaim them. -->
+<paths>
+    <cache-path name="captures" path="captures/" />
+</paths>

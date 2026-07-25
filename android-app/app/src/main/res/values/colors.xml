@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Adaptive icon background. Slightly darker than the app surface so the
+         mark's own glow reads as light against it. -->
+    <color name="ic_launcher_background">#050617</color>
+
+    <!-- Matches the #app-splash background in web/index.html, so the native
+         splash hands off to the web splash with no visible seam. Replaced at
+         runtime with the page's real surface colour once it loads. -->
+    <color name="app_background">#070A12</color>
+
+    <color name="offline_background">#070A12</color>
+    <color name="offline_title_text">#F1F5F9</color>
+    <color name="offline_body_text">#94A3B8</color>
+    <color name="offline_button_text">#FFFFFF</color>
+    <color name="brand_cyan">#46BEF1</color>
+    <color name="brand_purple">#A855F7</color>
+</resources>

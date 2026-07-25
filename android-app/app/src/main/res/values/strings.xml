@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Default locale is Uzbek, matching <html lang="uz"> on salom-ai.uz. -->
+<resources>
+    <string name="appName" translatable="false">Salom AI</string>
+    <string name="launcherName" translatable="false">Salom AI</string>
+
+    <!-- Launcher long-press shortcuts. Mirrors manifest.webmanifest. -->
+    <string name="shortcut_chat_short">Chat</string>
+    <string name="shortcut_chat_long">Yangi chat</string>
+    <string name="shortcut_apps_short">Ilovalar</string>
+    <string name="shortcut_apps_long">Ilovalar</string>
+
+    <!-- Offline screen -->
+    <string name="offline_title">Internet aloqasi yo‘q</string>
+    <string name="offline_message">Salom AI ishlashi uchun internet kerak. Wi‑Fi yoki mobil internetni yoqing va qayta urinib ko‘ring.</string>
+    <string name="offline_retry">Qayta urinish</string>
+    <string name="offline_logo_description" translatable="false">Salom AI</string>
+
+    <!-- Downloads -->
+    <string name="download_started">Yuklab olish boshlandi</string>
+    <string name="download_in_progress">Salom AI fayli yuklanmoqda</string>
+    <string name="download_failed">Faylni yuklab bo‘lmadi</string>
+
+    <!-- File picker -->
+    <string name="file_chooser_title">Fayl tanlang</string>
+
+    <!-- Errors -->
+    <string name="google_sign_in_failed">Google orqali kirishda xatolik. Qayta urinib ko‘ring.</string>
+    <string name="no_app_to_open">Buni ochadigan ilova topilmadi</string>
+    <string name="reloading">Qayta yuklanmoqda…</string>
+    <string name="error_server_title">Serverga ulanib bo‘lmadi</string>
+    <string name="error_server_message">Salom AI hozir javob bermayapti. Bir necha soniyadan so‘ng qayta urinib ko‘ring.</string>
+    <string name="webview_missing_title">Tizim komponenti yo‘q</string>
+    <string name="webview_missing_message">Salom AI ishlashi uchun Android System WebView kerak. Uni Play Store’dan yoqing yoki yangilang.</string>
+</resources>

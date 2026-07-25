@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="shortcut_chat_short">Chat</string>
+    <string name="shortcut_chat_long">New chat</string>
+    <string name="shortcut_apps_short">Apps</string>
+    <string name="shortcut_apps_long">Apps</string>
+
+    <string name="offline_title">No internet connection</string>
+    <string name="offline_message">Salom AI needs an internet connection. Turn on Wi‑Fi or mobile data and try again.</string>
+    <string name="offline_retry">Try again</string>
+
+    <string name="download_started">Download started</string>
+    <string name="download_in_progress">Downloading your Salom AI file</string>
+    <string name="download_failed">Could not download the file</string>
+
+    <string name="file_chooser_title">Choose a file</string>
+
+    <string name="google_sign_in_failed">Google sign-in failed. Please try again.</string>
+    <string name="no_app_to_open">No app available to open this</string>
+    <string name="reloading">Reloading…</string>
+    <string name="error_server_title">Can\'t reach the server</string>
+    <string name="error_server_message">Salom AI isn\'t responding right now. Try again in a few seconds.</string>
+    <string name="webview_missing_title">Missing system component</string>
+    <string name="webview_missing_message">Salom AI needs Android System WebView. Enable or update it from the Play Store.</string>
+</resources>

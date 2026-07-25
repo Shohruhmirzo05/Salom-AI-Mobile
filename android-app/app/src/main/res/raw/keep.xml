@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+    The OneSignal SDK resolves its small notification icon by NAME at runtime, so
+    nothing references it statically. Without this, `isShrinkResources = true`
+    strips it from release builds and every push notification falls back to the
+    full-colour launcher icon, which Android renders as a white blob.
+-->
+<resources xmlns:tools="http://schemas.android.com/tools"
+    tools:keep="@drawable/ic_stat_onesignal_default" />

@@ -1,0 +1,106 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+    Salom AI — Android app.
+
+    A native shell around https://salom-ai.uz. The product ships with the web
+    deploy; this app supplies the native surface: system integration, launcher
+    presence, permissions under the app's own name, downloads, push, and native
+    Google Sign-In (which Google refuses to serve inside a WebView).
+-->
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools">
+
+    <uses-permission android:name="android.permission.INTERNET" />
+    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
+    <!-- Realtime voice (web/src/lib/realtime-voice.ts getUserMedia). -->
+    <uses-permission android:name="android.permission.RECORD_AUDIO" />
+    <!--
+        CAMERA is deliberately NOT declared. Photos are captured by handing an
+        ACTION_IMAGE_CAPTURE intent to the system camera app, which holds its own
+        permission. Declaring CAMERA here without holding it makes Android refuse
+        to start that intent outright ("Permission Denial: ... with revoked
+        permission android.permission.CAMERA"), and declaring it just to request
+        it would add a prompt the user does not need.
+        Only add it back if the web app starts using getUserMedia({video:true}).
+    -->
+    <!-- Android 13+ runtime permission for push. -->
+    <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
+
+    <!-- Offered, never required: most users pick from the gallery and never talk. -->
+    <uses-feature android:name="android.hardware.microphone" android:required="false" />
+
+    <!-- Package visibility (Android 11+): needed to resolve the camera app for the
+         file picker and to detect whether Telegram can handle a t.me link. -->
+    <queries>
+        <intent>
+            <action android:name="android.media.action.IMAGE_CAPTURE" />
+        </intent>
+        <intent>
+            <action android:name="android.intent.action.VIEW" />
+            <data android:scheme="https" />
+        </intent>
+    </queries>
+
+    <application
+        android:name=".SalomApp"
+        android:allowBackup="false"
+        android:dataExtractionRules="@xml/data_extraction_rules"
+        android:fullBackupContent="@xml/backup_rules"
+        android:icon="@mipmap/ic_launcher"
+        android:roundIcon="@mipmap/ic_launcher_round"
+        android:label="@string/appName"
+        android:supportsRtl="true"
+        android:usesCleartextTraffic="false"
+        android:theme="@style/Theme.SalomAI">
+
+        <activity
+            android:name=".MainActivity"
+            android:exported="true"
+            android:label="@string/launcherName"
+            android:launchMode="singleTask"
+            android:theme="@style/Theme.SalomAI.Splash"
+            android:windowSoftInputMode="adjustResize"
+            android:configChanges="orientation|screenSize|smallestScreenSize|screenLayout|keyboardHidden|uiMode|density|fontScale">
+
+            <!-- Long-press the launcher icon → Yangi chat / Ilovalar. Mirrors the
+                 shortcuts in web/public/manifest.webmanifest. -->
+            <meta-data
+                android:name="android.app.shortcuts"
+                android:resource="@xml/shortcuts" />
+
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+
+            <!-- Android App Links: shared presentations, push landing pages and
+                 Payme/Click return URLs open in the app once assetlinks.json is
+                 published (see ../server/README.md). -->
+            <intent-filter android:autoVerify="true">
+                <action android:name="android.intent.action.VIEW" />
+                <category android:name="android.intent.category.DEFAULT" />
+                <category android:name="android.intent.category.BROWSABLE" />
+                <data android:scheme="https" />
+                <data android:host="salom-ai.uz" />
+                <data android:host="www.salom-ai.uz" />
+            </intent-filter>
+        </activity>
+
+        <!-- Supplies the camera output URI for <input type="file" capture>. -->
+        <provider
+            android:name="androidx.core.content.FileProvider"
+            android:authorities="@string/providerAuthority"
+            android:grantUriPermissions="true"
+            android:exported="false">
+            <meta-data
+                android:name="android.support.FILE_PROVIDER_PATHS"
+                android:resource="@xml/filepaths" />
+        </provider>
+
+        <!-- Push notification icon + accent, used by the OneSignal SDK. -->
+        <meta-data
+            android:name="com.onesignal.NotificationAccentColor.DEFAULT"
+            android:value="FF46BEF1"
+            tools:ignore="ManifestResource" />
+    </application>
+</manifest>

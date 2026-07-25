@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="shortcut_chat_short">Чат</string>
+    <string name="shortcut_chat_long">Новый чат</string>
+    <string name="shortcut_apps_short">Приложения</string>
+    <string name="shortcut_apps_long">Приложения</string>
+
+    <string name="offline_title">Нет подключения к интернету</string>
+    <string name="offline_message">Для работы Salom AI нужен интернет. Включите Wi‑Fi или мобильные данные и попробуйте снова.</string>
+    <string name="offline_retry">Повторить</string>
+
+    <string name="download_started">Загрузка началась</string>
+    <string name="download_in_progress">Загрузка файла Salom AI</string>
+    <string name="download_failed">Не удалось загрузить файл</string>
+
+    <string name="file_chooser_title">Выберите файл</string>
+
+    <string name="google_sign_in_failed">Не удалось войти через Google. Попробуйте снова.</string>
+    <string name="no_app_to_open">Нет приложения для открытия</string>
+    <string name="reloading">Перезагрузка…</string>
+    <string name="error_server_title">Не удалось подключиться к серверу</string>
+    <string name="error_server_message">Salom AI сейчас не отвечает. Попробуйте снова через несколько секунд.</string>
+    <string name="webview_missing_title">Отсутствует системный компонент</string>
+    <string name="webview_missing_message">Для работы Salom AI нужен Android System WebView. Включите или обновите его в Play Store.</string>
+</resources>

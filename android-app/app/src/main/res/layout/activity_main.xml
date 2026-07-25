@@ -1,0 +1,64 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+    The entire app UI. The WebView is padded out of the system bars in code
+    (MainActivity.applyWindowInsets) and the root background is repainted with the
+    page's own surface colour, so the status/navigation bar areas match the web
+    theme in both light and dark mode.
+-->
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/root"
+    tools:ignore="Overdraw"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/app_background">
+
+    <WebView
+        android:id="@+id/web_view"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent" />
+
+    <ProgressBar
+        android:id="@+id/progress"
+        style="?android:attr/progressBarStyleHorizontal"
+        android:layout_width="match_parent"
+        android:layout_height="3dp"
+        android:layout_gravity="top"
+        android:max="100"
+        android:progressTint="@color/brand_cyan"
+        android:progressBackgroundTint="@android:color/transparent"
+        android:visibility="gone"
+        tools:ignore="UnusedAttribute" />
+
+    <!--
+        Bridges the gap between the system splash (capped at 6 s) and the page's
+        first paint. On a slow connection the HTML itself can take longer than
+        that, and a bare dark screen with a thin progress bar reads as a hang. An
+        animating spinner over the same logo reads as "loading".
+    -->
+    <LinearLayout
+        android:id="@+id/loading_view"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:orientation="vertical"
+        android:gravity="center"
+        android:background="@color/app_background">
+
+        <ImageView
+            android:layout_width="112dp"
+            android:layout_height="112dp"
+            android:src="@drawable/splash"
+            android:contentDescription="@string/offline_logo_description" />
+
+        <ProgressBar
+            android:layout_width="32dp"
+            android:layout_height="32dp"
+            android:layout_marginTop="28dp"
+            android:indeterminateTint="@color/brand_cyan" />
+    </LinearLayout>
+
+    <include
+        android:id="@+id/offline_view"
+        layout="@layout/view_offline"
+        android:visibility="gone" />
+</FrameLayout>

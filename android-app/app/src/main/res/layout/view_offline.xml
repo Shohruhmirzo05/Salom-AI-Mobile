@@ -1,0 +1,64 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+    Shown instead of the WebView's error page. Two states, swapped at runtime by
+    MainActivity.showError(): no connectivity, and "we cannot reach the server"
+    (5xx, DNS/TLS failure, timeout). Telling someone with working Wi-Fi to check
+    their internet sends them to fix the wrong thing. Deliberately mirrors the dark web surface (#070A12) and the
+    brand gradient CTA so it reads as part of the app, not as a browser error.
+-->
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/offline_background"
+    tools:ignore="Overdraw"
+    android:orientation="vertical"
+    android:gravity="center"
+    android:paddingStart="32dp"
+    android:paddingEnd="32dp">
+    <!-- Deliberately NOT fitsSystemWindows: it replaces this padding with the
+         system inset padding, which flattens the horizontal margins. Content is
+         vertically centred, so it never collides with the status bar anyway. -->
+
+    <ImageView
+        android:layout_width="112dp"
+        android:layout_height="112dp"
+        android:src="@drawable/splash"
+        android:contentDescription="@string/offline_logo_description"
+        android:layout_marginBottom="28dp" />
+
+    <TextView
+        android:id="@+id/error_title"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="@string/offline_title"
+        android:textColor="@color/offline_title_text"
+        android:textSize="20sp"
+        android:textStyle="bold"
+        android:gravity="center"
+        android:layout_marginBottom="10dp" />
+
+    <TextView
+        android:id="@+id/error_message"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="@string/offline_message"
+        android:textColor="@color/offline_body_text"
+        android:textSize="15sp"
+        android:lineSpacingExtra="4sp"
+        android:gravity="center"
+        android:layout_marginBottom="32dp" />
+
+    <Button
+        android:id="@+id/retry_button"
+        android:layout_width="match_parent"
+        android:layout_height="52dp"
+        android:text="@string/offline_retry"
+        android:textColor="@color/offline_button_text"
+        android:textAllCaps="false"
+        android:textSize="16sp"
+        android:background="@drawable/bg_primary_button"
+        android:stateListAnimator="@null"
+        android:defaultFocusHighlightEnabled="false"
+        tools:ignore="UnusedAttribute" />
+</LinearLayout>

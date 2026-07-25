@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+    Long-press the launcher icon. Mirrors the "shortcuts" array in
+    web/public/manifest.webmanifest so the Android app and the installed PWA
+    behave identically.
+-->
+<shortcuts xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    tools:ignore="UnusedAttribute">
+    <shortcut
+        android:shortcutId="chat"
+        android:enabled="true"
+        android:icon="@drawable/ic_shortcut_chat"
+        android:shortcutShortLabel="@string/shortcut_chat_short"
+        android:shortcutLongLabel="@string/shortcut_chat_long">
+        <intent
+            android:action="android.intent.action.VIEW"
+            android:targetPackage="com.feratech.salomai"
+            android:targetClass="com.feratech.salomai.MainActivity"
+            android:data="https://salom-ai.uz/chat?source=android_shortcut" />
+        <categories android:name="android.shortcut.conversation" />
+    </shortcut>
+
+    <shortcut
+        android:shortcutId="apps"
+        android:enabled="true"
+        android:icon="@drawable/ic_shortcut_apps"
+        android:shortcutShortLabel="@string/shortcut_apps_short"
+        android:shortcutLongLabel="@string/shortcut_apps_long">
+        <intent
+            android:action="android.intent.action.VIEW"
+            android:targetPackage="com.feratech.salomai"
+            android:targetClass="com.feratech.salomai.MainActivity"
+            android:data="https://salom-ai.uz/apps?source=android_shortcut" />
+    </shortcut>
+</shortcuts>

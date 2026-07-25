@@ -1,0 +1,134 @@
+<!doctype html>
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Salom AI shell — capability harness</title>
+<style>
+  :root { color-scheme: dark; }
+  body { margin:0; padding:20px 18px 48px; background:#070A12; color:#E2E8F0;
+         font:15px/1.5 -apple-system,Roboto,sans-serif; }
+  h1 { font-size:18px; margin:0 0 4px; }
+  p.sub { color:#94A3B8; margin:0 0 22px; font-size:13px; }
+  section { border:1px solid #1E293B; border-radius:14px; padding:14px; margin-bottom:14px; }
+  h2 { font-size:14px; margin:0 0 10px; color:#F1F5F9; }
+  button, .btn { display:inline-block; background:linear-gradient(90deg,#46BEF1,#A855F7);
+         color:#fff; border:0; border-radius:11px; padding:11px 16px; font-size:14px;
+         text-decoration:none; cursor:pointer; }
+  input[type=file] { color:#94A3B8; font-size:13px; }
+  pre { background:#0B1220; border-radius:9px; padding:10px; margin:10px 0 0;
+        font-size:12px; color:#7DD3FC; white-space:pre-wrap; word-break:break-all; min-height:18px; }
+</style>
+
+<h1>Shell capability harness</h1>
+<p class="sub">Debug builds only. Exercises the native bridges without needing an account.</p>
+
+<section>
+  <h2>1 · File picker (gallery + camera)</h2>
+  <input id="pick" type="file" accept="image/*" multiple>
+  <pre id="pickOut">no selection</pre>
+</section>
+
+<section>
+  <h2>2 · Download → DownloadManager</h2>
+  <a class="btn" href="https://salom-ai.uz/og-image.png" download="salom-test.png">Download a file</a>
+  <pre id="dlOut">tap the button, then check the notification shade and Downloads</pre>
+</section>
+
+<section>
+  <h2>3 · Microphone (realtime voice path)</h2>
+  <button onclick="mic()">Request microphone</button>
+  <pre id="micOut">not requested</pre>
+</section>
+
+<section>
+  <h2>4 · Share sheet (navigator.share polyfill)</h2>
+  <button onclick="doShare()">Share a link</button>
+  <pre id="shareOut">navigator.share is <b id="shareHas">?</b></pre>
+</section>
+
+<section>
+  <h2>5 · System bar theming</h2>
+  <button onclick="surface('#FFFFFF')">Light surface</button>
+  <button onclick="surface('#070A12')">Dark surface</button>
+  <pre id="surfOut">watch the status bar icons flip</pre>
+</section>
+
+<section>
+  <h2>6 · Renderer crash recovery</h2>
+  <button onclick="oom()">Crash the renderer (OOM)</button>
+  <pre id="oomOut">the app should recover, not die</pre>
+</section>
+
+<section>
+  <h2>7 · Environment</h2>
+  <pre id="env"></pre>
+</section>
+
+<script>
+  document.getElementById('pick').addEventListener('change', function (e) {
+    var files = Array.prototype.slice.call(e.target.files || []);
+    document.getElementById('pickOut').textContent = files.length
+      ? files.map(function (f) { return f.name + '  ' + Math.round(f.size / 1024) + ' KB  ' + f.type; }).join('\n')
+      : 'no selection';
+  });
+
+  function mic() {
+    var out = document.getElementById('micOut');
+    out.textContent = 'requesting…';
+    navigator.mediaDevices.getUserMedia({ audio: { echoCancellation: true, noiseSuppression: true } })
+      .then(function (stream) {
+        var ctx = new (window.AudioContext || window.webkitAudioContext)();
+        var src = ctx.createMediaStreamSource(stream);
+        var proc = ctx.createScriptProcessor(4096, 1, 1);
+        var peak = 0, frames = 0;
+        proc.onaudioprocess = function (ev) {
+          var d = ev.inputBuffer.getChannelData(0);
+          for (var i = 0; i < d.length; i++) peak = Math.max(peak, Math.abs(d[i]));
+          if (++frames % 8 === 0) {
+            out.textContent = 'GRANTED\nAudioContext ' + ctx.sampleRate + ' Hz\n'
+              + 'ScriptProcessor frames ' + frames + '\npeak ' + peak.toFixed(4);
+          }
+        };
+        src.connect(proc); proc.connect(ctx.destination);
+        out.textContent = 'GRANTED — sampleRate ' + ctx.sampleRate + ' Hz, capturing…';
+      })
+      .catch(function (err) { out.textContent = 'DENIED / FAILED\n' + err.name + ': ' + err.message; });
+  }
+
+  function doShare() {
+    var out = document.getElementById('shareOut');
+    if (!navigator.share) { out.textContent = 'navigator.share MISSING — polyfill not injected'; return; }
+    navigator.share({ title: 'Salom AI', url: 'https://salom-ai.uz/' })
+      .then(function () { out.textContent = 'share() resolved — native sheet should have opened'; })
+      .catch(function (e) { out.textContent = 'share() rejected: ' + e; });
+  }
+  // The polyfill is injected on page-finished, which can land after this script.
+  setTimeout(function () {
+    document.getElementById('shareHas').textContent = (typeof navigator.share === 'function') ? 'PRESENT' : 'MISSING';
+  }, 800);
+
+  function surface(c) {
+    document.body.style.backgroundColor = c;
+    document.body.style.color = (c === '#FFFFFF') ? '#111' : '#E2E8F0';
+    document.getElementById('surfOut').textContent = 'body background = ' + c;
+    if (window.__salomSurfaceBridge) window.__salomSurfaceBridge();
+  }
+
+  function oom() {
+    document.getElementById('oomOut').textContent = 'allocating…';
+    var hog = [];
+    setTimeout(function grow() {
+      try { for (var i = 0; i < 40; i++) hog.push(new Uint8Array(64 * 1024 * 1024)); } catch (e) {}
+      setTimeout(grow, 0);
+    }, 50);
+  }
+
+  document.getElementById('env').textContent =
+    'userAgent\n' + navigator.userAgent +
+    '\n\ncookies ' + navigator.cookieEnabled +
+    '\nlocalStorage ' + (function () { try { localStorage.setItem('t', '1'); localStorage.removeItem('t'); return 'ok'; } catch (e) { return 'BLOCKED'; } })() +
+    '\nWebSocket ' + (typeof WebSocket !== 'undefined') +
+    '\ngetUserMedia ' + !!(navigator.mediaDevices && navigator.mediaDevices.getUserMedia) +
+    '\nAudioContext ' + (typeof (window.AudioContext || window.webkitAudioContext) !== 'undefined') +
+    '\nnavigator.share ' + (typeof navigator.share === 'function') +
+    '\ndevicePixelRatio ' + window.devicePixelRatio +
+    '\nviewport ' + window.innerWidth + 'x' + window.innerHeight;
+</script>

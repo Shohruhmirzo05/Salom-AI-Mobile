@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!--
+        Android 12+ system splash. Shown from the moment the icon is tapped until
+        the WebView paints its first frame (MainActivity holds it with
+        setKeepOnScreenCondition), so there is never a blank window in between.
+    -->
+    <style name="Theme.SalomAI.Splash" parent="Theme.SplashScreen">
+        <item name="windowSplashScreenBackground">@color/app_background</item>
+        <item name="windowSplashScreenAnimatedIcon">@drawable/ic_launcher_foreground</item>
+        <item name="postSplashScreenTheme">@style/Theme.SalomAI</item>
+    </style>
+
+    <style name="Theme.SalomAI" parent="Theme.AppCompat.NoActionBar">
+        <item name="android:windowBackground">@color/app_background</item>
+        <!-- Transparent bars: MainActivity paints the inset areas with the page's
+             own surface colour so light and dark web themes both look native. -->
+        <item name="android:statusBarColor">@android:color/transparent</item>
+        <item name="android:navigationBarColor">@android:color/transparent</item>
+        <item name="android:windowLightStatusBar">false</item>
+    </style>
+</resources>

@@ -1,0 +1,14 @@
+[
+  {
+    "relation": ["delegate_permission/common.handle_all_urls"],
+    "target": {
+      "namespace": "android_app",
+      "package_name": "com.feratech.salomai",
+      "sha256_cert_fingerprints": [
+        "REPLACE_WITH_PLAY_APP_SIGNING_SHA256",
+        "33:D9:28:80:B5:57:95:07:BE:3B:0A:8E:9F:FB:27:6F:A3:66:9D:DA:4D:2F:2B:59:5C:EC:B7:4C:37:7F:D2:D0",
+        "E3:D9:83:20:5D:69:4C:0A:63:62:75:10:6B:62:45:08:B2:9F:B4:86:74:DA:2B:36:FC:49:C0:08:CB:A7:50:EF"
+      ]
+    }
+  }
+]
