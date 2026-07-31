@@ -1,0 +1,28 @@
+{
+  "sourceLanguage" : "uz",
+  "strings" : {
+    "NSUserTrackingUsageDescription" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "This identifier is used to show you more relevant ads and measure their performance."
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Этот идентификатор используется для показа более подходящей рекламы и оценки её эффективности."
+          }
+        },
+        "uz-Cyrl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Бу идентификатор сизга мосроқ рекламаларни кўрсатиш ва уларнинг самарадорлигини ўлчаш учун ишлатилади."
+          }
+        }
+      }
+    }
+  },
+  "version" : "1.0"
+}

@@ -6,8 +6,10 @@
 //
 
 import SwiftUI
+import Combine
 import OneSignalFramework
 import GoogleMobileAds
+import AppTrackingTransparency
 
 @main
 struct Salom_Ai_iOSApp: App {
@@ -71,15 +73,81 @@ class AppDelegate: NSObject, UIApplicationDelegate {
        // Permission is requested contextually after the user has completed
        // several useful tasks; never interrupt first launch or authentication.
 
-       // Initialize Google Mobile Ads (rewarded ads → +1 message).
-       MobileAds.shared.start { _ in
-           Task { @MainActor in
-               let unitID = await RewardedAdManager.fetchRewardedUnitID()
-               RewardedAdManager.shared.configure(unitID: unitID)
-           }
-       }
+       // Google Mobile Ads is deliberately NOT initialized here. It is started
+       // by TrackingAuthorizationManager only after ATT has been resolved.
+       // This guarantees that no ad request can access IDFA before the user has
+       // made their choice.
 
        return true
+    }
+}
+
+/// Owns the one-time ATT gate and the dependent Google Mobile Ads startup.
+///
+/// ATT is part of the first-run setup in `ContentView`. Existing users who
+/// completed onboarding on an older build still see the privacy step whenever
+/// their system status remains `.notDetermined`.
+@MainActor
+final class TrackingAuthorizationManager: ObservableObject {
+    static let shared = TrackingAuthorizationManager()
+
+    @Published private(set) var status: ATTrackingManager.AuthorizationStatus
+    @Published private(set) var isRequesting = false
+
+    private var didStartMobileAds = false
+
+    private init() {
+        status = ATTrackingManager.trackingAuthorizationStatus
+    }
+
+    var needsOnboardingStep: Bool {
+        status == .notDetermined
+    }
+
+    /// Call on launch so returning users with an existing ATT decision can
+    /// initialize ads without seeing the onboarding step again.
+    func startAdsIfAuthorizationResolved() {
+        status = ATTrackingManager.trackingAuthorizationStatus
+        guard status != .notDetermined else { return }
+        startMobileAdsOnce()
+    }
+
+    /// Called only from a clear user action on the privacy onboarding screen.
+    /// The system prompt is the sole place where the user grants or denies.
+    func requestAuthorization() {
+        guard !isRequesting else { return }
+
+        let currentStatus = ATTrackingManager.trackingAuthorizationStatus
+        guard currentStatus == .notDetermined else {
+            status = currentStatus
+            startMobileAdsOnce()
+            return
+        }
+
+        isRequesting = true
+        ATTrackingManager.requestTrackingAuthorization { newStatus in
+            Task { @MainActor in
+                TrackingAuthorizationManager.shared.finishAuthorization(with: newStatus)
+            }
+        }
+    }
+
+    private func finishAuthorization(with newStatus: ATTrackingManager.AuthorizationStatus) {
+        status = newStatus
+        isRequesting = false
+        startMobileAdsOnce()
+    }
+
+    private func startMobileAdsOnce() {
+        guard !didStartMobileAds else { return }
+        didStartMobileAds = true
+
+        MobileAds.shared.start { _ in
+            Task { @MainActor in
+                let unitID = await RewardedAdManager.fetchRewardedUnitID()
+                RewardedAdManager.shared.configure(unitID: unitID)
+            }
+        }
     }
 }
 /*

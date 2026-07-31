@@ -15,6 +15,7 @@ struct ContentView: View {
     private var languageCode: String = "uz"
     
     @StateObject private var session = SessionManager.shared
+    @ObservedObject private var trackingAuthorization = TrackingAuthorizationManager.shared
     @State private var showSplash: Bool = true
     // Observe the payment-abandon survey flag (set after a non-paid checkout return).
     @ObservedObject private var subs = SubscriptionManager.shared
@@ -36,6 +37,12 @@ struct ContentView: View {
             } else if showSplash {
                 SplashView(isActive: $showSplash)
                     .transition(.opacity)
+            } else if trackingAuthorization.needsOnboardingStep {
+                TrackingPermissionView(
+                    isRequesting: trackingAuthorization.isRequesting,
+                    onContinue: trackingAuthorization.requestAuthorization
+                )
+                .transition(.move(edge: .trailing).combined(with: .opacity))
             } else if session.contentType == .onboarding || !hasCompletedOnboarding {
                 OnboardingView()
                     .transition(.move(edge: .trailing).combined(with: .opacity))
@@ -49,9 +56,11 @@ struct ContentView: View {
             }
         }
         .animation(.easeInOut(duration: 0.35), value: showSplash)
+        .animation(.easeInOut(duration: 0.35), value: trackingAuthorization.needsOnboardingStep)
         .animation(.easeInOut(duration: 0.35), value: hasCompletedOnboarding)
         .animation(.easeInOut(duration: 0.35), value: session.contentType)
         .onAppear {
+            trackingAuthorization.startAdsIfAuthorizationResolved()
             session.bootstrap(hasCompletedOnboarding: hasCompletedOnboarding)
             Analytics.shared.track("feature_opened", ["feature": "ios_app"])
 #if DEBUG
@@ -249,4 +258,355 @@ struct ContentView: View {
         }
     }
 
+}
+
+// MARK: - Privacy onboarding
+
+private struct TrackingPermissionView: View {
+    @AppStorage(AppStorageKeys.preferredLanguageCode)
+    private var languageCode: String = "uz"
+
+    let isRequesting: Bool
+    let onContinue: () -> Void
+
+    private var copy: TrackingPermissionCopy {
+        TrackingPermissionCopy(languageCode: languageCode)
+    }
+
+    var body: some View {
+        GeometryReader { proxy in
+            ScrollView {
+                VStack(spacing: 0) {
+                    topBar
+
+                    Spacer(minLength: 30)
+
+                    privacyIllustration
+                        .padding(.bottom, 34)
+
+                    VStack(spacing: 14) {
+                        Text(copy.eyebrow)
+                            .font(.system(size: 12, weight: .bold))
+                            .tracking(1.4)
+                            .foregroundColor(SalomTheme.Colors.accentPrimary)
+
+                        Text(copy.title)
+                            .font(.system(size: 32, weight: .bold, design: .rounded))
+                            .multilineTextAlignment(.center)
+                            .foregroundColor(SalomTheme.Colors.textPrimary)
+                            .fixedSize(horizontal: false, vertical: true)
+
+                        Text(copy.subtitle)
+                            .font(.system(size: 16))
+                            .multilineTextAlignment(.center)
+                            .foregroundColor(SalomTheme.Colors.textSecondary)
+                            .lineSpacing(3)
+                            .fixedSize(horizontal: false, vertical: true)
+                    }
+                    .frame(maxWidth: 560)
+
+                    privacyBenefits
+                        .padding(.top, 28)
+
+                    Spacer(minLength: 32)
+
+                    continueButton
+
+                    Text(copy.footnote)
+                        .font(.system(size: 12))
+                        .multilineTextAlignment(.center)
+                        .foregroundColor(SalomTheme.Colors.textTertiary)
+                        .lineSpacing(2)
+                        .padding(.top, 14)
+                        .frame(maxWidth: 520)
+                }
+                .padding(.horizontal, min(max(proxy.size.width * 0.07, 22), 72))
+                .padding(.top, max(proxy.safeAreaInsets.top, 12))
+                .padding(.bottom, max(proxy.safeAreaInsets.bottom, 22))
+                .frame(maxWidth: .infinity)
+                .frame(minHeight: proxy.size.height)
+            }
+            .scrollIndicators(.hidden)
+            .background(background)
+        }
+        .ignoresSafeArea()
+    }
+
+    private var topBar: some View {
+        HStack {
+            HStack(spacing: 9) {
+                Image("app-icon-transparent")
+                    .resizable()
+                    .scaledToFit()
+                    .frame(width: 30, height: 30)
+
+                Text("Salom AI")
+                    .font(.system(size: 19, weight: .bold))
+                    .foregroundColor(SalomTheme.Colors.textPrimary)
+            }
+
+            Spacer()
+
+            Menu {
+                languageButton("Oʻzbekcha", flag: "🇺🇿", code: "uz")
+                languageButton("Кириллча", flag: "🇺🇿", code: "uz-Cyrl")
+                languageButton("Русский", flag: "🇷🇺", code: "ru")
+                languageButton("English", flag: "🇬🇧", code: "en")
+            } label: {
+                HStack(spacing: 5) {
+                    Text(currentFlag)
+                    Image(systemName: "chevron.down")
+                        .font(.system(size: 10, weight: .semibold))
+                }
+                .font(.system(size: 15))
+                .foregroundColor(SalomTheme.Colors.textPrimary)
+                .padding(.horizontal, 12)
+                .padding(.vertical, 8)
+                .background(
+                    Capsule()
+                        .fill(SalomTheme.Colors.surface)
+                        .overlay(Capsule().stroke(SalomTheme.Colors.border, lineWidth: 1))
+                )
+            }
+        }
+    }
+
+    private var privacyIllustration: some View {
+        ZStack {
+            Circle()
+                .fill(SalomTheme.Colors.accentPrimary.opacity(0.11))
+                .frame(width: 230, height: 230)
+
+            Circle()
+                .stroke(SalomTheme.Colors.accentPrimary.opacity(0.17), lineWidth: 1)
+                .frame(width: 188, height: 188)
+
+            RoundedRectangle(cornerRadius: 36, style: .continuous)
+                .fill(
+                    LinearGradient(
+                        colors: [
+                            SalomTheme.Colors.accentPrimary,
+                            SalomTheme.Colors.accentSecondary
+                        ],
+                        startPoint: .topLeading,
+                        endPoint: .bottomTrailing
+                    )
+                )
+                .frame(width: 132, height: 150)
+                .shadow(
+                    color: SalomTheme.Colors.accentPrimary.opacity(0.3),
+                    radius: 26,
+                    x: 0,
+                    y: 16
+                )
+                .overlay {
+                    Image(systemName: "hand.raised.fill")
+                        .font(.system(size: 54, weight: .medium))
+                        .foregroundColor(.white)
+                }
+
+            privacyBadge(systemName: "slider.horizontal.3", x: -92, y: 55)
+            privacyBadge(systemName: "lock.fill", x: 94, y: -45)
+            privacyBadge(systemName: "checkmark.shield.fill", x: -82, y: -75)
+        }
+        .accessibilityHidden(true)
+    }
+
+    private func privacyBadge(systemName: String, x: CGFloat, y: CGFloat) -> some View {
+        Image(systemName: systemName)
+            .font(.system(size: 18, weight: .semibold))
+            .foregroundColor(SalomTheme.Colors.accentPrimary)
+            .frame(width: 48, height: 48)
+            .background(
+                Circle()
+                    .fill(SalomTheme.Colors.surface)
+                    .shadow(color: Color.black.opacity(0.09), radius: 12, x: 0, y: 6)
+            )
+            .overlay(Circle().stroke(SalomTheme.Colors.border, lineWidth: 1))
+            .offset(x: x, y: y)
+    }
+
+    private var privacyBenefits: some View {
+        HStack(spacing: 12) {
+            benefit(
+                icon: "person.crop.circle.badge.checkmark",
+                title: copy.relevantTitle,
+                subtitle: copy.relevantSubtitle
+            )
+            benefit(
+                icon: "hand.tap.fill",
+                title: copy.controlTitle,
+                subtitle: copy.controlSubtitle
+            )
+        }
+        .frame(maxWidth: 620)
+    }
+
+    private func benefit(icon: String, title: String, subtitle: String) -> some View {
+        VStack(alignment: .leading, spacing: 10) {
+            Image(systemName: icon)
+                .font(.system(size: 20, weight: .semibold))
+                .foregroundColor(SalomTheme.Colors.accentPrimary)
+                .frame(width: 42, height: 42)
+                .background(
+                    RoundedRectangle(cornerRadius: 13, style: .continuous)
+                        .fill(SalomTheme.Colors.accentPrimary.opacity(0.1))
+                )
+
+            Text(title)
+                .font(.system(size: 14, weight: .bold))
+                .foregroundColor(SalomTheme.Colors.textPrimary)
+                .fixedSize(horizontal: false, vertical: true)
+
+            Text(subtitle)
+                .font(.system(size: 12))
+                .foregroundColor(SalomTheme.Colors.textSecondary)
+                .fixedSize(horizontal: false, vertical: true)
+        }
+        .frame(maxWidth: .infinity, minHeight: 132, alignment: .topLeading)
+        .padding(16)
+        .background(
+            RoundedRectangle(cornerRadius: 22, style: .continuous)
+                .fill(SalomTheme.Colors.surface)
+                .overlay(
+                    RoundedRectangle(cornerRadius: 22, style: .continuous)
+                        .stroke(SalomTheme.Colors.border, lineWidth: 1)
+                )
+        )
+    }
+
+    private var continueButton: some View {
+        Button(action: onContinue) {
+            HStack(spacing: 10) {
+                if isRequesting {
+                    ProgressView()
+                        .tint(.white)
+                }
+
+                Text(copy.continueTitle)
+                    .font(.system(size: 17, weight: .bold))
+
+                if !isRequesting {
+                    Image(systemName: "arrow.right")
+                        .font(.system(size: 16, weight: .bold))
+                }
+            }
+            .foregroundColor(.white)
+            .frame(maxWidth: 560)
+            .frame(height: 58)
+            .background(
+                RoundedRectangle(cornerRadius: 18, style: .continuous)
+                    .fill(SalomTheme.Gradients.accent)
+                    .shadow(
+                        color: SalomTheme.Colors.accentPrimary.opacity(0.3),
+                        radius: 18,
+                        x: 0,
+                        y: 9
+                    )
+            )
+        }
+        .buttonStyle(.plain)
+        .disabled(isRequesting)
+        .accessibilityIdentifier("tracking_consent_continue")
+    }
+
+    private var background: some View {
+        ZStack {
+            SalomTheme.Colors.bgMain
+
+            Circle()
+                .fill(SalomTheme.Colors.accentPrimary.opacity(0.13))
+                .frame(width: 420, height: 420)
+                .blur(radius: 90)
+                .offset(x: -220, y: -300)
+
+            Circle()
+                .fill(SalomTheme.Colors.accentSecondary.opacity(0.11))
+                .frame(width: 360, height: 360)
+                .blur(radius: 100)
+                .offset(x: 230, y: 330)
+        }
+        .ignoresSafeArea()
+    }
+
+    @ViewBuilder
+    private func languageButton(_ title: String, flag: String, code: String) -> some View {
+        Button {
+            HapticManager.shared.fire(.selection)
+            languageCode = code
+        } label: {
+            Label {
+                Text(title)
+            } icon: {
+                Text(flag)
+            }
+        }
+        .disabled(languageCode == code)
+    }
+
+    private var currentFlag: String {
+        switch languageCode {
+        case "uz-Cyrl": "🇺🇿"
+        case "ru": "🇷🇺"
+        case "en": "🇬🇧"
+        default: "🇺🇿"
+        }
+    }
+}
+
+private struct TrackingPermissionCopy {
+    let eyebrow: String
+    let title: String
+    let subtitle: String
+    let relevantTitle: String
+    let relevantSubtitle: String
+    let controlTitle: String
+    let controlSubtitle: String
+    let continueTitle: String
+    let footnote: String
+
+    init(languageCode: String) {
+        switch languageCode {
+        case "uz-Cyrl":
+            eyebrow = "МАХФИЙЛИК"
+            title = "Танлов доим сизда"
+            subtitle = "Salom AI бепул имкониятларни реклама орқали қўллаб-қувватлайди. Рухсат берсангиз, сизга мосроқ рекламалар кўрсатилади."
+            relevantTitle = "Мосроқ реклама"
+            relevantSubtitle = "Қизиқишларингизга яқин таклифлар"
+            controlTitle = "Сиз бошқарасиз"
+            controlSubtitle = "Рад этсангиз ҳам илова тўлиқ ишлайди"
+            continueTitle = "Давом этиш"
+            footnote = "Кейинги Apple ойнасида рухсат бериш ёки рад этишни ўзингиз танлайсиз."
+        case "ru":
+            eyebrow = "КОНФИДЕНЦИАЛЬНОСТЬ"
+            title = "Вы всегда решаете сами"
+            subtitle = "Реклама помогает сохранять бесплатные возможности Salom AI. С разрешением объявления будут более полезными для вас."
+            relevantTitle = "Полезнее для вас"
+            relevantSubtitle = "Предложения ближе к вашим интересам"
+            controlTitle = "Вы всё контролируете"
+            controlSubtitle = "При отказе приложение продолжит работать"
+            continueTitle = "Продолжить"
+            footnote = "В следующем окне Apple вы сами выберете, разрешить отслеживание или нет."
+        case "en":
+            eyebrow = "PRIVACY"
+            title = "You’re always in control"
+            subtitle = "Ads help keep Salom AI’s free features available. With permission, the ads you see can be more relevant."
+            relevantTitle = "More relevant"
+            relevantSubtitle = "Offers closer to your interests"
+            controlTitle = "Your choice"
+            controlSubtitle = "The app still works if you decline"
+            continueTitle = "Continue"
+            footnote = "In the next Apple dialog, you can choose whether to allow tracking."
+        default:
+            eyebrow = "MAXFIYLIK"
+            title = "Tanlov doim sizda"
+            subtitle = "Salom AI bepul imkoniyatlarni reklama orqali qo‘llab-quvvatlaydi. Ruxsat bersangiz, sizga mosroq reklamalar ko‘rsatiladi."
+            relevantTitle = "Mosroq reklama"
+            relevantSubtitle = "Qiziqishlaringizga yaqin takliflar"
+            controlTitle = "Siz boshqarasiz"
+            controlSubtitle = "Rad etsangiz ham ilova to‘liq ishlaydi"
+            continueTitle = "Davom etish"
+            footnote = "Keyingi Apple oynasida ruxsat berish yoki rad etishni o‘zingiz tanlaysiz."
+        }
+    }
 }

