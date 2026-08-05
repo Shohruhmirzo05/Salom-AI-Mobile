@@ -1,23 +1,79 @@
 {
   "sourceLanguage" : "uz",
   "strings" : {
+    "CFBundleDisplayName" : {
+      "comment" : "Bundle display name",
+      "extractionState" : "extracted_with_value",
+      "localizations" : {
+        "uz" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "Salom AI"
+          }
+        }
+      }
+    },
+    "CFBundleName" : {
+      "comment" : "Bundle name",
+      "extractionState" : "extracted_with_value",
+      "localizations" : {
+        "uz" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "Salom-Ai-iOS"
+          }
+        }
+      }
+    },
+    "NSMicrophoneUsageDescription" : {
+      "comment" : "Privacy - Microphone Usage Description",
+      "extractionState" : "extracted_with_value",
+      "localizations" : {
+        "uz" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "Biz ovozli xabarlar uchun mikrofondan foydalanamiz."
+          }
+        }
+      }
+    },
+    "NSPhotoLibraryAddUsageDescription" : {
+      "comment" : "Privacy - Photo Library Additions Usage Description",
+      "extractionState" : "extracted_with_value",
+      "localizations" : {
+        "uz" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "Yaratilgan rasmlarni telefoningizga saqlash uchun ruxsat kerak."
+          }
+        }
+      }
+    },
     "NSUserTrackingUsageDescription" : {
+      "comment" : "Privacy - Tracking Usage Description",
+      "extractionState" : "extracted_with_value",
       "localizations" : {
         "en" : {
           "stringUnit" : {
-            "state" : "translated",
+            "state" : "needs_review",
             "value" : "This identifier is used to show you more relevant ads and measure their performance."
           }
         },
         "ru" : {
           "stringUnit" : {
-            "state" : "translated",
+            "state" : "needs_review",
             "value" : "Этот идентификатор используется для показа более подходящей рекламы и оценки её эффективности."
+          }
+        },
+        "uz" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "Bu identifikator sizga mosroq reklamalarni ko‘rsatish va ularning samaradorligini o‘lchash uchun ishlatiladi."
           }
         },
         "uz-Cyrl" : {
           "stringUnit" : {
-            "state" : "translated",
+            "state" : "needs_review",
             "value" : "Бу идентификатор сизга мосроқ рекламаларни кўрсатиш ва уларнинг самарадорлигини ўлчаш учун ишлатилади."
           }
         }
