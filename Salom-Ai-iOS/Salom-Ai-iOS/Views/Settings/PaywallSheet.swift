@@ -595,7 +595,7 @@ struct PaywallSheet: View {
     }
     private var maxSavingsPct: Int {
         if subscriptionManager.usesAppleIAP { return 0 }
-        paidPlans.compactMap { savingsPct(for: $0) }.max() ?? 0
+        return paidPlans.compactMap { savingsPct(for: $0) }.max() ?? 0
     }
 
     private var selectedPlan: SubscriptionPlan? {
