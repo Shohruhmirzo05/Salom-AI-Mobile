@@ -60,11 +60,12 @@ struct SplashView: View {
             async let minSplashTime: () = Task.sleep(nanoseconds: 1_800_000_000)
             async let subCheck: () = await SubscriptionManager.shared.checkSubscriptionStatus()
             async let plansFetch: () = await SubscriptionManager.shared.fetchPlans(force: true)
+            async let billingFetch: () = await SubscriptionManager.shared.refreshIOSBillingConfig()
 
             do {
                 // Wait for all to finish. Leaving the splash cancels this task;
                 // cancellation is a normal lifecycle event, never a fatal error.
-                _ = try await (minSplashTime, subCheck, plansFetch)
+                _ = try await (minSplashTime, subCheck, plansFetch, billingFetch)
             } catch is CancellationError {
                 return
             } catch {

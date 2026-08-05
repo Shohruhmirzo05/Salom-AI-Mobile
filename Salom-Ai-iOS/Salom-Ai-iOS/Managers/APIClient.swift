@@ -323,6 +323,8 @@ extension APIClient {
         case autoRenew(cardId: Int?, enabled: Bool)
         case cancelSubscription
         case retryPayment
+        case iosBillingConfig
+        case verifyAppleTransaction(signedTransaction: String, planCode: String?)
 
         // Cards
         case tokenizeCardRequest(cardNumber: String, expireDate: String)
@@ -402,7 +404,8 @@ extension APIClient {
                  .presentationsConfig, .listPresentations, .getPresentation, .getExportStatus,
                  .referatsConfig, .listReferats, .getReferat, .getReferatExportStatus,
                  .workTasks, .listWork, .getWork, .workExportStatus, .getWorkProfile,
-                 .dtmSubjects, .dtmTopics, .dtmLevels, .dtmQuiz, .dtmProgress, .recoveryOffer, .accountStreak:
+                 .dtmSubjects, .dtmTopics, .dtmLevels, .dtmQuiz, .dtmProgress, .recoveryOffer, .accountStreak,
+                 .iosBillingConfig:
                 return .get
             case .deleteConversation, .deleteAccount, .deleteCard, .deletePresentation, .deleteReferat:
                 return .delete
@@ -535,6 +538,10 @@ extension APIClient {
                 return "/subscriptions/cancel"
             case .retryPayment:
                 return "/subscriptions/retry-payment"
+            case .iosBillingConfig:
+                return "/subscriptions/ios-billing-config"
+            case .verifyAppleTransaction:
+                return "/subscriptions/apple/verify"
             case .tokenizeCardRequest:
                 return "/cards/tokenize/request"
             case .tokenizeCardVerify:
@@ -731,8 +738,12 @@ extension APIClient {
                 if let conversationId { body["conversation_id"] = conversationId }
                 return body
             case .subscribe(let plan, let provider):
-                var body: [String: Any] = ["plan": plan, "provider": provider]
+                var body: [String: Any] = ["plan": plan, "provider": provider, "platform": "ios"]
                 PaywallAttributionStore.shared.requestFields.forEach { body[$0.key] = $0.value }
+                return body
+            case .verifyAppleTransaction(let signedTransaction, let planCode):
+                var body: [String: Any] = ["signed_transaction": signedTransaction]
+                if let planCode { body["plan_code"] = planCode }
                 return body
             case .autoRenew(let cardId, let enabled):
                 var body: [String: Any] = ["enabled": enabled]
@@ -743,7 +754,12 @@ extension APIClient {
             case .tokenizeCardRequest(let cardNumber, let expireDate):
                 return ["card_number": cardNumber, "expire_date": expireDate]
             case .tokenizeCardVerify(let requestId, let smsCode, let planCode):
-                var body: [String: Any] = ["request_id": requestId, "sms_code": smsCode, "plan_code": planCode]
+                var body: [String: Any] = [
+                    "request_id": requestId,
+                    "sms_code": smsCode,
+                    "plan_code": planCode,
+                    "platform": "ios"
+                ]
                 PaywallAttributionStore.shared.requestFields.forEach { body[$0.key] = $0.value }
                 return body
             case .updateSettings(let payload):

@@ -52,6 +52,7 @@ extension EnvironmentValues {
 struct PaywallSheet: View {
     @Environment(\.dismiss) var dismiss
     @StateObject private var subscriptionManager = SubscriptionManager.shared
+    @StateObject private var appleIAP = AppleIAPManager.shared
 
     let context: PaywallContextID
     let source: String
@@ -59,6 +60,7 @@ struct PaywallSheet: View {
     @State private var path = NavigationPath()
     @State private var selectedPlanCode: String? = nil
     @State private var billingPeriod: BillingPeriod
+    @State private var purchaseError: String?
 
     init(context: PaywallContextID = .general, source: String = "ios") {
         self.context = context
@@ -81,6 +83,7 @@ struct PaywallSheet: View {
             if subscriptionManager.plans.isEmpty {
                 await subscriptionManager.fetchPlans()
             }
+            await subscriptionManager.refreshIOSBillingConfig()
             if selectedPlanCode == nil {
                 selectedPlanCode = recommendedPlan?.code
             }
@@ -435,7 +438,8 @@ struct PaywallSheet: View {
                         plan: plan,
                         selected: selectedPlanCode == plan.code,
                         isRecommended: plan.code == recommendedPlan?.code,
-                        savingsPct: savingsPct(for: plan)
+                        savingsPct: subscriptionManager.usesAppleIAP ? nil : savingsPct(for: plan),
+                        priceLabel: displayedPrice(for: plan)
                     ) {
                         HapticManager.shared.fire(.lightImpact)
                         withAnimation(.easeOut(duration: 0.18)) {
@@ -457,15 +461,30 @@ struct PaywallSheet: View {
                     HapticManager.shared.fire(.mediumImpact)
                     Analytics.shared.track("paywall_plan_clicked", ["plan": selected.code, "paywall_id": context.rawValue, "source": source])
                     Analytics.shared.track("paywall_plan_selected", ["plan": selected.code, "paywall_id": context.rawValue, "source": source])
-                    path.append(PaymentStep.methodChoice(planCode: selected.code))
+                    purchaseError = nil
+                    if subscriptionManager.usesAppleIAP {
+                        Task {
+                            if await appleIAP.purchase(planCode: selected.code) {
+                                dismiss()
+                            } else {
+                                purchaseError = appleIAP.errorMessage
+                            }
+                        }
+                    } else {
+                        path.append(PaymentStep.methodChoice(planCode: selected.code))
+                    }
                 } label: {
                     HStack(spacing: 6) {
-                        Text(context.spec.cta)
-                            .font(.system(size: 16, weight: .semibold))
-                            .lineLimit(1)
-                            .minimumScaleFactor(0.85)
+                        if appleIAP.isPurchasing {
+                            ProgressView().tint(SalomTheme.Colors.onAccent)
+                        } else {
+                            Text(context.spec.cta)
+                                .font(.system(size: 16, weight: .semibold))
+                                .lineLimit(1)
+                                .minimumScaleFactor(0.85)
+                        }
                         Spacer()
-                        Text(formatPrice(selected.priceUzs))
+                        Text(displayedPrice(for: selected))
                             .font(.system(size: 16, weight: .semibold))
                             .lineLimit(1)
                             .minimumScaleFactor(0.85)
@@ -479,14 +498,27 @@ struct PaywallSheet: View {
                     .shadow(color: SalomTheme.Colors.accentPrimary.opacity(0.28), radius: 16, x: 0, y: 8)
                 }
                 .buttonStyle(.plain)
+                .disabled(subscriptionManager.usesAppleIAP && (appleIAP.isPurchasing || appleIAP.displayPrice(for: selected.code) == nil))
 
-                Text(String.appLocalized("Obuna avtomatik yangilanadi · to'lovlar qaytarilmaydi"))
+                if let purchaseError {
+                    Text(purchaseError)
+                        .font(.system(size: 12))
+                        .foregroundColor(Color(hex: "#F97373"))
+                        .multilineTextAlignment(.center)
+                }
+
+                Text(subscriptionManager.usesAppleIAP
+                     ? String.appLocalized("To'lov Apple ID orqali. Obuna bekor qilinmaguncha avtomatik yangilanadi.")
+                     : String.appLocalized("Obuna avtomatik yangilanadi · to'lovlar qaytarilmaydi"))
                     .font(.system(size: 11))
                     .foregroundColor(SalomTheme.Colors.textTertiary)
                     .multilineTextAlignment(.center)
-                Link(String.appLocalized("Foydalanish shartlari"), destination: URL(string: "https://salom-ai.uz/terms-of-service")!)
-                    .font(.system(size: 11, weight: .medium))
-                    .foregroundColor(SalomTheme.Colors.textSecondary)
+                HStack(spacing: 14) {
+                    Link(String.appLocalized("Foydalanish shartlari"), destination: URL(string: "https://salom-ai.uz/terms-of-service")!)
+                    Link(String.appLocalized("Maxfiylik siyosati"), destination: URL(string: "https://salom-ai.uz/privacy-policy")!)
+                }
+                .font(.system(size: 11, weight: .medium))
+                .foregroundColor(SalomTheme.Colors.textSecondary)
             }
             .padding(.horizontal, 22)
             .padding(.bottom, 12)
@@ -562,12 +594,20 @@ struct PaywallSheet: View {
         return pct > 0 ? pct : nil
     }
     private var maxSavingsPct: Int {
+        if subscriptionManager.usesAppleIAP { return 0 }
         paidPlans.compactMap { savingsPct(for: $0) }.max() ?? 0
     }
 
     private var selectedPlan: SubscriptionPlan? {
         guard let code = selectedPlanCode else { return displayedPlans.first }
         return paidPlans.first { $0.code == code }
+    }
+
+    private func displayedPrice(for plan: SubscriptionPlan) -> String {
+        if subscriptionManager.usesAppleIAP {
+            return appleIAP.displayPrice(for: plan.code) ?? String.appLocalized("Yuklanmoqda...")
+        }
+        return formatPrice(plan.priceUzs)
     }
 }
 
@@ -578,6 +618,7 @@ private struct PlanPriceRow: View {
     let selected: Bool
     let isRecommended: Bool
     var savingsPct: Int? = nil
+    let priceLabel: String
     let onTap: () -> Void
 
     var body: some View {
@@ -625,7 +666,7 @@ private struct PlanPriceRow: View {
 
                     // The actual charged amount is primary; no misleading daily framing.
                     VStack(alignment: .trailing, spacing: 1) {
-                        Text(formatPrice(plan.priceUzs))
+                        Text(priceLabel)
                             .font(.system(size: 19, weight: .bold))
                             .foregroundColor(SalomTheme.Colors.textPrimary)
                             .tracking(-0.3)
@@ -687,9 +728,14 @@ struct SubscriptionPaymentFlow: View {
 
     @Environment(\.dismiss) var dismiss
     @State private var path = NavigationPath()
+    @StateObject private var subscriptionManager = SubscriptionManager.shared
 
     var body: some View {
-        NavigationStack(path: $path) {
+        Group {
+            if subscriptionManager.usesAppleIAP {
+                ApplePurchaseSheet(planCode: planCode) { dismiss() }
+            } else {
+                NavigationStack(path: $path) {
             PaymentMethodSheet(planCode: planCode) {
                 path.append(PaymentStep.cardInput(planCode: planCode))
             }
@@ -710,8 +756,89 @@ struct SubscriptionPaymentFlow: View {
                 default: EmptyView()
                 }
             }
+                }
+            }
         }
         .environment(\.dismissAll, { dismiss() })
+        .task { await subscriptionManager.refreshIOSBillingConfig() }
+    }
+}
+
+private struct ApplePurchaseSheet: View {
+    let planCode: String
+    let onSuccess: () -> Void
+
+    @StateObject private var appleIAP = AppleIAPManager.shared
+    @StateObject private var subscriptionManager = SubscriptionManager.shared
+
+    var body: some View {
+        ZStack {
+            SalomTheme.Colors.bgMain.ignoresSafeArea()
+            VStack(spacing: 22) {
+                Spacer()
+                ZStack {
+                    Circle()
+                        .fill(SalomTheme.Colors.accentPrimary.opacity(0.14))
+                        .frame(width: 92, height: 92)
+                    Image(systemName: "apple.logo")
+                        .font(.system(size: 42, weight: .semibold))
+                        .foregroundColor(SalomTheme.Colors.textPrimary)
+                }
+                Text(String.appLocalized("App Store orqali xavfsiz obuna"))
+                    .font(.system(size: 24, weight: .bold))
+                    .foregroundColor(SalomTheme.Colors.textPrimary)
+                    .multilineTextAlignment(.center)
+                Text(appleIAP.displayPrice(for: planCode) ?? String.appLocalized("Yuklanmoqda..."))
+                    .font(.system(size: 30, weight: .heavy))
+                    .foregroundColor(SalomTheme.Colors.textPrimary)
+
+                if let error = appleIAP.errorMessage {
+                    Text(error)
+                        .font(.footnote)
+                        .foregroundColor(Color(hex: "#F97373"))
+                        .multilineTextAlignment(.center)
+                }
+
+                Button {
+                    Task { if await appleIAP.purchase(planCode: planCode) { onSuccess() } }
+                } label: {
+                    HStack {
+                        if appleIAP.isPurchasing {
+                            ProgressView().tint(SalomTheme.Colors.onAccent)
+                        } else {
+                            Text(String.appLocalized("Apple orqali obuna bo'lish")).fontWeight(.semibold)
+                        }
+                    }
+                    .frame(maxWidth: .infinity)
+                    .frame(height: 54)
+                    .foregroundColor(SalomTheme.Colors.onAccent)
+                    .background(SalomTheme.Gradients.accent)
+                    .clipShape(RoundedRectangle(cornerRadius: 14, style: .continuous))
+                }
+                .buttonStyle(.plain)
+                .disabled(appleIAP.isPurchasing || appleIAP.displayPrice(for: planCode) == nil)
+
+                Button(String.appLocalized("Xaridlarni tiklash")) {
+                    Task { if await appleIAP.restorePurchases() { onSuccess() } }
+                }
+                .font(.system(size: 14, weight: .semibold))
+                .foregroundColor(SalomTheme.Colors.textSecondary)
+
+                Text(String.appLocalized("To'lov Apple ID orqali. Obuna bekor qilinmaguncha avtomatik yangilanadi."))
+                    .font(.caption)
+                    .foregroundColor(SalomTheme.Colors.textTertiary)
+                    .multilineTextAlignment(.center)
+                HStack(spacing: 16) {
+                    Link(String.appLocalized("Foydalanish shartlari"), destination: URL(string: "https://salom-ai.uz/terms-of-service")!)
+                    Link(String.appLocalized("Maxfiylik siyosati"), destination: URL(string: "https://salom-ai.uz/privacy-policy")!)
+                }
+                .font(.caption.weight(.medium))
+                .foregroundColor(SalomTheme.Colors.textSecondary)
+                Spacer()
+            }
+            .padding(.horizontal, 24)
+        }
+        .task { await subscriptionManager.refreshIOSBillingConfig() }
     }
 }
 

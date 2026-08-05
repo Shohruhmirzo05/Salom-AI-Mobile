@@ -10435,6 +10435,132 @@
         }
       }
     },
+    "App Store mahsuloti yuklanmadi. Qayta urinib ko'ring." : {
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "The App Store product did not load. Please try again." } },
+        "ru" : { "stringUnit" : { "state" : "translated", "value" : "Продукт App Store не загрузился. Попробуйте ещё раз." } },
+        "uz-Cyrl" : { "stringUnit" : { "state" : "translated", "value" : "App Store маҳсулоти юкланмади. Қайта уриниб кўринг." } }
+      }
+    },
+    "Xaridni tasdiqlab bo'lmadi." : {
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "The purchase could not be verified." } },
+        "ru" : { "stringUnit" : { "state" : "translated", "value" : "Не удалось подтвердить покупку." } },
+        "uz-Cyrl" : { "stringUnit" : { "state" : "translated", "value" : "Харидни тасдиқлаб бўлмади." } }
+      }
+    },
+    "Xarid tasdiqlanishi kutilmoqda." : {
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "The purchase is awaiting approval." } },
+        "ru" : { "stringUnit" : { "state" : "translated", "value" : "Покупка ожидает подтверждения." } },
+        "uz-Cyrl" : { "stringUnit" : { "state" : "translated", "value" : "Харид тасдиқланиши кутилмоқда." } }
+      }
+    },
+    "Xaridni yakunlab bo'lmadi." : {
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "The purchase could not be completed." } },
+        "ru" : { "stringUnit" : { "state" : "translated", "value" : "Не удалось завершить покупку." } },
+        "uz-Cyrl" : { "stringUnit" : { "state" : "translated", "value" : "Харидни якунлаб бўлмади." } }
+      }
+    },
+    "App Store mahsulotlari hozircha mavjud emas." : {
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "App Store products are currently unavailable." } },
+        "ru" : { "stringUnit" : { "state" : "translated", "value" : "Продукты App Store сейчас недоступны." } },
+        "uz-Cyrl" : { "stringUnit" : { "state" : "translated", "value" : "App Store маҳсулотлари ҳозирча мавжуд эмас." } }
+      }
+    },
+    "Obuna faol emas." : {
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "The subscription is not active." } },
+        "ru" : { "stringUnit" : { "state" : "translated", "value" : "Подписка не активна." } },
+        "uz-Cyrl" : { "stringUnit" : { "state" : "translated", "value" : "Обуна фаол эмас." } }
+      }
+    },
+    "Internet aloqasini tekshirib, qayta urinib ko'ring." : {
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Check your internet connection and try again." } },
+        "ru" : { "stringUnit" : { "state" : "translated", "value" : "Проверьте подключение к интернету и попробуйте снова." } },
+        "uz-Cyrl" : { "stringUnit" : { "state" : "translated", "value" : "Интернет алоқасини текшириб, қайта уриниб кўринг." } }
+      }
+    },
+    "Bu obuna hududingizda mavjud emas." : {
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "This subscription is unavailable in your region." } },
+        "ru" : { "stringUnit" : { "state" : "translated", "value" : "Эта подписка недоступна в вашем регионе." } },
+        "uz-Cyrl" : { "stringUnit" : { "state" : "translated", "value" : "Бу обуна ҳудудингизда мавжуд эмас." } }
+      }
+    },
+    "App Store xaridida xatolik yuz berdi. Qayta urinib ko'ring." : {
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "There was an App Store purchase error. Please try again." } },
+        "ru" : { "stringUnit" : { "state" : "translated", "value" : "Произошла ошибка покупки в App Store. Попробуйте снова." } },
+        "uz-Cyrl" : { "stringUnit" : { "state" : "translated", "value" : "App Store харидида хатолик юз берди. Қайта уриниб кўринг." } }
+      }
+    },
+    "App Store orqali xavfsiz obuna" : {
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Secure subscription through the App Store" } },
+        "ru" : { "stringUnit" : { "state" : "translated", "value" : "Безопасная подписка через App Store" } },
+        "uz-Cyrl" : { "stringUnit" : { "state" : "translated", "value" : "App Store орқали хавфсиз обуна" } }
+      }
+    },
+    "Apple orqali obuna bo'lish" : {
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Subscribe with Apple" } },
+        "ru" : { "stringUnit" : { "state" : "translated", "value" : "Оформить через Apple" } },
+        "uz-Cyrl" : { "stringUnit" : { "state" : "translated", "value" : "Apple орқали обуна бўлиш" } }
+      }
+    },
+    "Xaridlarni tiklash" : {
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Restore Purchases" } },
+        "ru" : { "stringUnit" : { "state" : "translated", "value" : "Восстановить покупки" } },
+        "uz-Cyrl" : { "stringUnit" : { "state" : "translated", "value" : "Харидларни тиклаш" } }
+      }
+    },
+    "To'lov Apple ID orqali. Obuna bekor qilinmaguncha avtomatik yangilanadi." : {
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Payment is charged to your Apple ID. The subscription renews automatically until canceled." } },
+        "ru" : { "stringUnit" : { "state" : "translated", "value" : "Оплата списывается с Apple ID. Подписка продлевается автоматически до отмены." } },
+        "uz-Cyrl" : { "stringUnit" : { "state" : "translated", "value" : "Тўлов Apple ID орқали. Обуна бекор қилинмагунча автоматик янгиланади." } }
+      }
+    },
+    "App Store obunasi" : {
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "App Store subscription" } },
+        "ru" : { "stringUnit" : { "state" : "translated", "value" : "Подписка App Store" } },
+        "uz-Cyrl" : { "stringUnit" : { "state" : "translated", "value" : "App Store обунаси" } }
+      }
+    },
+    "Yangilanish va bekor qilish Apple ID orqali boshqariladi." : {
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Renewal and cancellation are managed through your Apple ID." } },
+        "ru" : { "stringUnit" : { "state" : "translated", "value" : "Продление и отмена управляются через Apple ID." } },
+        "uz-Cyrl" : { "stringUnit" : { "state" : "translated", "value" : "Янгиланиш ва бекор қилиш Apple ID орқали бошқарилади." } }
+      }
+    },
+    "Obunani boshqarish" : {
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Manage Subscription" } },
+        "ru" : { "stringUnit" : { "state" : "translated", "value" : "Управлять подпиской" } },
+        "uz-Cyrl" : { "stringUnit" : { "state" : "translated", "value" : "Обунани бошқариш" } }
+      }
+    },
+    "App Store narxi" : {
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "App Store price" } },
+        "ru" : { "stringUnit" : { "state" : "translated", "value" : "Цена в App Store" } },
+        "uz-Cyrl" : { "stringUnit" : { "state" : "translated", "value" : "App Store нархи" } }
+      }
+    },
+    "Maxfiylik siyosati" : {
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Privacy Policy" } },
+        "ru" : { "stringUnit" : { "state" : "translated", "value" : "Политика конфиденциальности" } },
+        "uz-Cyrl" : { "stringUnit" : { "state" : "translated", "value" : "Махфийлик сиёсати" } }
+      }
+    },
     "Кириллча" : {
       "localizations" : {
         "en" : {

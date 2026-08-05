@@ -352,6 +352,26 @@ struct SubscriptionPlan: Codable, Identifiable {
     }
 }
 
+enum IOSBillingMode: String, Codable {
+    case localPayments = "local_payments"
+    case appleIAP = "apple_iap"
+}
+
+struct IOSBillingConfig: Codable {
+    let mode: IOSBillingMode
+    let productIds: [String: String]
+    let appAccountToken: String
+    let refreshSeconds: Int
+}
+
+struct ApplePurchaseVerificationResponse: Codable {
+    let ok: Bool
+    let active: Bool
+    let plan: String
+    let expiresAt: Date?
+    let transactionId: String
+}
+
 // MARK: - Win-back / recovery offer (GET /subscriptions/recovery-offer)
 
 /// Returned only for users who started a payment but never finished and have no
@@ -601,6 +621,7 @@ struct CurrentSubscriptionFull: Codable {
     let inRecovery: Bool?
     let recoveryUntil: Date?
     let canRetry: Bool?
+    let provider: String?
 }
 
 struct RetryPaymentResponse: Codable {

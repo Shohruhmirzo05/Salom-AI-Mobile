@@ -4,6 +4,7 @@ import Combine
 
 struct SubscriptionView: View {
     @StateObject private var subscriptionManager = SubscriptionManager.shared
+    @StateObject private var appleIAP = AppleIAPManager.shared
     @Environment(\.dismiss) var dismiss
     
     @State private var selectedPlanForPayment: IdentifiablePlanCode?
@@ -52,9 +53,12 @@ struct SubscriptionView: View {
             }
         }
         .task {
+            await subscriptionManager.refreshIOSBillingConfig()
             await subscriptionManager.fetchPlans()
             await subscriptionManager.checkSubscriptionStatus()
-            await subscriptionManager.fetchSavedCards()
+            if subscriptionManager.currentPlan?.provider != "apple" {
+                await subscriptionManager.fetchSavedCards()
+            }
         }
         .fullScreenCover(item: $selectedPlanForPayment) { selection in
             NavigationStack {
@@ -176,6 +180,51 @@ struct SubscriptionView: View {
     @ViewBuilder
     private func AutoRenewSection() -> some View {
         if let current = subscriptionManager.currentPlan, current.active {
+            if current.provider == "apple" {
+                VStack(alignment: .leading, spacing: 12) {
+                    HStack(spacing: 12) {
+                        Image(systemName: "apple.logo")
+                            .font(.title2)
+                            .foregroundColor(SalomTheme.Colors.textPrimary)
+                        VStack(alignment: .leading, spacing: 3) {
+                            Text(String.appLocalized("App Store obunasi"))
+                                .font(.subheadline.weight(.semibold))
+                                .foregroundColor(SalomTheme.Colors.textPrimary)
+                            Text(String.appLocalized("Yangilanish va bekor qilish Apple ID orqali boshqariladi."))
+                                .font(.caption)
+                                .foregroundColor(SalomTheme.Colors.textSecondary)
+                        }
+                        Spacer()
+                    }
+                    Button {
+                        if let url = URL(string: "https://apps.apple.com/account/subscriptions") {
+                            UIApplication.shared.open(url)
+                        }
+                    } label: {
+                        HStack {
+                            Text(String.appLocalized("Obunani boshqarish")).fontWeight(.semibold)
+                            Spacer()
+                            Image(systemName: "arrow.up.right")
+                        }
+                        .frame(maxWidth: .infinity)
+                        .padding(.vertical, 13)
+                        .padding(.horizontal, 15)
+                        .foregroundColor(SalomTheme.Colors.onAccent)
+                        .background(SalomTheme.Gradients.accent)
+                        .clipShape(RoundedRectangle(cornerRadius: 13, style: .continuous))
+                    }
+                    .buttonStyle(.plain)
+
+                    Button(String.appLocalized("Xaridlarni tiklash")) {
+                        Task { _ = await appleIAP.restorePurchases() }
+                    }
+                    .font(.footnote.weight(.semibold))
+                    .foregroundColor(SalomTheme.Colors.textSecondary)
+                    .frame(maxWidth: .infinity)
+                }
+                .padding(16)
+                .background(RoundedRectangle(cornerRadius: 16).fill(SalomTheme.Colors.surface))
+            } else {
             VStack(alignment: .leading, spacing: 12) {
                 // Auto-renew toggle
                 HStack {
@@ -281,6 +330,7 @@ struct SubscriptionView: View {
                     )
                 }
             }
+            }
         }
     }
     
@@ -289,7 +339,7 @@ struct SubscriptionView: View {
         let paid = subscriptionManager.plans.filter { $0.priceUzs > 0 && !$0.code.hasSuffix("_promo") }
         let hasYearly = paid.contains { PlanPeriodHelper.isYearly($0) }
         let displayed = paid.filter { PlanPeriodHelper.isYearly($0) == (billingPeriod == .yearly) }
-        let maxSave = paid.compactMap { PlanPeriodHelper.savingsPct($0, in: paid) }.max() ?? 0
+        let maxSave = subscriptionManager.usesAppleIAP ? 0 : (paid.compactMap { PlanPeriodHelper.savingsPct($0, in: paid) }.max() ?? 0)
         VStack(spacing: 16) {
             if hasYearly {
                 HStack(spacing: 4) {
@@ -343,24 +393,33 @@ struct SubscriptionView: View {
             }
             
             VStack(alignment: .leading, spacing: 4) {
-                let days = plan.durationDays ?? 30
-                let perDay = Int((Double(plan.priceUzs) / Double(max(1, days))).rounded())
-                HStack(alignment: .firstTextBaseline, spacing: 6) {
-                    Text("\(perDay.formatted()) so'm")
+                if subscriptionManager.usesAppleIAP {
+                    Text(appleIAP.displayPrice(for: plan.code) ?? String.appLocalized("Yuklanmoqda..."))
                         .font(.title.weight(.bold))
                         .foregroundColor(SalomTheme.Colors.textPrimary)
-                    Text("/ kun")
+                    Text(String.appLocalized("App Store narxi"))
                         .font(.caption)
                         .foregroundColor(SalomTheme.Colors.textSecondary)
-                }
-                HStack(spacing: 6) {
-                    Text("\(plan.priceUzs.formatted()) UZS / \(days >= 300 ? "yil" : "oy")")
-                        .font(.caption)
-                        .foregroundColor(SalomTheme.Colors.textSecondary)
-                    if let s = savingsPct, s > 0 {
-                        Text("−\(s)% tejang")
-                            .font(.caption.weight(.bold))
-                            .foregroundColor(SalomTheme.Colors.signal)
+                } else {
+                    let days = plan.durationDays ?? 30
+                    let perDay = Int((Double(plan.priceUzs) / Double(max(1, days))).rounded())
+                    HStack(alignment: .firstTextBaseline, spacing: 6) {
+                        Text("\(perDay.formatted()) so'm")
+                            .font(.title.weight(.bold))
+                            .foregroundColor(SalomTheme.Colors.textPrimary)
+                        Text("/ kun")
+                            .font(.caption)
+                            .foregroundColor(SalomTheme.Colors.textSecondary)
+                    }
+                    HStack(spacing: 6) {
+                        Text("\(plan.priceUzs.formatted()) UZS / \(days >= 300 ? "yil" : "oy")")
+                            .font(.caption)
+                            .foregroundColor(SalomTheme.Colors.textSecondary)
+                        if let s = savingsPct, s > 0 {
+                            Text("−\(s)% tejang")
+                                .font(.caption.weight(.bold))
+                                .foregroundColor(SalomTheme.Colors.signal)
+                        }
                     }
                 }
             }
@@ -415,7 +474,7 @@ struct SubscriptionView: View {
                 )
                 .foregroundColor((isCurrent || plan.priceUzs == 0) ? SalomTheme.Colors.textSecondary : SalomTheme.Colors.onAccent)
             }
-            .disabled(isCurrent || plan.priceUzs == 0)
+            .disabled(isCurrent || plan.priceUzs == 0 || (subscriptionManager.usesAppleIAP && appleIAP.displayPrice(for: plan.code) == nil))
         }
         .padding(20)
         .background(
@@ -430,7 +489,8 @@ private func subscriptionPlanDisplayName(_ plan: SubscriptionPlan) -> String {
     let code = plan.code.lowercased()
     if code.contains("pro") { return String.appLocalized("Pro") }
     if code.contains("standard") { return String.appLocalized("Standard") }
-    if code.contains("free") || code.contains("lite") { return String.appLocalized("Bepul") }
+    if code.contains("free") { return String.appLocalized("Bepul") }
+    if code.contains("lite") { return String.appLocalized("Standard") }
     return plan.name
 }
 

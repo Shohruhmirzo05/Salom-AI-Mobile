@@ -19,6 +19,8 @@ final class SubscriptionManager: ObservableObject {
     @Published var savedCards: [SavedCard] = []
     @Published var isLoading = false
     @Published var lastError: String?
+    @Published private(set) var iosBillingMode: IOSBillingMode
+    @Published private(set) var iosBillingConfig: IOSBillingConfig?
 
     /// Root-level payment-result banner. Set by the deep-link / foreground funnel,
     /// observed by `ContentView.paymentToast(_:)`. Never set this directly from a
@@ -55,8 +57,45 @@ final class SubscriptionManager: ObservableObject {
     private let pendingCheckoutTTL: TimeInterval = 30 * 60
     /// Guards against overlapping backend status polls (deep link + foreground).
     private var isPollingPaymentStatus = false
+    private var billingMonitorTask: Task<Void, Never>?
+    private static let billingModeCacheKey = "ios.billing.mode"
 
-    private init() {}
+    private init() {
+        iosBillingMode = IOSBillingMode(
+            rawValue: UserDefaults.standard.string(forKey: Self.billingModeCacheKey) ?? ""
+        ) ?? .localPayments
+        billingMonitorTask = Task { [weak self] in
+            while !Task.isCancelled {
+                if TokenStore.shared.accessToken != nil {
+                    await self?.refreshIOSBillingConfig()
+                }
+                try? await Task.sleep(for: .seconds(15))
+            }
+        }
+    }
+
+    deinit { billingMonitorTask?.cancel() }
+
+    var usesAppleIAP: Bool { iosBillingMode == .appleIAP }
+
+    /// Refreshes the native-iOS checkout switch. Failure deliberately keeps the
+    /// last known mode so a temporary network outage never exposes the other
+    /// payment rail inside an already-running App Store build.
+    func refreshIOSBillingConfig() async {
+        guard TokenStore.shared.accessToken != nil else { return }
+        do {
+            let config = try await APIClient.shared.request(
+                .iosBillingConfig,
+                decodeTo: IOSBillingConfig.self
+            )
+            iosBillingConfig = config
+            iosBillingMode = config.mode
+            UserDefaults.standard.set(config.mode.rawValue, forKey: Self.billingModeCacheKey)
+            await AppleIAPManager.shared.configure(config)
+        } catch {
+            print("❌ Failed to refresh iOS billing mode: \(error)")
+        }
+    }
     
     /// Fetches the latest subscription status from the API
     func checkSubscriptionStatus() async {
@@ -103,7 +142,9 @@ final class SubscriptionManager: ObservableObject {
             resetPaymentRecovery()
             return
         }
-        await checkSubscriptionStatus()
+        async let billingRefresh: () = refreshIOSBillingConfig()
+        async let subscriptionRefresh: () = checkSubscriptionStatus()
+        _ = await (billingRefresh, subscriptionRefresh)
         guard pendingPaymentId != nil else { return }
         await resolvePayment(id: pendingPaymentId, trustedStatus: nil)
     }
@@ -437,6 +478,10 @@ final class SubscriptionManager: ObservableObject {
     /// Win-back: returns a discounted offer for users who abandoned a payment.
     /// `nil`/`eligible == false` means show normal pricing (no popup).
     func fetchRecoveryOffer(paymentId: Int? = nil, baseCode: String? = nil) async -> RecoveryOfferResponse? {
+        // Local discounted plan codes are intentionally not presented while
+        // StoreKit owns checkout. App Store promotional offers can be enabled as
+        // StoreKit products later without leaking Click/Payme into the iOS UI.
+        guard !usesAppleIAP else { return nil }
         do {
             return try await APIClient.shared.request(
                 .recoveryOffer(paymentId: paymentId, baseCode: baseCode),

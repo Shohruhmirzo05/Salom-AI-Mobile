@@ -74,7 +74,14 @@ struct PaymentMethodSheet: View {
             }
         }
         .toolbarBackground(.hidden, for: .navigationBar)
-        .task { await loadPaymentConfig() }
+        .task {
+            await subscriptionManager.refreshIOSBillingConfig()
+            if subscriptionManager.usesAppleIAP { dismissAll() }
+            await loadPaymentConfig()
+        }
+        .onChange(of: subscriptionManager.iosBillingMode) { _, mode in
+            if mode == .appleIAP { dismissAll() }
+        }
     }
 
     /// Payme appears only when the backend enables it (off in production).
