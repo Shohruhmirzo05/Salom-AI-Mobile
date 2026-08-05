@@ -38,7 +38,14 @@ final class AppleIAPManager: ObservableObject {
             productsByPlan = [:]
             return
         }
-        guard changed || productsByPlan.isEmpty else { return }
+        guard changed || productsByPlan.isEmpty else {
+            // Billing config refreshes while the app is open. Re-submit any
+            // unfinished/current StoreKit entitlement even when the product
+            // map did not change, so a temporary backend outage heals without
+            // requiring another purchase or a full app restart.
+            await syncCurrentEntitlements()
+            return
+        }
         await loadProducts()
         await syncCurrentEntitlements()
     }
