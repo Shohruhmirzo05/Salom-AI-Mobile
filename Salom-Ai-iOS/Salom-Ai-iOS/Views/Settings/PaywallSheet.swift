@@ -466,8 +466,6 @@ struct PaywallSheet: View {
                         Task {
                             if await appleIAP.purchase(planCode: selected.code) {
                                 dismiss()
-                            } else {
-                                purchaseError = appleIAP.errorMessage
                             }
                         }
                     } else {
@@ -500,10 +498,12 @@ struct PaywallSheet: View {
                 .buttonStyle(.plain)
                 .disabled(subscriptionManager.usesAppleIAP && (appleIAP.isPurchasing || appleIAP.displayPrice(for: selected.code) == nil))
 
-                if let purchaseError {
-                    Text(purchaseError)
+                if let message = subscriptionManager.usesAppleIAP ? appleIAP.errorMessage : purchaseError {
+                    Text(message)
                         .font(.system(size: 12))
-                        .foregroundColor(Color(hex: "#F97373"))
+                        .foregroundColor(appleIAP.isEntitlementSyncPending
+                                         ? SalomTheme.Colors.accentPrimary
+                                         : Color(hex: "#F97373"))
                         .multilineTextAlignment(.center)
                 }
 
@@ -795,7 +795,9 @@ private struct ApplePurchaseSheet: View {
                 if let error = appleIAP.errorMessage {
                     Text(error)
                         .font(.footnote)
-                        .foregroundColor(Color(hex: "#F97373"))
+                        .foregroundColor(appleIAP.isEntitlementSyncPending
+                                         ? SalomTheme.Colors.accentPrimary
+                                         : Color(hex: "#F97373"))
                         .multilineTextAlignment(.center)
                 }
 

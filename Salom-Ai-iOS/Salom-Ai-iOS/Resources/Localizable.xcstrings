@@ -10456,6 +10456,13 @@
         "uz-Cyrl" : { "stringUnit" : { "state" : "translated", "value" : "Харид тасдиқланиши кутилмоқда." } }
       }
     },
+    "Xarid tasdiqlandi. Obuna avtomatik faollashtirilmoqda." : {
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Purchase confirmed. Your subscription is being activated automatically." } },
+        "ru" : { "stringUnit" : { "state" : "translated", "value" : "Покупка подтверждена. Подписка активируется автоматически." } },
+        "uz-Cyrl" : { "stringUnit" : { "state" : "translated", "value" : "Харид тасдиқланди. Обуна автоматик фаоллаштирилмоқда." } }
+      }
+    },
     "Xaridni yakunlab bo'lmadi." : {
       "localizations" : {
         "en" : { "stringUnit" : { "state" : "translated", "value" : "The purchase could not be completed." } },
